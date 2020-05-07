@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright 2020 Micro Focus or one of its affiliates.
+
+    The only warranties for products and services of Micro Focus and its
+    affiliates and licensors ("Micro Focus") are set forth in the express
+    warranty statements accompanying such products and services. Nothing
+    herein should be construed as constituting an additional warranty.
+    Micro Focus shall not be liable for technical or editorial errors or
+    omissions contained herein. The information contained herein is subject
+    to change without notice.
+
+    Contains Confidential Information. Except as specifically indicated
+    otherwise, a valid license is required for possession, use or copying.
+    Consistent with FAR 12.211 and 12.212, Commercial Computer Software,
+    Computer Software Documentation, and Technical Data for Commercial
+    Items are licensed to the U.S. Government under vendor's standard
+    commercial license.
+
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.microfocus.sepg.fortify</groupId>
+        <artifactId>fortify-issue-manager-aggregator</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>fortify-issue-manager-cli-image</artifactId>
+    <packaging>pom</packaging>
+
+    <properties>
+        <maven.install.skip>true</maven.install.skip>
+        <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.microfocus.sepg.fortify</groupId>
+            <artifactId>fortify-issue-manager-cli</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>docker-image-build</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>docker-image-push</id>
+                        <goals>
+                            <goal>push</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <images>
+                        <image>
+                            <name>${corporateDockerRegistry}/sepg/fortify-issue-manager:${project.version}</name>
+                            <build>
+                                 <from>cafinternal/prereleases:opensuse-jre8-3.0.0-SNAPSHOT</from>
+                                <labels>
+                                    <Build.Number>${project.version}</Build.Number>
+                                    <Build.Date>${maven.build.timestamp}</Build.Date>
+                                    <Git.Repo>https://github.houston.softwaregrp.net/sepg/fortify-issue-manager</Git.Repo>
+                                    <Git.Branch>${git.branch}</Git.Branch>
+                                    <Git.Commit>${git.revision}</Git.Commit>
+                                </labels>
+                                <entryPoint>
+                                    <arg>/tini</arg>
+                                    <arg>--</arg>
+                                    <arg>java</arg>
+                                    <arg>-jar</arg>
+                                    <arg>/maven/fortify-issue-manager-cli-${project.version}.jar</arg>
+                                </entryPoint>
+                                <assembly>
+                                    <mode>tar</mode>
+                                    <descriptor>assembly.xml</descriptor>
+                                </assembly>
+                            </build>
+                        </image>
+                    </images>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

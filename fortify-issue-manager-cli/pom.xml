@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright 2020 Micro Focus or one of its affiliates.
+
+    The only warranties for products and services of Micro Focus and its
+    affiliates and licensors ("Micro Focus") are set forth in the express
+    warranty statements accompanying such products and services. Nothing
+    herein should be construed as constituting an additional warranty.
+    Micro Focus shall not be liable for technical or editorial errors or
+    omissions contained herein. The information contained herein is subject
+    to change without notice.
+
+    Contains Confidential Information. Except as specifically indicated
+    otherwise, a valid license is required for possession, use or copying.
+    Consistent with FAR 12.211 and 12.212, Commercial Computer Software,
+    Computer Software Documentation, and Technical Data for Commercial
+    Items are licensed to the U.S. Government under vendor's standard
+    commercial license.
+
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.microfocus.sepg.fortify</groupId>
+        <artifactId>fortify-issue-manager-aggregator</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>fortify-issue-manager-cli</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.microfocus.sepg.fortify</groupId>
+            <artifactId>fortify-issue-manager</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>info.picocli</groupId>
+            <artifactId>picocli</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <mainClass>com.microfocus.sepg.fortify.issue.manager.cli.Program</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

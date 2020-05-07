@@ -1,0 +1,44 @@
+#
+# Copyright 2020 Micro Focus or one of its affiliates.
+#
+# The only warranties for products and services of Micro Focus and its
+# affiliates and licensors ("Micro Focus") are set forth in the express
+# warranty statements accompanying such products and services. Nothing
+# herein should be construed as constituting an additional warranty.
+# Micro Focus shall not be liable for technical or editorial errors or
+# omissions contained herein. The information contained herein is subject
+# to change without notice.
+#
+# Contains Confidential Information. Except as specifically indicated
+# otherwise, a valid license is required for possession, use or copying.
+# Consistent with FAR 12.211 and 12.212, Commercial Computer Software,
+# Computer Software Documentation, and Technical Data for Commercial
+# Items are licensed to the U.S. Government under vendor's standard
+# commercial license.
+#
+
+fortifySettings:
+  username: <username>
+  password: <password>
+  tenant: "MF_IMG"
+  scope: "api-tenant"
+  apiUrl: "https://api.ams.fortify.com"
+  issueUrl: "https://ams.fortify.com"
+  applicationIds:
+    - 113410
+    - 111530
+    - 111529
+    - 111528
+    - 111532
+    - 111426
+
+bugTrackerSettings:
+  username: <username>
+  password: <password>
+  # apiUrl: "https://portal.digitalsafe.net"
+  apiUrl: "https://uatjira.digitalsafe.net"
+  proxyHost: "web-proxy.us.softwaregrp.net"
+  proxyPort: 8080
+  scripts:
+      - name: "getPayload.js"
+        script: "load('classpath:scripts/getPayload.js')"
