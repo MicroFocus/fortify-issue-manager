@@ -1,20 +1,17 @@
 @REM
 @REM Copyright 2020 Micro Focus or one of its affiliates.
 @REM
-@REM The only warranties for products and services of Micro Focus and its
-@REM affiliates and licensors ("Micro Focus") are set forth in the express
-@REM warranty statements accompanying such products and services. Nothing
-@REM herein should be construed as constituting an additional warranty.
-@REM Micro Focus shall not be liable for technical or editorial errors or
-@REM omissions contained herein. The information contained herein is subject
-@REM to change without notice.
+@REM Licensed under the Apache License, Version 2.0 (the "License");
+@REM you may not use this file except in compliance with the License.
+@REM You may obtain a copy of the License at
 @REM
-@REM Contains Confidential Information. Except as specifically indicated
-@REM otherwise, a valid license is required for possession, use or copying.
-@REM Consistent with FAR 12.211 and 12.212, Commercial Computer Software,
-@REM Computer Software Documentation, and Technical Data for Commercial
-@REM Items are licensed to the U.S. Government under vendor's standard
-@REM commercial license.
+@REM      http://www.apache.org/licenses/LICENSE-2.0
+@REM
+@REM Unless required by applicable law or agreed to in writing, software
+@REM distributed under the License is distributed on an "AS IS" BASIS,
+@REM WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+@REM See the License for the specific language governing permissions and
+@REM limitations under the License.
 @REM
 
 @echo off
