@@ -18,13 +18,14 @@
  */
 package com.microfocus.sepg.fortify.issue.manager.test;
 
-import org.junit.Test;
+import org.junit.Ignore;
+//import org.junit.Test;
 
 import com.microfocus.sepg.fortify.issue.manager.FortifyIssueManager;
 
 public class FortifyIssueManagerTest
 {
-    @Test
+    @Ignore
     public void testManageIssues() throws Exception
     {
         FortifyIssueManager.manageIssues("/fortifyIssueManagerConfig.yaml");
