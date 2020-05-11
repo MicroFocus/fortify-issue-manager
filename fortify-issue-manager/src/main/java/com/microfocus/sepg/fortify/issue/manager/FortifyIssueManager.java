@@ -58,7 +58,7 @@ public final class FortifyIssueManager
     private FortifyIssueManager(final FortifyClient client, final BugTrackerSettings bugTrackerSettings,
                                 final List<Integer> applicationIds, final String issueUrl)
     {
-        fortifyRequestHandler = new FortifyRequestHandler(client);
+        this.fortifyRequestHandler = new FortifyRequestHandler(client);
         this.bugTrackerSettings = bugTrackerSettings;
         this.applicationIds = applicationIds;
         this.issueUrl = issueUrl;
