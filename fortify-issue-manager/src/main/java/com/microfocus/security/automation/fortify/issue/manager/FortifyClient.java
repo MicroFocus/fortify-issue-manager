@@ -16,6 +16,7 @@
 package com.microfocus.security.automation.fortify.issue.manager;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
@@ -36,13 +37,13 @@ final class FortifyClient
     private final static int WRITE_TIMEOUT = 600; // seconds
     private final static int READ_TIMEOUT = 600; // seconds
 
-    private String apiUrl;
-    private OkHttpClient client;
+    private final String apiUrl;
+    private final OkHttpClient client;
     private String token;
-    private String scope;
+    private final String scope;
 
-    private String username;
-    private String password;
+    private final String username;
+    private final String password;
 
     /*
      * Constructor that encapsulates the connection to Fortify
@@ -60,8 +61,9 @@ final class FortifyClient
      * Used for authenticating in the case of a time out using the saved apiConnection credentials.
      *
      * @throws java.io.IOException in some circumstances
+     * @throws FortifyAuthenticationException if user cannot be authenticated
      */
-    public void authenticate() throws IOException {
+    public void authenticate() throws IOException, FortifyAuthenticationException {
 
         final RequestBody formBody = new FormBody.Builder()
                     .add("scope", scope)
@@ -79,13 +81,19 @@ final class FortifyClient
         if (!response.isSuccessful())
             throw new IOException("Unexpected code " + response);
 
-        final String content = IOUtils.toString(response.body().byteStream(), "utf-8");
-        response.body().close();
+        if(response.body() == null)
+        {
+            throw new FortifyAuthenticationException("Unable to authenticate Fortify user. Response is null for POST /oauth/token");
+        }
 
-        // Parse the Response
-        final JsonParser parser = new JsonParser();
-        final JsonObject obj = parser.parse(content).getAsJsonObject();
-        this.token = obj.get("access_token").getAsString();
+        // Read the results and close the response
+        try(final InputStream responseStream = response.body().byteStream()) {
+            final String content = IOUtils.toString(responseStream, "utf-8");
+            // Parse the Response
+            final JsonParser parser = new JsonParser();
+            final JsonObject obj = parser.parse(content).getAsJsonObject();
+            this.token = obj.get("access_token").getAsString();
+        }
     }
 
     /**

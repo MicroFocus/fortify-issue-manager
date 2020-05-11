@@ -16,6 +16,7 @@
 package com.microfocus.security.automation.fortify.issue.manager;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.util.List;
 
@@ -34,9 +35,7 @@ import com.microfocus.security.automation.fortify.issue.manager.models.Release;
 import com.microfocus.security.automation.fortify.issue.manager.models.Vulnerability;
 
 import okhttp3.HttpUrl;
-import okhttp3.MediaType;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
 
 final class FortifyRequestHandler
@@ -51,7 +50,8 @@ final class FortifyRequestHandler
         this.gson = new Gson();
     }
 
-    public List<Application> getApplications(final FilterList filters, final String fields) throws IOException {
+    public List<Application> getApplications(final FilterList filters, final String fields)
+            throws IOException, FortifyAuthenticationException, FortifyRequestException {
         final String content = performRequest("api/v3/applications", filters, fields);
 
         final Type t = new TypeToken<GenericListResponse<Application>>() {}.getType();
@@ -66,7 +66,8 @@ final class FortifyRequestHandler
         }
     }
 
-    public List<Release> getReleases(final FilterList filters, final String fields) throws IOException {
+    public List<Release> getReleases(final FilterList filters, final String fields)
+            throws IOException, FortifyAuthenticationException, FortifyRequestException {
         final String content = performRequest("api/v3/releases", filters, fields);
         final Type t = new TypeToken<GenericListResponse<Release>>() {}.getType();
         final GenericListResponse<Release> results = gson.fromJson(content, t);
@@ -81,7 +82,7 @@ final class FortifyRequestHandler
     }
 
     public List<Vulnerability> getVulnerabilities(final int releaseId, final FilterList filters, final String fields)
-            throws IOException {
+            throws IOException, FortifyAuthenticationException, FortifyRequestException {
         final String content = performRequest("api/v3/releases/" + releaseId + "/vulnerabilities", filters, fields);
 
         final Type t = new TypeToken<GenericListResponse<Vulnerability>>() {}.getType();
@@ -96,10 +97,14 @@ final class FortifyRequestHandler
         }
     }
 
-    private String performRequest(final String api, final FilterList filters, final String fields) throws IOException
+    private String performRequest(final String api, final FilterList filters, final String fields)
+            throws IOException, FortifyAuthenticationException, FortifyRequestException
     {
         HttpUrl.Builder builder = HttpUrl.parse(fortifyClient.getApiUrl()).newBuilder().addPathSegments(api);
-
+        if(builder == null)
+        {
+            throw new FortifyRequestException("Invalid url : " + api);
+        }
         if(filters != null)
         {
             builder = builder.addQueryParameter("filters", filters.toString());
@@ -128,17 +133,27 @@ final class FortifyRequestHandler
         }
 
         // Read the results and close the response
-        final String responseContent = IOUtils.toString(response.body().byteStream(), "utf-8");
-        response.body().close();
+        if(response.body() == null)
+        {
+            throw new FortifyRequestException("Unable to authenticate Fortify user. Response is null for GET " + url);
+        }
 
-        return responseContent;
+        // Read the result
+        try(final InputStream responseStream = response.body().byteStream()) {
+            final String responseContent = IOUtils.toString(responseStream, "utf-8");
+            return responseContent;
+        }
     }
 
     public void updateVulnerability(final int releaseId, final List<String> vulnerabilityIdList, final String bugLink)
-            throws IOException
+            throws IOException, FortifyRequestException
     {
         final String api = "api/v3/releases/" + releaseId + "/vulnerabilities/bug-link";
         final HttpUrl.Builder builder = HttpUrl.parse(fortifyClient.getApiUrl()).newBuilder().addPathSegments(api);
+        if(builder == null)
+        {
+            throw new FortifyRequestException("Invalid url : " + api);
+        }
         final String updateVulnerabilityUrl = builder.build().toString();
 
         final JsonArray vulnerabilityIds = new JsonArray();
@@ -150,7 +165,7 @@ final class FortifyRequestHandler
         LOGGER.info("Updating vulnerabilities: POST {} with {}", updateVulnerabilityUrl, payload.toString());
 
         /*
-        // TODO
+        // TODO Update the Fortify issue with bug link
         final RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), payload.toString());
 
         final Request request = new Request.Builder()
@@ -166,11 +181,17 @@ final class FortifyRequestHandler
             fortifyClient.authenticate();
         }
 
-        // Read the results and close the response
-        final String responseContent = IOUtils.toString(response.body().byteStream(), "utf-8");
-        response.body().close();
+        // Read the result
+        if(response.body() == null)
+        {
+            throw new FortifyRequestException("Unable to update vulnerability. Response is null for POST " + api);
+        }
 
-        LOGGER.info("Updated vulnerabilities with bugLink {}, response: {}", bugLink, responseContent);
+        // Read the result
+        try(final InputStream responseStream = response.body().byteStream()) {
+            final String responseContent = IOUtils.toString(responseStream, "utf-8");
+            LOGGER.info("Updated vulnerabilities with bugLink {}, response: {}", bugLink, responseContent);
+        }
         */
     }
 }

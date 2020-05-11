@@ -91,7 +91,8 @@ public final class FortifyIssueManager
                                                                              fortifySettings.getIssueUrl());
             issueManager.linkIssuesToBugTracker();
             LOGGER.info("Managing Fortify issues completed.");
-        } catch (final IOException | ScriptNotFoundException | ScriptException e)
+        } catch (final IOException | ScriptNotFoundException | ScriptException
+                     | FortifyAuthenticationException | FortifyRequestException e)
         {
             LOGGER.error("Error managing Fortify issues", e);
         }
@@ -107,7 +108,8 @@ public final class FortifyIssueManager
         }
     }
 
-    private void linkIssuesToBugTracker() throws IOException, ScriptNotFoundException, ScriptException
+    private void linkIssuesToBugTracker()
+            throws IOException, ScriptNotFoundException, ScriptException, FortifyAuthenticationException, FortifyRequestException
     {
         // Get the list of configured Applications
         final FilterList filters = new FilterList();
@@ -177,7 +179,8 @@ public final class FortifyIssueManager
     /*
      * Get a list of 'production' releases for the application
      */
-    private List<Release> getReleases(final int applicationId) throws IOException
+    private List<Release> getReleases(final int applicationId)
+            throws IOException, FortifyAuthenticationException, FortifyRequestException
     {
         LOGGER.info("Getting releases for application {}...", applicationId);
         final FilterList filters = new FilterList();
@@ -190,7 +193,8 @@ public final class FortifyIssueManager
         return releases;
     }
 
-    private List<Vulnerability> getVulnerabilities(final int releaseId) throws IOException
+    private List<Vulnerability> getVulnerabilities(final int releaseId)
+            throws IOException, FortifyAuthenticationException, FortifyRequestException
     {
         LOGGER.info("Getting vulnerabilities for release {}...", releaseId);
         final FilterList filters = new FilterList();
@@ -223,7 +227,7 @@ public final class FortifyIssueManager
                             final Application application,
                             final int releaseId,
                             final Map<Category, List<Vulnerability>> sortedIssues,
-                            final Invocable getPayLoadScript)
+                            final Invocable getPayLoadScript) throws FortifyRequestException
     {
         final String issueBaseUrl = String.format(FORTIFY_ISSUE_LINK_FORMAT, issueUrl, releaseId);
         try

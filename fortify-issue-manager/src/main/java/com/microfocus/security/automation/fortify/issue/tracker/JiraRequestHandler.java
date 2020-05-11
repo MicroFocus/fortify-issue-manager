@@ -16,11 +16,13 @@
 package com.microfocus.security.automation.fortify.issue.tracker;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.net.UrlEscapers;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.microfocus.security.automation.fortify.issue.manager.BugTrackerSettings;
@@ -61,7 +63,7 @@ public final class JiraRequestHandler
             if(response.has("key"))
             {
                 final String bugLink = response.get("key").getAsString();
-                return client.getApiUrl() + "/" + bugLink;
+                return client.getApiUrl() + "/" + UrlEscapers.urlPathSegmentEscaper().escape(bugLink);
             }
             else
             {
@@ -74,9 +76,13 @@ public final class JiraRequestHandler
         }
     }
 
-    private String performPostRequest(final String api, final String payload) throws IOException
+    private String performPostRequest(final String api, final String payload) throws IOException, BugTrackerException
     {
         final HttpUrl.Builder builder = HttpUrl.parse(client.getApiUrl()).newBuilder().addPathSegments(api);
+        if(builder == null)
+        {
+            throw new BugTrackerException("Invalid url : " + api);
+        }
         final String url = builder.build().toString();
         LOGGER.info("Performing request POST {}", url);
 
@@ -89,11 +95,16 @@ public final class JiraRequestHandler
                 .build();
 
         final Response response = client.getClient().newCall(request).execute();
+        if(response.body() == null)
+        {
+            throw new BugTrackerException("Response is null for : " + api);
+        }
 
-        // Read the results and close the response
-        final String responseContent = IOUtils.toString(response.body().byteStream(), "utf-8");
-        response.body().close();
-        LOGGER.info("performPostRequest response: {}", responseContent);
-        return responseContent;
+        // Read the result
+        try(final InputStream responseStream = response.body().byteStream()) {
+            final String responseContent = IOUtils.toString(responseStream, "utf-8");
+            LOGGER.info("performPostRequest response: {}", responseContent);
+            return responseContent;
+        }
     }
 }
