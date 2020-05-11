@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class GenericListResponse<T> {
-    private List<T> items = new ArrayList<>();
+    private final List<T> items = new ArrayList<>();
     private int totalCount;
 
     public int getTotalCount() {
