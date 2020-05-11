@@ -1,11 +1,12 @@
-### fortify-issue-manager
-This is a utility to find Fortify issues created by Fortify scans and create corresponding bugs in a bug tracker like Jira. Once the bugs are created they are linked back to the Fortify issue.
+# Fortify Issue Manager
+
+This is a utility to find issues created by Fortify on Demand scans and create corresponding bugs in a bug tracker like Jira. Once the bugs are created they are linked back to the Fortify on Demand issue.
 
 It can be used from another Java project by including the following dependency:
 
 ```xml
 <dependency>
-    <groupId>com.microfocus.sepg.fortify</groupId>
+    <groupId>com.microfocus.security.automation.fortify</groupId>
     <artifactId>fortify-issue-manager</artifactId>
 </dependency>
 ```
@@ -24,7 +25,7 @@ This modules provides a simple command-line interface which wraps the `manageIss
       -c, --configFile=<configFile>
              Specifies the configuration file
 
-The configuration file that includes connection details to Fortify and the bug tracker must be specified.
+The configuration file that includes connection details to Fortify on Demand and the bug tracker must be specified.
 
 ### fortify-issue-manager-cli-image
 This module builds a Docker image for the command-line interface, potentially allowing for simpler usage in some environments.
