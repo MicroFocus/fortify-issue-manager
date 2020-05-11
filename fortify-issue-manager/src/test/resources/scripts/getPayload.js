@@ -77,7 +77,7 @@ function getInformationSecurityCategory(severity, category) {
 function getPayload(applicationId, applicationName, severity, category, description) {
     
     var issue = {
-      "fields": {
+      fields: {
         "project": {
           "key": "SCMOD"
         },
