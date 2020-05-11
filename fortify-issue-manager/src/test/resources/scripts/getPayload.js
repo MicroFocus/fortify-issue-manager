@@ -63,7 +63,7 @@ function getInformationSecurityCategory(severity, category) {
     }
     else 
     {
-        if(severity == 4)
+        if(severity === 4)
         {
             return informationSecurityCategoryLookupMap["FoD-SCA-Critical"];
         }
