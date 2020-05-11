@@ -54,7 +54,7 @@ public final class BugTrackerSettings
     {
         return proxyHost;
     }
-    public void setProxyHost(String proxyHost)
+    public void setProxyHost(final String proxyHost)
     {
         this.proxyHost = proxyHost;
     }
@@ -62,7 +62,7 @@ public final class BugTrackerSettings
     {
         return proxyPort;
     }
-    public void setProxyPort(int proxyPort)
+    public void setProxyPort(final int proxyPort)
     {
         this.proxyPort = proxyPort;
     }
@@ -74,63 +74,4 @@ public final class BugTrackerSettings
     {
         this.scripts = scripts;
     }
-
-    /*
-    private String titleFormat;
-    private String epic;
-    private String affectsVersion;
-    private String fixVersion;
-    private Map<String, String> teams;
-    */
-    /*
-    public String getTitleFormat()
-    {
-        return titleFormat;
-    }
-
-    public void setTitleFormat(String titleFormat)
-    {
-        this.titleFormat = titleFormat;
-    }
-
-    public String getEpic()
-    {
-        return epic;
-    }
-
-    public void setEpic(String epic)
-    {
-        this.epic = epic;
-    }
-
-    public String getAffectsVersion()
-    {
-        return affectsVersion;
-    }
-
-    public void setAffectsVersion(String affectsVersion)
-    {
-        this.affectsVersion = affectsVersion;
-    }
-
-    public String getFixVersion()
-    {
-        return fixVersion;
-    }
-
-    public void setFixVersion(String fixVersion)
-    {
-        this.fixVersion = fixVersion;
-    }
-
-    public Map<String, String> getTeams()
-    {
-        return teams;
-    }
-
-    public void setTeams(Map<String, String> teams)
-    {
-        this.teams = teams;
-    }
-    */
 }

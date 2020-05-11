@@ -20,7 +20,7 @@ public final class Category
     private final String name;
     private final int severity;
 
-    public Category(String name, int severity)
+    public Category(final String name, final int severity)
     {
         this.name = name;
         this.severity = severity;
@@ -47,7 +47,7 @@ public final class Category
     }
 
     @Override
-    public boolean equals(Object obj)
+    public boolean equals(final Object obj)
     {
         if (this == obj)
             return true;
@@ -70,7 +70,7 @@ public final class Category
     @Override
     public String toString()
     {
-        StringBuilder builder = new StringBuilder();
+        final StringBuilder builder = new StringBuilder();
         builder.append("Category [");
         builder.append(name);
         builder.append(", ");

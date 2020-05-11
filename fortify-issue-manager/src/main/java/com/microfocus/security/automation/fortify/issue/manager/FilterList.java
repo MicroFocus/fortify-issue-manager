@@ -29,34 +29,35 @@ final class FilterList
         this.filters = new HashMap<>();
     }
 
-    public FilterList addFilter(String key, String value) {
+    public FilterList addFilter(final String key, final String value) {
         this.filters.put(key, value);
         return this;
     }
 
-    public FilterList addFilter(String key, int value) {
+    public FilterList addFilter(final String key, final int value) {
         this.filters.put(key, Integer.toString(value));
         return this;
     }
 
-    public FilterList addFilter(String key, boolean value) {
+    public FilterList addFilter(final String key, final boolean value) {
         this.filters.put(key, Boolean.toString(value));
         return this;
     }
 
-    public FilterList removeFilter(String key) {
+    public FilterList removeFilter(final String key) {
         if (filters.containsKey(key))
             filters.remove(key);
         return this;
     }
 
+    @Override
     public String toString() {
 
-        Iterator<Map.Entry<String, String>> iterator = filters.entrySet().iterator();
+        final Iterator<Map.Entry<String, String>> iterator = filters.entrySet().iterator();
 
-        List<String> list = new ArrayList<>();
+        final List<String> list = new ArrayList<>();
         while (iterator.hasNext()) {
-            Map.Entry<String, String> filter = iterator.next();
+            final Map.Entry<String, String> filter = iterator.next();
             list.add(filter.getKey() + ":" + filter.getValue());
             iterator.remove();
         }
