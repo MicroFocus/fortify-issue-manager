@@ -27,7 +27,7 @@
         <version>2.1.0-129</version>
     </parent>
 
-    <groupId>com.microfocus.sepg.fortify</groupId>
+    <groupId>com.microfocus.security.automation.fortify</groupId>
     <artifactId>fortify-issue-manager-aggregator</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
@@ -93,12 +93,12 @@
                 <version>25.0-jre</version>
             </dependency>
             <dependency>
-                <groupId>com.microfocus.sepg.fortify</groupId>
+                <groupId>com.microfocus.security.automation.fortify</groupId>
                 <artifactId>fortify-issue-manager</artifactId>
                 <version>1.0.0-SNAPSHOT</version>
             </dependency>
             <dependency>
-                <groupId>com.microfocus.sepg.fortify</groupId>
+                <groupId>com.microfocus.security.automation.fortify</groupId>
                 <artifactId>fortify-issue-manager-cli</artifactId>
                 <version>1.0.0-SNAPSHOT</version>
             </dependency>

@@ -22,7 +22,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.microfocus.sepg.fortify</groupId>
+        <groupId>com.microfocus.security.automation.fortify</groupId>
         <artifactId>fortify-issue-manager-aggregator</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
@@ -37,7 +37,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.microfocus.sepg.fortify</groupId>
+            <groupId>com.microfocus.security.automation.fortify</groupId>
             <artifactId>fortify-issue-manager-cli</artifactId>
         </dependency>
     </dependencies>
@@ -71,7 +71,7 @@
                                 <labels>
                                     <Build.Number>${project.version}</Build.Number>
                                     <Build.Date>${maven.build.timestamp}</Build.Date>
-                                    <Git.Repo>https://github.houston.softwaregrp.net/sepg/fortify-issue-manager</Git.Repo>
+                                    <Git.Repo>https://github.com/MicroFocus/fortify-issue-manager</Git.Repo>
                                     <Git.Branch>${git.branch}</Git.Branch>
                                     <Git.Commit>${git.revision}</Git.Commit>
                                 </labels>

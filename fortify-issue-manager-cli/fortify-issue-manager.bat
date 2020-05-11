@@ -21,4 +21,4 @@ setlocal
 for /f "delims=" %%i in ('"mvn -q -f "%~dp0pom.xml" org.codehaus.mojo:exec-maven-plugin:1.5.0:exec -Dexec.executable=cmd -Dexec.args="/c echo %%classpath""') do set _PROJ_CLASSPATH=%%i
 
 :: Execute the program
-java -classpath %_PROJ_CLASSPATH% com.microfocus.sepg.fortify.issue.manager.cli.Program %*
+java -classpath %_PROJ_CLASSPATH% com.microfocus.security.automation.fortify.issue.manager.cli.Program %*
