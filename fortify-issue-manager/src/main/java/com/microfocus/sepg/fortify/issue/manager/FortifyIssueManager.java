@@ -212,7 +212,7 @@ public final class FortifyIssueManager
             final Category category = new Category(vulnerability.getCategory(), vulnerability.getSeverity());
             if(!sortedIssues.containsKey(category))
             {
-                sortedIssues.put(category, new ArrayList<Vulnerability>());
+                sortedIssues.put(category, new ArrayList<>());
             }
             sortedIssues.get(category).add(vulnerability);
         }
