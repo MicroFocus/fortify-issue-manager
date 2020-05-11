@@ -59,7 +59,7 @@ function getInformationSecurityCategory(severity, category) {
         {
             return informationSecurityCategoryLookupMap["FoD-OSS-High"];
         }
-            
+
     }
     else 
     {
@@ -94,7 +94,7 @@ function getPayload(applicationId, applicationName, severity, category, descript
         },
         "components": [
           {
-            "name": "Fod: " + applicationName // TODO: get the name fixed to FoD
+            "name": "FoD: " + applicationName
           }
         ],
         "versions": [  // Affects Version/s
@@ -111,7 +111,7 @@ function getPayload(applicationId, applicationName, severity, category, descript
         "customfield_10947": "SCMOD-6608", // Epic link -8803
         "customfield_12362": { // Team(s)
             "id": getTeamOwnership(category, applicationId)
-        }        
+        }
       }
     };
     return JSON.stringify(issue);
