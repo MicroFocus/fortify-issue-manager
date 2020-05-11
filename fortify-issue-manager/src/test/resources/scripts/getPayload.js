@@ -51,7 +51,7 @@ function getTeamOwnership(category, applicationId) {
 function getInformationSecurityCategory(severity, category) {
     if(category.contains("Open Source"))
     {
-        if(severity == 4)
+        if(severity === 4)
         {
             return informationSecurityCategoryLookupMap["FoD-OSS-Critical"];
         }
