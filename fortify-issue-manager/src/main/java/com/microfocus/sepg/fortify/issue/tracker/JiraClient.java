@@ -69,14 +69,9 @@ final class JiraClient
 
         if(StringUtils.isNotEmpty(proxyHost))
         {
-            final Authenticator proxyAuthenticator = new Authenticator() {
-                @Override public Request authenticate(final Route route, final Response response) throws IOException {
-                     final String credential = Credentials.basic(username, password);
-                     return response.request().newBuilder()
-                         .header("Proxy-Authorization", credential)
-                         .build();
-                }
-              };
+            final Authenticator proxyAuthenticator = (route, response) -> response.request().newBuilder()
+                .header("Proxy-Authorization", Credentials.basic(username, password))
+                .build();
 
               baseClient.proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort)))
                         .proxyAuthenticator(proxyAuthenticator);
