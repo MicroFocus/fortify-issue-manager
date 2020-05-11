@@ -23,7 +23,7 @@ import java.util.Map;
 
 final class FilterList
 {
-    private Map<String, String> filters;
+    private final Map<String, String> filters;
 
     public FilterList() {
         this.filters = new HashMap<>();
