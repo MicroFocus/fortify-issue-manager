@@ -32,6 +32,10 @@
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
+    <name>Fortify Issue Manager</name>
+    <description>Utility to manager Fortify on Demand issues.</description>
+    <url>https://github.com/MicroFocus/fortify-issue-manager</url>
+
     <inceptionYear>2020</inceptionYear>
 
     <licenses>
@@ -64,7 +68,7 @@
     <properties>
         <copyrightYear>2020</copyrightYear>
         <copyrightNotice>Copyright ${copyrightYear} Micro Focus or one of its affiliates.</copyrightNotice>
-        <dockerHubOrganization>microfocus</dockerHubOrganization>
+        <dockerHubOrganization>cafapi</dockerHubOrganization>
         <dockerMicroFocusOrg>${dockerImagePrefix}${dockerHubOrganization}${dockerOrgSeperator}</dockerMicroFocusOrg>
         <dockerProjectVersion>${dockerVersionSeperator}${project.version}</dockerProjectVersion>
         <enforceCorrectDependencies>true</enforceCorrectDependencies>
