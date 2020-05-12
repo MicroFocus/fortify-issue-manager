@@ -28,9 +28,8 @@ var titleLookupMap = {
       4: "Critical"       // Critical
 };
 
-function getPayload(applicationName, severity, category, description) {
-    
-    var issue = {
+function getPayload(applicationId, applicationName, severity, category, description) {
+    return {
       fields: {
         project: {
           key: "ACME"
@@ -45,5 +44,4 @@ function getPayload(applicationName, severity, category, description) {
         }
       }
     };
-    return issue;
 }

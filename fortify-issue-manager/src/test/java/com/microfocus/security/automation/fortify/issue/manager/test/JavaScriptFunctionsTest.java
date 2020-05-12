@@ -47,6 +47,7 @@ public class JavaScriptFunctionsTest
                                  + "\n|[103015915|CVE-2018-1270|com.acme.frontend.util:util-liquibase-installer@1.17.0-201|";
         final ScriptEngine engine = getScriptEngine("/getPayload.js");
         final String responseJson = JavaScriptFunctions.invokeFunction(engine, "getPayload",
+                12345,
                 "Acme Front End",
                 4,
                 "Open Source",
