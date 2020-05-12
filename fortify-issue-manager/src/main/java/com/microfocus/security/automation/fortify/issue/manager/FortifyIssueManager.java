@@ -196,7 +196,7 @@ public final class FortifyIssueManager
         filters.addFilter("bugSubmitted", false);
 
         final String fields = null;
-        final List<Vulnerability> vulnerabilities = fortifyRequestHandler.getAllVulnerabilities(releaseId, filters, fields);
+        final List<Vulnerability> vulnerabilities = fortifyRequestHandler.getVulnerabilities(releaseId, filters, fields);
         return vulnerabilities;
     }
 

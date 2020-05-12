@@ -55,19 +55,16 @@ final class FortifyRequestHandler
 
     public List<Application> getApplications(final FilterList filters, final String fields)
             throws IOException, FortifyAuthenticationException, FortifyRequestException {
-        int offset = 0;
-        final String content = performRequest("api/v3/applications", filters, fields, "applicationId", offset);
+        final String url = getUrl("api/v3/applications", filters, fields, "applicationId");
+        final String content = performRequest(url);
 
         final Type t = new TypeToken<GenericListResponse<Application>>() {}.getType();
         final GenericListResponse<Application> results = gson.fromJson(content, t);
         if (results.getTotalCount() > 0)
         {
-            final List<Application> applications = new ArrayList<>();
-            applications.addAll(results.getItems());
             if(results.getTotalCount() > LIMIT)
             {
-                LOGGER.info("!!!!!!!!! GET NEXT PAGE OF APPLICATIONS...: {}", results.getTotalCount());
-                offset = offset + LIMIT;
+                LOGGER.warn("Too many Applications: {}", results.getTotalCount());
             }
             return results.getItems();
         }
@@ -79,18 +76,15 @@ final class FortifyRequestHandler
 
     public List<Release> getReleases(final FilterList filters, final String fields)
             throws IOException, FortifyAuthenticationException, FortifyRequestException {
-        int offset = 0;
-        final String content = performRequest("api/v3/releases", filters, fields, "releaseId", offset);
+        final String url = getUrl("api/v3/releases", filters, fields, "releaseId");
+        final String content = performRequest(url);
         final Type t = new TypeToken<GenericListResponse<Release>>() {}.getType();
         final GenericListResponse<Release> results = gson.fromJson(content, t);
         if (results.getTotalCount() > 0)
         {
-            final List<Release> releases = new ArrayList<>();
-            releases.addAll(results.getItems());
             if(results.getTotalCount() > LIMIT)
             {
-                LOGGER.info("!!!!!!!!! GET NEXT PAGE OF RELEASES...: {}", results.getTotalCount());
-                offset = offset + LIMIT;
+                LOGGER.warn("Too many releases: {}", results.getTotalCount());
             }
             return results.getItems();
         }
@@ -100,9 +94,11 @@ final class FortifyRequestHandler
         }
     }
 
-    public List<Vulnerability> getAllVulnerabilities(final int releaseId, final FilterList filters, final String fields)
+    public List<Vulnerability> getVulnerabilities(final int releaseId, final FilterList filters, final String fields)
             throws IOException, FortifyAuthenticationException, FortifyRequestException {
-        final String content = performRequest("api/v3/releases/" + releaseId + "/vulnerabilities", filters, fields, "id", 0);
+        final String url = getUrl("api/v3/releases/" + releaseId + "/vulnerabilities", filters, fields, "id");
+        final String firstPageUrl = url + "&offset=0";
+        final String content = performRequest(firstPageUrl);
 
         final Type t = new TypeToken<GenericListResponse<Vulnerability>>() {}.getType();
         final GenericListResponse<Vulnerability> results = gson.fromJson(content, t);
@@ -119,8 +115,9 @@ final class FortifyRequestHandler
             for(int i = 0; i < batchesCount; i++)
             {
                 offset = offset + LIMIT;
-                LOGGER.info("Getting vulnerabilities at offset: {} with {} and {}...", offset, filters, fields);
-                final List<Vulnerability> pageOfVulnerabilities = getVulnerabilities(releaseId, filters, fields, offset);
+                final String nextPageUrl = url + "&offset=" + offset;
+                LOGGER.info("Getting vulnerabilities at offset: {}...", offset);
+                final List<Vulnerability> pageOfVulnerabilities = getVulnerabilities(nextPageUrl);
                 vulnerabilities.addAll(pageOfVulnerabilities);
                 LOGGER.info("Got vulnerabilities {} so far", vulnerabilities.size());
             }
@@ -128,45 +125,19 @@ final class FortifyRequestHandler
         return vulnerabilities;
     }
 
-    public List<Vulnerability> getVulnerabilities(final int releaseId, final FilterList filters, final String fields, int offset)
+    private List<Vulnerability> getVulnerabilities(final String pageUrl)
             throws IOException, FortifyAuthenticationException, FortifyRequestException
     {
-        final String content = performRequest("api/v3/releases/" + releaseId + "/vulnerabilities", filters, fields, "id", offset);
+        final String content = performRequest(pageUrl);
 
         final Type t = new TypeToken<GenericListResponse<Vulnerability>>() {}.getType();
         final GenericListResponse<Vulnerability> results = gson.fromJson(content, t);
-        LOGGER.info("Got {} vulnerabilities at offset {}.", results.getItems().size(), offset);
         return results.getItems();
     }
 
-    private String performRequest(final String api, final FilterList filters, final String fields,
-            final String orderBy, final int offset)
+    private String performRequest(final String url)
             throws IOException, FortifyAuthenticationException, FortifyRequestException
     {
-        HttpUrl.Builder builder = HttpUrl.parse(fortifyClient.getApiUrl()).newBuilder().addPathSegments(api);
-        if(builder == null)
-        {
-            throw new FortifyRequestException("Invalid url : " + api);
-        }
-        if(filters != null)
-        {
-            builder = builder.addQueryParameter("filters", filters.toString());
-        }
-
-        if (StringUtils.isNotEmpty(fields))
-        {
-            builder = builder.addQueryParameter("fields", fields);
-        }
-
-        if(StringUtils.isNotEmpty(orderBy))
-        {
-            builder = builder.addQueryParameter("orderBy", orderBy);
-        }
-
-        builder = builder.addQueryParameter("offset", Integer.toString(offset));
-
-        final String url = builder.build().toString();
-
         LOGGER.info("Performing request GET {}", url);
 
         final Request request = new Request.Builder()
@@ -243,5 +214,31 @@ final class FortifyRequestHandler
             LOGGER.info("Updated vulnerabilities with bugLink {}, response: {}", bugLink, responseContent);
         }
         */
+    }
+
+    private String getUrl(final String api, final FilterList filters, final String fields, final String orderBy)
+            throws FortifyRequestException {
+        HttpUrl.Builder builder = HttpUrl.parse(fortifyClient.getApiUrl()).newBuilder().addPathSegments(api);
+        if(builder == null)
+        {
+            throw new FortifyRequestException("Invalid url : " + api);
+        }
+        if(filters != null)
+        {
+            builder = builder.addQueryParameter("filters", filters.toString());
+        }
+
+        if (StringUtils.isNotEmpty(fields))
+        {
+            builder = builder.addQueryParameter("fields", fields);
+        }
+
+        if(StringUtils.isNotEmpty(orderBy))
+        {
+            builder = builder.addQueryParameter("orderBy", orderBy);
+        }
+
+        final String url = builder.build().toString();
+        return url;
     }
 }
