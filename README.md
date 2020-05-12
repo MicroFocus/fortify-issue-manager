@@ -14,17 +14,8 @@ It can be used from another Java project by including the following dependency:
 It makes the following `static` method available in the `FortifyIssueManager` class:
 
 ```java
-public static void manageIssues(final String scriptFile)
+public static boolean manageIssues(final String scriptFile)
 ```
-
-The javascript file must have a `getPayload` function that will be passed the following arguments:
-- applicationId - The Fortify application ID
-- applicationName - The Fortify application Name
-- severity - The severity of the Fortify issue
-- category - The category of the Fortify issue
-- description - The description of the Fortify vulnerabilities in the category
-The script should return the payload for creating a bug in a bug tracking application.  
-Here is a sample script file [getPayload.js](./fortify-issue-manager/src/test/resources/getPayload.js).
 
 ### fortify-java-issue-manager-cli
 
@@ -34,7 +25,18 @@ This modules provides a simple command-line interface which wraps the `manageIss
       -s, --scriptFile=<scriptFile>
              Specifies the script file with the `getPayload` function to create the bug details
 
-The configuration file that includes connection details to Fortify on Demand and the bug tracker must be specified.
+A javascript file that includes a `getPayload` function must be specified.
+
+The `getPayload` function will be passed the following arguments:
+- applicationId - The Fortify application ID
+- applicationName - The Fortify application Name
+- severity - The severity of the Fortify issue
+- category - The category of the Fortify issue
+- description - The description of the Fortify vulnerabilities in the category
+
+The script should return the payload for creating a bug in a bug tracking application.  
+
+Here is a sample script file [getPayload.js](./fortify-issue-manager/src/test/resources/getPayload.js).
 
 ### fortify-issue-manager-cli-image
 This module builds a Docker image for the command-line interface, potentially allowing for simpler usage in some environments.

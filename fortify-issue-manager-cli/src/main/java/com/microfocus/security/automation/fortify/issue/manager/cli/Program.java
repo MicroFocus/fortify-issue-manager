@@ -28,7 +28,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 @Command(name = "fortify-issue-manager")
-public final class Program implements Callable<Void>
+public final class Program implements Callable<Integer>
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(Program.class);
 
@@ -45,17 +45,25 @@ public final class Program implements Callable<Void>
 
     public static void main(final String[] args)
     {
-        CommandLine.call(new Program(), args);
+        int exitCode = new CommandLine(new Program()).execute(args);
+        System.exit(exitCode);
     }
 
     @Override
-    public Void call() throws Exception
+    public Integer call() throws Exception
     {
         if (Objects.isNull(scriptFile)) {
             LOGGER.error("Script file with the `getPayload` function to create the bug details must be specified.");
             CommandLine.usage(new Program(), System.out);
         } else {
-            FortifyIssueManager.manageIssues(scriptFile);
+            if(FortifyIssueManager.manageIssues(scriptFile))
+            {
+                return 0;
+            }
+            else
+            {
+                return -1;
+            }
         }
         return null;
     }

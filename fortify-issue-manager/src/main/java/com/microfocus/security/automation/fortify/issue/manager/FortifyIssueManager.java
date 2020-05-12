@@ -57,11 +57,13 @@ public final class FortifyIssueManager
     private final BugTracker bugTracker;
     private final String[] applicationIds;
     private final String issueUrl;
+    private static boolean hasErrors;
 
     private FortifyIssueManager(final FortifyClient client,
                                 final BugTrackerSettings bugTrackerSettings,
                                 final String[] applicationIds, final String issueUrl)
     {
+        hasErrors = false;
         this.fortifyRequestHandler = new FortifyRequestHandler(client);
         this.bugTracker = new JiraRequestHandler(bugTrackerSettings);
         this.applicationIds = applicationIds;
@@ -71,8 +73,9 @@ public final class FortifyIssueManager
     /**
      * Create bugs for Fortify issues.
      * @param scriptFile Script file to create the bug payload
+     * @returns true if there were no errors when managing issues
      */
-    public static void manageIssues(final String scriptFile)
+    public static boolean manageIssues(final String scriptFile)
     {
         // Check that the required parameters have been specified
         if (Objects.isNull(scriptFile)) {
@@ -96,16 +99,18 @@ public final class FortifyIssueManager
                                                                              fortifySettings.getApplicationIds(),
                                                                              fortifySettings.getIssueUrl());
             issueManager.linkIssuesToBugTracker(scriptFile);
-            LOGGER.info("Managing Fortify issues completed.");
         } catch (final IOException | ScriptNotFoundException | ScriptException
-                     | FortifyAuthenticationException | FortifyRequestException e)
+                     | FortifyAuthenticationException | FortifyRequestException | NoSuchMethodException e)
         {
             LOGGER.error("Error managing Fortify issues", e);
+            hasErrors = true;
         }
+        LOGGER.info("Managing Fortify issues completed with {}", hasErrors ? "errors." : "no errors.");
+        return !hasErrors;
     }
 
     private void linkIssuesToBugTracker(final String scriptFile)
-            throws IOException, ScriptNotFoundException, ScriptException, FortifyAuthenticationException, FortifyRequestException
+            throws IOException, ScriptNotFoundException, ScriptException, FortifyAuthenticationException, FortifyRequestException, NoSuchMethodException
     {
         // Get the list of configured Applications
         final FilterList filters = new FilterList();
@@ -219,56 +224,51 @@ public final class FortifyIssueManager
     private void createBugs(final Application application,
                             final int releaseId,
                             final Map<Category, List<Vulnerability>> sortedIssues,
-                            final ScriptEngine getPayLoadScript) throws FortifyRequestException
+                            final ScriptEngine getPayLoadScript) throws FortifyRequestException, NoSuchMethodException, ScriptException
     {
         final String issueBaseUrl = String.format(FORTIFY_ISSUE_LINK_FORMAT, issueUrl, releaseId);
-        try
+
+        final Set<Category> categories = sortedIssues.keySet();
+        int counter = 1;
+        for(final Category category : categories)
         {
-                final Set<Category> categories = sortedIssues.keySet();
-                int counter = 1;
-                for(final Category category : categories)
+            LOGGER.info("Creating bugs for Application:{} Release:{} {}...",
+                        application.getApplicationId(), releaseId, category);
+            LOGGER.info("-----------------------------------------");
+            final List<Vulnerability> vulnerabilities = sortedIssues.get(category);
+            final String bugDescription = category.getName().contains("Open Source")
+                                            ? getOpenSourceIssueDescription(issueBaseUrl, vulnerabilities)
+                                            : getIssueDescription(issueBaseUrl, vulnerabilities);
+
+            final String bugDetails = JavaScriptFunctions.invokeFunction(getPayLoadScript, "getPayload",
+                                                              application.getApplicationId(),
+                                                              application.getApplicationName(),
+                                                              category.getSeverity(),
+                                                              category.getName(),
+                                                              bugDescription);
+
+            LOGGER.info("{} BUG-{} : {}", category.getName(), counter++, bugDetails);
+
+            try
+            {
+                final String bugLink = this.bugTracker.createBug(bugDetails);
+                LOGGER.info("Updating vulnerabilities with bugLink {}...", bugLink);
+                final List<String> vulnerabilityIds = vulnerabilities.stream()
+                                                                     .map(Vulnerability::getVulnId)
+                                                                     .collect(Collectors.toList());
+                try
                 {
-                    LOGGER.info("Creating bugs for Application:{} Release:{} {}...",
-                                application.getApplicationId(), releaseId, category);
-                    LOGGER.info("-----------------------------------------");
-                    final List<Vulnerability> vulnerabilities = sortedIssues.get(category);
-                    final String bugDescription = category.getName().contains("Open Source")
-                                                    ? getOpenSourceIssueDescription(issueBaseUrl, vulnerabilities)
-                                                    : getIssueDescription(issueBaseUrl, vulnerabilities);
-
-                    final String bugDetails = JavaScriptFunctions.invokeFunction(getPayLoadScript, "getPayload",
-                                                                      application.getApplicationId(),
-                                                                      application.getApplicationName(),
-                                                                      category.getSeverity(),
-                                                                      category.getName(),
-                                                                      bugDescription);
-
-                    LOGGER.info("{} BUG-{} : {}", category.getName(), counter++, bugDetails);
-
-                    try
-                    {
-                        final String bugLink = this.bugTracker.createBug(bugDetails);
-                        LOGGER.info("Updating vulnerabilities with bugLink {}...", bugLink);
-                        final List<String> vulnerabilityIds = vulnerabilities.stream()
-                                                                             .map(Vulnerability::getVulnId)
-                                                                             .collect(Collectors.toList());
-                        try
-                        {
-                            fortifyRequestHandler.updateVulnerability(releaseId, vulnerabilityIds, bugLink);
-                        } catch (final IOException e)
-                        {
-                            LOGGER.error("Error updating vulnerability", e);
-                        }
-                    } catch (final BugTrackerException e)
-                    {
-                        LOGGER.error("Error creating bug", e);
-                    }
-                    LOGGER.info("-----------------------------------------");
+                    fortifyRequestHandler.updateVulnerability(releaseId, vulnerabilityIds, bugLink);
+                } catch (final IOException e)
+                {
+                    LOGGER.error("Error updating vulnerability", e);
                 }
-
-        } catch (final NoSuchMethodException | ScriptException e)
-        {
-            LOGGER.error("Error preparing issue payload", e);
+            } catch (final BugTrackerException e)
+            {
+                LOGGER.error("Error creating bug", e);
+                hasErrors = true;
+            }
+            LOGGER.info("-----------------------------------------");
         }
     }
 
