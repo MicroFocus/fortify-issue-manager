@@ -86,7 +86,7 @@ public final class JiraRequestHandler implements BugTracker
             throw new BugTrackerException("Invalid url : " + api);
         }
         final String url = builder.build().toString();
-        LOGGER.info("Performing request POST {}", url);
+        LOGGER.debug("Performing request POST {}", url);
 
         final RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), payload);
 
@@ -105,7 +105,7 @@ public final class JiraRequestHandler implements BugTracker
         // Read the result
         try(final InputStream responseStream = response.body().byteStream()) {
             final String responseContent = IOUtils.toString(responseStream, "utf-8");
-            LOGGER.info("performPostRequest response: {}", responseContent);
+            LOGGER.debug("performPostRequest response: {}", responseContent);
             return responseContent;
         }
     }

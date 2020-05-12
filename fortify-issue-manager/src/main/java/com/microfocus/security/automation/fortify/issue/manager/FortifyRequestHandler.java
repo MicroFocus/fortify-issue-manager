@@ -111,15 +111,15 @@ final class FortifyRequestHandler
         {
             int offset = 0;
             final int batchesCount = results.getTotalCount() / 50;
-            LOGGER.info("Getting all {} vulnerabilities in {} batches of {} each...", results.getTotalCount(), batchesCount, LIMIT);
+            LOGGER.debug("Getting all {} vulnerabilities in {} batches of {} each...", results.getTotalCount(), batchesCount, LIMIT);
             for(int i = 0; i < batchesCount; i++)
             {
                 offset = offset + LIMIT;
                 final String nextPageUrl = url + "&offset=" + offset;
-                LOGGER.info("Getting vulnerabilities at offset: {}...", offset);
+                LOGGER.debug("Getting vulnerabilities at offset: {}...", offset);
                 final List<Vulnerability> pageOfVulnerabilities = getVulnerabilities(nextPageUrl);
                 vulnerabilities.addAll(pageOfVulnerabilities);
-                LOGGER.info("Got vulnerabilities {} so far", vulnerabilities.size());
+                LOGGER.debug("Got vulnerabilities {} so far", vulnerabilities.size());
             }
         }
         return vulnerabilities;
@@ -138,7 +138,7 @@ final class FortifyRequestHandler
     private String performRequest(final String url)
             throws IOException, FortifyAuthenticationException, FortifyRequestException
     {
-        LOGGER.info("Performing request GET {}", url);
+        LOGGER.debug("Performing request GET {}", url);
 
         final Request request = new Request.Builder()
                 .url(url)
