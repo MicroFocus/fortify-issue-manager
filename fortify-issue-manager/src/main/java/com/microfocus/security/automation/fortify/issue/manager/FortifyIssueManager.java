@@ -236,13 +236,7 @@ public final class FortifyIssueManager
                     final String bugDescription = category.getName().contains("Open Source")
                                                     ? getOpenSourceIssueDescription(issueBaseUrl, vulnerabilities)
                                                     : getIssueDescription(issueBaseUrl, vulnerabilities);
-                    final String bugDetails = (String)invocableScript.invokeFunction("getPayload",
-                                                                        application.getApplicationId(),
-                                                                        application.getApplicationName(),
-                                                                        category.getSeverity(),
-                                                                        category.getName(),
-                                                                        bugDescription);
-                    /*
+
                     final Object bugDetailsObj = invocableScript.invokeFunction("getPayload",
                                                                       application.getApplicationId(),
                                                                       application.getApplicationName(),
@@ -250,21 +244,9 @@ public final class FortifyIssueManager
                                                                       category.getName(),
                                                                       bugDescription);
 
-                    */
-                    //final Bindings bindings = getPayLoadScript.getContext().getBindings(ScriptContext.GLOBAL_SCOPE);
-                    //bindings.put("bugDetailsObject", bugDetailsObj);
-                    /*
-                    getPayLoadScript.put("bugDetailsObj", bugDetailsObj);
-                    final String bugDetails = (String) getPayLoadScript.eval("JSON.stringify({bugDetailsObj:bugDetailsObj})");
-                    */
-                    /*
-                    final Object fnObj = getPayLoadScript.eval(""
-                                + "({"
-                                + "    toJson: JSON.stringify"
-                                + "});");
+                    final Object jsonObj = getPayLoadScript.get("JSON");
+                    final String bugDetails = (String)invocableScript.invokeMethod(jsonObj, "stringify", bugDetailsObj);
 
-                    final String bugDetails = (String)invocableScript.invokeMethod(fnObj, "toJson", bugDetailsObj);
-*/
                     LOGGER.info("{} BUG-{} : {}", category.getName(), counter++, bugDetails);
 
                     try
@@ -367,7 +349,7 @@ public final class FortifyIssueManager
                 LOGGER.error(ex.getMessage(), ex);
             }
         }
-        LOGGER.info("proxySettings : {}", proxySettings);
+        LOGGER.debug("proxySettings : {}", proxySettings);
         return proxySettings;
     }
 }
