@@ -31,7 +31,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
@@ -46,6 +45,7 @@ import com.microfocus.security.automation.fortify.issue.manager.models.Applicati
 import com.microfocus.security.automation.fortify.issue.manager.models.Category;
 import com.microfocus.security.automation.fortify.issue.manager.models.Release;
 import com.microfocus.security.automation.fortify.issue.manager.models.Vulnerability;
+import com.microfocus.security.automation.fortify.issue.manager.utils.JavaScriptFunctions;
 import com.microfocus.security.automation.fortify.issue.tracker.JiraRequestHandler;
 
 public final class FortifyIssueManager
@@ -222,7 +222,6 @@ public final class FortifyIssueManager
                             final ScriptEngine getPayLoadScript) throws FortifyRequestException
     {
         final String issueBaseUrl = String.format(FORTIFY_ISSUE_LINK_FORMAT, issueUrl, releaseId);
-        final Invocable invocableScript = (Invocable)getPayLoadScript;
         try
         {
                 final Set<Category> categories = sortedIssues.keySet();
@@ -237,15 +236,12 @@ public final class FortifyIssueManager
                                                     ? getOpenSourceIssueDescription(issueBaseUrl, vulnerabilities)
                                                     : getIssueDescription(issueBaseUrl, vulnerabilities);
 
-                    final Object bugDetailsObj = invocableScript.invokeFunction("getPayload",
+                    final String bugDetails = JavaScriptFunctions.invokeFunction(getPayLoadScript, "getPayload",
                                                                       application.getApplicationId(),
                                                                       application.getApplicationName(),
                                                                       category.getSeverity(),
                                                                       category.getName(),
                                                                       bugDescription);
-
-                    final Object jsonObj = getPayLoadScript.get("JSON");
-                    final String bugDetails = (String)invocableScript.invokeMethod(jsonObj, "stringify", bugDetailsObj);
 
                     LOGGER.info("{} BUG-{} : {}", category.getName(), counter++, bugDetails);
 
