@@ -15,63 +15,41 @@
  */
 package com.microfocus.security.automation.fortify.issue.manager;
 
-import java.util.List;
+import java.util.Map;
 
 public final class BugTrackerSettings
 {
-    private String username;
-    private String password;
-    private String apiUrl;
-    private String proxyHost;
-    private int proxyPort;
-    private List<Script> scripts;
+    private final String username;
+    private final String password;
+    private final String apiUrl;
+    private final Map<String, String> proxySettings;
+
+    public BugTrackerSettings(final Map<String, String> proxySettings)
+    {
+        this.username = System.getenv("BUG_TRACKER_USERNAME");
+        this.password = System.getenv("BUG_TRACKER_PASSWORD");
+        this.apiUrl = System.getenv("BUG_TRACKER_API_URL");
+        this.proxySettings = proxySettings;
+    }
 
     public String getUsername()
     {
         return username;
     }
-    public void setUsername(final String username)
-    {
-        this.username = username;
-    }
+
     public String getPassword()
     {
         return password;
     }
-    public void setPassword(final String password)
-    {
-        this.password = password;
-    }
+
     public String getApiUrl()
     {
         return apiUrl;
     }
-    public void setApiUrl(final String apiUrl)
+
+    public Map<String, String> getProxySettings()
     {
-        this.apiUrl = apiUrl;
+        return proxySettings;
     }
-    public String getProxyHost()
-    {
-        return proxyHost;
-    }
-    public void setProxyHost(final String proxyHost)
-    {
-        this.proxyHost = proxyHost;
-    }
-    public int getProxyPort()
-    {
-        return proxyPort;
-    }
-    public void setProxyPort(final int proxyPort)
-    {
-        this.proxyPort = proxyPort;
-    }
-    public List<Script> getScripts()
-    {
-        return scripts;
-    }
-    public void setScripts(final List<Script> scripts)
-    {
-        this.scripts = scripts;
-    }
+
 }

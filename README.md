@@ -14,32 +14,37 @@ It can be used from another Java project by including the following dependency:
 It makes the following `static` method available in the `FortifyIssueManager` class:
 
 ```java
-public static void manageIssues(final String configFile)
+public static void manageIssues(final String scriptFile)
 ```
 
 ### fortify-java-issue-manager-cli
 
 This modules provides a simple command-line interface which wraps the `manageIssues()` function.
 
-    Usage: fortify-issue-manager -c=<configFile>
-      -c, --configFile=<configFile>
-             Specifies the configuration file
+    Usage: fortify-issue-manager -s=<scriptFile>
+      -s, --scriptFile=<scriptFile>
+             Specifies the script file with the `getPayload` function to create the bug details
 
 The configuration file that includes connection details to Fortify on Demand and the bug tracker must be specified.
 
 ### fortify-issue-manager-cli-image
 This module builds a Docker image for the command-line interface, potentially allowing for simpler usage in some environments.
 
-To pull the image, first ensure that you have logged into the Docker registry using your [swinfra.net](http://domaininfo.swinfra.net/) account credentials:
-
-```
-docker login saas-docker.svsartifactory.swinfra.net
-```
-
 Here is an example command:
 
 ```
 docker container run --rm \
-    saas-docker.svsartifactory.swinfra.net/sepg/fortify-issue-manager:<VERSION-NUMBER> \
-    -c=/fortifyIssueManagerConfig.yaml
+    -e FORTIFY_USERNAME=<Fortify on Demand username> \
+    -e FORTIFY_PASSWORD=<Fortify on Demand password> \
+    -e FORTIFY_TENANT=<Fortify on Demand tenant> \
+    -e FORTIFY_SCOPE=<Fortify on Demand scope> \
+    -e FORTIFY_API_URL=<Fortify on Demand API URL> \
+    -e FORTIFY_ISSUE_URL=<Fortify on Demand issue URL> \
+    -e FORTIFY_APPLICATION_IDS=<Comma separated list of application ids> \
+    -e BUG_TRACKER_USERNAME=<Bug tracker username> \
+    -e BUG_TRACKER_PASSWORD=<Bug tracker password> \
+    -e BUG_TRACKER_API_URL=<Bug tracker URL> \
+    -v $(pwd):/wd \
+    cafapi/fortify-issue-manager:<VERSION-NUMBER> \
+    -s=/wd/getPayload.js
 ```

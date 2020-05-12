@@ -13,19 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.microfocus.security.automation.fortify.issue.tracker;
+package com.microfocus.security.automation.fortify.issue.manager;
 
-public final class BugTrackerException extends Exception
+public interface BugTracker
 {
-    private static final long serialVersionUID = 8042918310997057898L;
 
-    public BugTrackerException(final String message)
-    {
-        super(message);
-    }
-
-    public BugTrackerException(final Exception ex)
-    {
-        super(ex);
-    }
+    /**
+     * Create a bug with specified details.
+     * @param bugDetails Bug details
+     * @return link to bug created
+     * @throws BugTrackerException If a bug cannot be created in the bug tracker
+     */
+    String createBug(String bugDetails) throws BugTrackerException;
 }

@@ -25,6 +25,8 @@ import org.slf4j.LoggerFactory;
 import com.google.common.net.UrlEscapers;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.microfocus.security.automation.fortify.issue.manager.BugTracker;
+import com.microfocus.security.automation.fortify.issue.manager.BugTrackerException;
 import com.microfocus.security.automation.fortify.issue.manager.BugTrackerSettings;
 
 import okhttp3.HttpUrl;
@@ -33,7 +35,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public final class JiraRequestHandler
+public final class JiraRequestHandler implements BugTracker
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(JiraRequestHandler.class);
 
@@ -46,12 +48,12 @@ public final class JiraRequestHandler
                                         bugTrackerSettings.getUsername(),
                                         bugTrackerSettings.getPassword(),
                                         bugTrackerSettings.getApiUrl(),
-                                        bugTrackerSettings.getProxyHost(),
-                                        bugTrackerSettings.getProxyPort()
+                                        bugTrackerSettings.getProxySettings()
                                     );
         this.parser = new JsonParser();
     }
 
+    @Override
     public String createBug(final String payload) throws BugTrackerException
     {
         try

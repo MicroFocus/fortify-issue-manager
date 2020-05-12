@@ -15,20 +15,14 @@
  */
 package com.microfocus.security.automation.fortify.issue.tracker;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang.StringUtils;
 import org.glassfish.jersey.internal.util.Base64;
 
-import okhttp3.Authenticator;
-import okhttp3.Credentials;
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-import okhttp3.Route;
 
 final class JiraClient
 {
@@ -38,22 +32,13 @@ final class JiraClient
 
     private final String apiUrl;
     private final OkHttpClient client;
-
-    private final String username;
-    private final String password;
-
-    private final int proxyPort;
-    private final String proxyHost;
+    private final Map<String, String> proxySettings;
 
     private final String encodedAuth;
 
-    JiraClient(final String username, final String password, final String apiUrl,
-            final String proxyHost, final int proxyPort) {
-        this.username = username;
-        this.password = password;
+    JiraClient(final String username, final String password, final String apiUrl, final Map<String, String> proxySettings) {
         this.apiUrl = apiUrl;
-        this.proxyHost = proxyHost;
-        this.proxyPort = proxyPort;
+        this.proxySettings = proxySettings;
 
         client = createClient();
 
@@ -67,14 +52,10 @@ final class JiraClient
                 .writeTimeout(WRITE_TIMEOUT, TimeUnit.SECONDS)
                 .readTimeout(READ_TIMEOUT, TimeUnit.SECONDS);
 
-        if(StringUtils.isNotEmpty(proxyHost))
-        {
-            final Authenticator proxyAuthenticator = (route, response) -> response.request().newBuilder()
-                .header("Proxy-Authorization", Credentials.basic(username, password))
-                .build();
-
-              baseClient.proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort)))
-                        .proxyAuthenticator(proxyAuthenticator);
+        if (!proxySettings.isEmpty()) {
+            final Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxySettings.get("host"),
+                    Integer.valueOf(proxySettings.get("port"))));
+            baseClient.proxy(proxy);
         }
         return baseClient.build();
     }

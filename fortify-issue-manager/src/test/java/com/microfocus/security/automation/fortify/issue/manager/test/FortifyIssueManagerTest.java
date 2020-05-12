@@ -25,6 +25,6 @@ public class FortifyIssueManagerTest
     @Ignore
     public void testManageIssues() throws Exception
     {
-        FortifyIssueManager.manageIssues("/fortifyIssueManagerConfig.yaml");
+        FortifyIssueManager.manageIssues("/getPayload.js");
     }
 }

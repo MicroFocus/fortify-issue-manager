@@ -15,27 +15,17 @@
  */
 package com.microfocus.security.automation.fortify.issue.manager;
 
-public final class Script
+public final class BugTrackerException extends Exception
 {
-    private String name;
-    private String script;
+    private static final long serialVersionUID = 8042918310997057898L;
 
-    public String getName()
+    public BugTrackerException(final String message)
     {
-        return name;
-    }
-    public void setName(final String name)
-    {
-        this.name = name;
-    }
-    public String getScript()
-    {
-        return script;
-    }
-    public void setScript(final String script)
-    {
-        this.script = script;
+        super(message);
     }
 
-    
+    public BugTrackerException(final Exception ex)
+    {
+        super(ex);
+    }
 }

@@ -15,8 +15,12 @@
  */
 package com.microfocus.security.automation.fortify.issue.manager;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -32,17 +36,16 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
 
 import com.google.common.base.Joiner;
 import com.microfocus.security.automation.fortify.issue.manager.models.Application;
 import com.microfocus.security.automation.fortify.issue.manager.models.Category;
 import com.microfocus.security.automation.fortify.issue.manager.models.Release;
 import com.microfocus.security.automation.fortify.issue.manager.models.Vulnerability;
-import com.microfocus.security.automation.fortify.issue.tracker.BugTrackerException;
 import com.microfocus.security.automation.fortify.issue.tracker.JiraRequestHandler;
 
 public final class FortifyIssueManager
@@ -51,45 +54,48 @@ public final class FortifyIssueManager
     private final String FORTIFY_ISSUE_LINK_FORMAT = "%s/Releases/%s/Issues/";
 
     private final FortifyRequestHandler fortifyRequestHandler;
-    private final BugTrackerSettings bugTrackerSettings;
-    private final List<Integer> applicationIds;
+    private final BugTracker bugTracker;
+    private final String[] applicationIds;
     private final String issueUrl;
 
-    private FortifyIssueManager(final FortifyClient client, final BugTrackerSettings bugTrackerSettings,
-                                final List<Integer> applicationIds, final String issueUrl)
+    private FortifyIssueManager(final FortifyClient client,
+                                final BugTrackerSettings bugTrackerSettings,
+                                final String[] applicationIds, final String issueUrl)
     {
         this.fortifyRequestHandler = new FortifyRequestHandler(client);
-        this.bugTrackerSettings = bugTrackerSettings;
+        this.bugTracker = new JiraRequestHandler(bugTrackerSettings);
         this.applicationIds = applicationIds;
         this.issueUrl = issueUrl;
     }
 
     /**
      * Create bugs for Fortify issues.
-     * @param configFile Configuration file for the Fortify issues manager
+     * @param scriptFile Script file to create the bug payload
      */
-    public static void manageIssues(final String configFile)
+    public static void manageIssues(final String scriptFile)
     {
         // Check that the required parameters have been specified
-        if (Objects.isNull(configFile)) {
-            throw new NullPointerException("Configuration file must be specified");
+        if (Objects.isNull(scriptFile)) {
+            throw new NullPointerException("Script file must be specified");
         }
         try
         {
-            final FortifyIssueManagerConfiguration config = loadConfiguration(configFile);
             LOGGER.info("Managing Fortify issues ...");
-            final FortifySettings fortifySettings = config.getFortifySettings();
+            final FortifySettings fortifySettings = new FortifySettings();
+            final Map<String, String> proxySettings = getProxySetting("HTTP_PROXY");
+            final BugTrackerSettings bugTrackerSettings = new BugTrackerSettings(proxySettings);
             final FortifyClient client = new FortifyClient(
                                                         fortifySettings.getTenant() + "\\" + fortifySettings.getUsername(),
                                                         fortifySettings.getPassword(),
                                                         fortifySettings.getApiUrl(),
-                                                        fortifySettings.getScope());
+                                                        fortifySettings.getScope(),
+                                                        proxySettings);
             client.authenticate();
             final FortifyIssueManager issueManager = new FortifyIssueManager(client,
-                                                                             config.getBugTrackerSettings(),
+                                                                             bugTrackerSettings,
                                                                              fortifySettings.getApplicationIds(),
                                                                              fortifySettings.getIssueUrl());
-            issueManager.linkIssuesToBugTracker();
+            issueManager.linkIssuesToBugTracker(scriptFile);
             LOGGER.info("Managing Fortify issues completed.");
         } catch (final IOException | ScriptNotFoundException | ScriptException
                      | FortifyAuthenticationException | FortifyRequestException e)
@@ -98,17 +104,7 @@ public final class FortifyIssueManager
         }
     }
 
-    private static FortifyIssueManagerConfiguration loadConfiguration(final String configFile) throws IOException
-    {
-        final Yaml yaml = new Yaml(new Constructor(FortifyIssueManagerConfiguration.class));
-        try(final InputStream inputStream = FortifyIssueManager.class.getResourceAsStream(configFile))
-        {
-            final FortifyIssueManagerConfiguration config = yaml.load(inputStream);
-            return config;
-        }
-    }
-
-    private void linkIssuesToBugTracker()
+    private void linkIssuesToBugTracker(final String scriptFile)
             throws IOException, ScriptNotFoundException, ScriptException, FortifyAuthenticationException, FortifyRequestException
     {
         // Get the list of configured Applications
@@ -124,9 +120,7 @@ public final class FortifyIssueManager
         }
         LOGGER.info("Got {} application(s).", applications.size());
 
-        final JiraRequestHandler jiraReqHandler = new JiraRequestHandler(bugTrackerSettings);
-
-        final Invocable bugPayloadScript = getBugPayloadScript();
+        final ScriptEngine bugPayloadScript = getBugPayloadScript(scriptFile);
 
         // For each application get Releases where sdlcStatusType is set to "Production"
         for(final Application application : applications)
@@ -153,27 +147,27 @@ public final class FortifyIssueManager
                     LOGGER.info("Got {} vulnerabilities.", vulnerabilities.size());
                     final Map<Category, List<Vulnerability>> sortedIssues = sortVulnerabilities(vulnerabilities);
                     // Create a bug in the bug tracker for each category of issues, update the vulnerability with the bugLink
-                    createBugs(jiraReqHandler, application, release.getReleaseId(), sortedIssues, bugPayloadScript);
+                    createBugs(application, release.getReleaseId(), sortedIssues, bugPayloadScript);
                 }
             }
         }
     }
 
-    private Invocable getBugPayloadScript() throws ScriptNotFoundException, ScriptException
+    private ScriptEngine getBugPayloadScript(final String scriptFile)
+            throws ScriptNotFoundException, ScriptException, FileNotFoundException, IOException
     {
-        final List<Script> scripts = bugTrackerSettings.getScripts();
-        final Script getPayloadScript = scripts.stream()
-                                               .filter(script -> script.getName().equals("getPayload.js"))
-                                               .findFirst()
-                                               .get();
-        if(getPayloadScript == null)
+        LOGGER.info("Loding script from {}", scriptFile);
+        try(final InputStream inputStream = new FileInputStream(scriptFile))
         {
-            throw new ScriptNotFoundException("Script getPayload.js not found.");
+            final String getPayloadScript = IOUtils.toString(inputStream, "utf-8");
+            if(StringUtils.isEmpty(getPayloadScript))
+            {
+                throw new ScriptNotFoundException("Script getPayload not found.");
+            }
+            final ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
+            engine.eval(getPayloadScript);
+            return engine;
         }
-        final ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
-        engine.eval(getPayloadScript.getScript());
-        final Invocable invocable = (Invocable) engine;
-        return invocable;
     }
 
     /*
@@ -202,8 +196,7 @@ public final class FortifyIssueManager
         filters.addFilter("bugSubmitted", false);
 
         final String fields = null;
-
-        final List<Vulnerability> vulnerabilities = fortifyRequestHandler.getVulnerabilities(releaseId, filters, fields);
+        final List<Vulnerability> vulnerabilities = fortifyRequestHandler.getAllVulnerabilities(releaseId, filters, fields);
         return vulnerabilities;
     }
 
@@ -223,13 +216,13 @@ public final class FortifyIssueManager
         return sortedIssues;
     }
 
-    private void createBugs(final JiraRequestHandler jiraReqHandler,
-                            final Application application,
+    private void createBugs(final Application application,
                             final int releaseId,
                             final Map<Category, List<Vulnerability>> sortedIssues,
-                            final Invocable getPayLoadScript) throws FortifyRequestException
+                            final ScriptEngine getPayLoadScript) throws FortifyRequestException
     {
         final String issueBaseUrl = String.format(FORTIFY_ISSUE_LINK_FORMAT, issueUrl, releaseId);
+        final Invocable invocableScript = (Invocable)getPayLoadScript;
         try
         {
                 final Set<Category> categories = sortedIssues.keySet();
@@ -243,17 +236,40 @@ public final class FortifyIssueManager
                     final String bugDescription = category.getName().contains("Open Source")
                                                     ? getOpenSourceIssueDescription(issueBaseUrl, vulnerabilities)
                                                     : getIssueDescription(issueBaseUrl, vulnerabilities);
-                    final String bugDetails = (String)getPayLoadScript.invokeFunction("getPayload",
+                    final String bugDetails = (String)invocableScript.invokeFunction("getPayload",
+                                                                        application.getApplicationId(),
+                                                                        application.getApplicationName(),
+                                                                        category.getSeverity(),
+                                                                        category.getName(),
+                                                                        bugDescription);
+                    /*
+                    final Object bugDetailsObj = invocableScript.invokeFunction("getPayload",
                                                                       application.getApplicationId(),
                                                                       application.getApplicationName(),
                                                                       category.getSeverity(),
                                                                       category.getName(),
                                                                       bugDescription);
+
+                    */
+                    //final Bindings bindings = getPayLoadScript.getContext().getBindings(ScriptContext.GLOBAL_SCOPE);
+                    //bindings.put("bugDetailsObject", bugDetailsObj);
+                    /*
+                    getPayLoadScript.put("bugDetailsObj", bugDetailsObj);
+                    final String bugDetails = (String) getPayLoadScript.eval("JSON.stringify({bugDetailsObj:bugDetailsObj})");
+                    */
+                    /*
+                    final Object fnObj = getPayLoadScript.eval(""
+                                + "({"
+                                + "    toJson: JSON.stringify"
+                                + "});");
+
+                    final String bugDetails = (String)invocableScript.invokeMethod(fnObj, "toJson", bugDetailsObj);
+*/
                     LOGGER.info("{} BUG-{} : {}", category.getName(), counter++, bugDetails);
 
                     try
                     {
-                        final String bugLink = jiraReqHandler.createBug(bugDetails);
+                        final String bugLink = this.bugTracker.createBug(bugDetails);
                         LOGGER.info("Updating vulnerabilities with bugLink {}...", bugLink);
                         final List<String> vulnerabilityIds = vulnerabilities.stream()
                                                                              .map(Vulnerability::getVulnId)
@@ -331,4 +347,27 @@ public final class FortifyIssueManager
         return issues.toString();
     }
 
+    private static Map<String, String> getProxySetting(final String proxyEnvVariable)
+    {
+        final Map<String, String> proxySettings = new HashMap<>();
+
+        final String proxy = System.getenv(proxyEnvVariable);
+        if (proxy != null) {
+            try {
+                final URI uri = new URI(proxy);
+                final String host = uri.getHost();
+                if (host != null) {
+                    proxySettings.put("host", host);
+                    final int port = uri.getPort();
+                    proxySettings.put("port", port != -1 ? port + "" : "80");
+                } else {
+                    LOGGER.error("Misconfigured {}, host name can't be null.", proxyEnvVariable);
+                }
+            } catch (final URISyntaxException ex) {
+                LOGGER.error(ex.getMessage(), ex);
+            }
+        }
+        LOGGER.info("proxySettings : {}", proxySettings);
+        return proxySettings;
+    }
 }

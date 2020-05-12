@@ -17,6 +17,9 @@ package com.microfocus.security.automation.fortify.issue.manager;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
@@ -45,14 +48,18 @@ final class FortifyClient
     private final String username;
     private final String password;
 
+    private final Map<String, String> proxySettings;
+
     /*
      * Constructor that encapsulates the connection to Fortify
     */
-    FortifyClient(final String username, final String password, final String apiUrl, final String scope) {
+    FortifyClient(final String username, final String password, final String apiUrl, final String scope,
+            final Map<String, String> proxySettings) {
         this.username = username;
         this.password = password;
         this.apiUrl = apiUrl;
         this.scope = scope;
+        this.proxySettings = proxySettings;
 
         client = createClient();
     }
@@ -106,6 +113,12 @@ final class FortifyClient
                 .connectTimeout(CONNECTION_TIMEOUT, TimeUnit.SECONDS)
                 .writeTimeout(WRITE_TIMEOUT, TimeUnit.SECONDS)
                 .readTimeout(READ_TIMEOUT, TimeUnit.SECONDS);
+
+        if (!proxySettings.isEmpty()) {
+            final Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxySettings.get("host"),
+                    Integer.valueOf(proxySettings.get("port"))));
+            baseClient.proxy(proxy);
+        }
 
         return baseClient.build();
     }

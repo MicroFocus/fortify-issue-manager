@@ -33,11 +33,11 @@ public final class Program implements Callable<Void>
     private static final Logger LOGGER = LoggerFactory.getLogger(Program.class);
 
     @Option(
-        names = {"-c", "--configFile"},
-        paramLabel = "<configFile>",
-        description = "Configuration file"
+        names = {"-s", "--scriptFile"},
+        paramLabel = "<scriptFile>",
+        description = "Script file with the `getPayload` function to create the bug details"
     )
-    private String configFile;
+    private String scriptFile;
 
     private Program()
     {
@@ -51,11 +51,11 @@ public final class Program implements Callable<Void>
     @Override
     public Void call() throws Exception
     {
-        if (Objects.isNull(configFile)) {
-            LOGGER.error("Configuration file must be specified.");
+        if (Objects.isNull(scriptFile)) {
+            LOGGER.error("Script file with the `getPayload` function to create the bug details must be specified.");
             CommandLine.usage(new Program(), System.out);
         } else {
-            FortifyIssueManager.manageIssues(configFile);
+            FortifyIssueManager.manageIssues(scriptFile);
         }
         return null;
     }
