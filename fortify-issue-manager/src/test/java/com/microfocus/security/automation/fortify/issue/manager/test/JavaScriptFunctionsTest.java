@@ -15,6 +15,8 @@
  */
 package com.microfocus.security.automation.fortify.issue.manager.test;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,6 +31,8 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.microfocus.security.automation.fortify.issue.manager.utils.JavaScriptFunctions;
 
 public class JavaScriptFunctionsTest
@@ -42,12 +46,22 @@ public class JavaScriptFunctionsTest
         final String description = "||Issue Id||CVE ID||Component||"
                                  + "\n|[103015915|CVE-2018-1270|com.acme.frontend.util:util-liquibase-installer@1.17.0-201|";
         final ScriptEngine engine = getScriptEngine("/getPayload.js");
-        final String response = JavaScriptFunctions.invokeFunction(engine, "getPayload",
+        final String responseJson = JavaScriptFunctions.invokeFunction(engine, "getPayload",
                 "Acme Front End",
                 4,
                 "Open Source",
                 description);
-        LOGGER.info("Response: {}", response);
+        LOGGER.info("Response: {}", responseJson);
+
+        final JsonParser parser = new JsonParser();
+        final JsonObject response = parser.parse(responseJson).getAsJsonObject();
+        final JsonObject fieldsNode = response.get("fields").getAsJsonObject();
+        assertTrue("invokeFunction returned fields", fieldsNode != null);
+        assertTrue("invokeFunction returned project", fieldsNode.has("project"));
+        assertTrue("invokeFunction returned issuetype", fieldsNode.has("issuetype"));
+        assertTrue("invokeFunction returned summary", fieldsNode.has("summary"));
+        assertTrue("invokeFunction returned description", fieldsNode.has("description"));
+        assertTrue("invokeFunction returned priority", fieldsNode.has("priority"));
     }
 
     private ScriptEngine getScriptEngine(final String scriptFile) throws FileNotFoundException, IOException, ScriptException
