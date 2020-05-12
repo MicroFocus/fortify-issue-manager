@@ -17,6 +17,15 @@ It makes the following `static` method available in the `FortifyIssueManager` cl
 public static void manageIssues(final String scriptFile)
 ```
 
+The javascript file must have a `getPayload` function that will be passed the following arguments:
+- applicationId - The Fortify application ID
+- applicationName - The Fortify application Name
+- severity - The severity of the Fortify issue
+- category - The category of the Fortify issue
+- description - The description of the Fortify vulnerabilities in the category
+The script should return the payload for creating a bug in a bug tracking application.  
+Here is a sample script file [getPayload.js](./fortify-issue-manager/src/test/resources/getPayload.js).
+
 ### fortify-java-issue-manager-cli
 
 This modules provides a simple command-line interface which wraps the `manageIssues()` function.
@@ -45,6 +54,6 @@ docker container run --rm \
     -e BUG_TRACKER_PASSWORD=<Bug tracker password> \
     -e BUG_TRACKER_API_URL=<Bug tracker URL> \
     -v $(pwd):/wd \
-    cafapi/fortify-issue-manager:<VERSION-NUMBER> \
+    microfocus/fortify-issue-manager:<VERSION-NUMBER> \
     -s=/wd/getPayload.js
 ```
