@@ -64,7 +64,6 @@ public final class FortifyIssueManager
                                 final BugTrackerSettings bugTrackerSettings,
                                 final String[] applicationIds, final String issueUrl)
     {
-        hasErrors = false;
         this.fortifyRequestHandler = new FortifyRequestHandler(client);
         this.bugTracker = new JiraRequestHandler(bugTrackerSettings);
         this.applicationIds = applicationIds;
