@@ -33,7 +33,9 @@ final class FortifySettings
         this.scope = System.getenv("FORTIFY_SCOPE");
         this.apiUrl = System.getenv("FORTIFY_API_URL");
         this.issueUrl = System.getenv("FORTIFY_ISSUE_URL");
-        this.applicationIds = System.getenv("FORTIFY_APPLICATION_IDS").split(",");
+        this.applicationIds = System.getenv("FORTIFY_APPLICATION_IDS") == null
+                              ? null
+                              : System.getenv("FORTIFY_APPLICATION_IDS").split(",");
     }
 
     public String getUsername()

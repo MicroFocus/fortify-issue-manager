@@ -73,7 +73,7 @@ public final class FortifyIssueManager
     /**
      * Create bugs for Fortify issues.
      * @param scriptFile Script file to create the bug payload
-     * @returns true if there were no errors when managing issues
+     * @return true if there were no errors when managing issues
      */
     public static boolean manageIssues(final String scriptFile)
     {
@@ -112,12 +112,17 @@ public final class FortifyIssueManager
     private void linkIssuesToBugTracker(final String scriptFile)
             throws IOException, ScriptNotFoundException, ScriptException, FortifyAuthenticationException, FortifyRequestException, NoSuchMethodException
     {
+        if(this.applicationIds == null || this.applicationIds.length == 0)
+        {
+            LOGGER.info("No application ids configured.");
+            return;
+        }
         // Get the list of configured Applications
         final FilterList filters = new FilterList();
-        filters.addFilter("applicationId", Joiner.on('|').join(applicationIds));
+        filters.addFilter("applicationId", Joiner.on('|').join(this.applicationIds));
         final String applicationFields = "applicationId,applicationName";
         LOGGER.info("Getting applications...");
-        final List<Application> applications = fortifyRequestHandler.getApplications(filters, applicationFields);
+        final List<Application> applications = this.fortifyRequestHandler.getApplications(filters, applicationFields);
         if(applications == null || applications.isEmpty())
         {
             LOGGER.info("No applications found.");
@@ -188,7 +193,7 @@ public final class FortifyIssueManager
 
         final String fields = "releaseId,releaseName,applicationId,applicationName,sdlcStatusType";
 
-        final List<Release> releases = fortifyRequestHandler.getReleases(filters, fields);
+        final List<Release> releases = this.fortifyRequestHandler.getReleases(filters, fields);
         return releases;
     }
 
@@ -201,7 +206,7 @@ public final class FortifyIssueManager
         filters.addFilter("bugSubmitted", false);
 
         final String fields = null;
-        final List<Vulnerability> vulnerabilities = fortifyRequestHandler.getVulnerabilities(releaseId, filters, fields);
+        final List<Vulnerability> vulnerabilities = this.fortifyRequestHandler.getVulnerabilities(releaseId, filters, fields);
         return vulnerabilities;
     }
 
@@ -258,7 +263,7 @@ public final class FortifyIssueManager
                                                                      .collect(Collectors.toList());
                 try
                 {
-                    fortifyRequestHandler.updateVulnerability(releaseId, vulnerabilityIds, bugLink);
+                    this.fortifyRequestHandler.updateVulnerability(releaseId, vulnerabilityIds, bugLink);
                 } catch (final IOException e)
                 {
                     LOGGER.error("Error updating vulnerability", e);

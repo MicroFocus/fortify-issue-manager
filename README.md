@@ -55,6 +55,7 @@ docker container run --rm \
     -e BUG_TRACKER_USERNAME=<Bug tracker username> \
     -e BUG_TRACKER_PASSWORD=<Bug tracker password> \
     -e BUG_TRACKER_API_URL=<Bug tracker URL> \
+    -e HTTP_PROXY \
     -v $(pwd):/wd \
     microfocus/fortify-issue-manager:<VERSION-NUMBER> \
     -s=/wd/getPayload.js
