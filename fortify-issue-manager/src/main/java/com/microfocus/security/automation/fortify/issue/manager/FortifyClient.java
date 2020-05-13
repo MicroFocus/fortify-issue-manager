@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -36,6 +35,7 @@ import okhttp3.Response;
 
 final class FortifyClient
 {
+    enum GrantType {CLIENT_CREDENTIALS, PASSWORD};
     public final static int MAX_SIZE = 50;
     private final static int CONNECTION_TIMEOUT = 30; // seconds
     private final static int WRITE_TIMEOUT = 600; // seconds
@@ -45,19 +45,21 @@ final class FortifyClient
     private final OkHttpClient client;
     private String token;
     private final String scope;
+    private final GrantType grantType;
 
-    private final String username;
-    private final String password;
+    private final String id;
+    private final String secret;
 
     private final Map<String, String> proxySettings;
 
     /*
      * Constructor that encapsulates the connection to Fortify
     */
-    FortifyClient(final String username, final String password, final String apiUrl, final String scope,
+    FortifyClient(final GrantType grantType, final String id, final String secret, final String apiUrl, final String scope,
             final Map<String, String> proxySettings) {
-        this.username = username;
-        this.password = password;
+        this.grantType = grantType;
+        this.id = id;
+        this.secret = secret;
         this.apiUrl = apiUrl;
         this.scope = scope;
         this.proxySettings = proxySettings;
@@ -73,21 +75,24 @@ final class FortifyClient
      */
     public void authenticate() throws IOException, FortifyAuthenticationException {
 
-        if(StringUtils.isEmpty(username))
-        {
-            throw new FortifyAuthenticationException("Fortify username is invalid.");
-        }
-        if(StringUtils.isEmpty(password))
-        {
-            throw new FortifyAuthenticationException("Fortify password is invalid.");
-        }
-
-        final RequestBody formBody = new FormBody.Builder()
+        final RequestBody formBody;
+        if (grantType == GrantType.CLIENT_CREDENTIALS) {
+            formBody = new FormBody.Builder()
+                    .add("scope", scope)
+                    .add("grant_type", "client_credentials")
+                    .add("client_id", id)
+                    .add("client_secret", secret)
+                    .build();
+        } else if (grantType == GrantType.PASSWORD) {
+            formBody = new FormBody.Builder()
                     .add("scope", scope)
                     .add("grant_type", "password")
-                    .add("username", username)
-                    .add("password", password)
+                    .add("username", id)
+                    .add("password", secret)
                     .build();
+        } else {
+            throw new FortifyAuthenticationException("Invalid Grant Type");
+        }
 
         final Request request = new Request.Builder()
                 .url(apiUrl + "/oauth/token")
@@ -135,14 +140,6 @@ final class FortifyClient
 
     public String getToken() {
         return token;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getPassword() {
-        return password;
     }
 
     public String getApiUrl() {

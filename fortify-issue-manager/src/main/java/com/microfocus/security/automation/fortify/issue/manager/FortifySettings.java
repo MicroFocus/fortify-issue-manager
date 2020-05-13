@@ -15,60 +15,72 @@
  */
 package com.microfocus.security.automation.fortify.issue.manager;
 
+import java.util.Map;
+
+import com.microfocus.security.automation.fortify.issue.manager.FortifyClient.GrantType;
+
 final class FortifySettings
 {
-    private String username;
-    private String password;
-    private String tenant;
-    private String scope;
-    private String apiUrl;
-    private String issueUrl;
-    private String[] applicationIds;
+    private final GrantType grantType;
+    private final String id;
+    private final String secret;
+    private final String scope;
+    private final String apiUrl;
+    private final String issueUrl;
+    private final Map<String, String> proxySettings;
+    private final String[] applicationIds;
 
-    FortifySettings()
+    FortifySettings(final GrantType grantType, final String id, final String secret, final String scope,
+            final String apiUrl, final String issueUrl, final Map<String, String> proxySettings,
+            final  String[] applicationIds)
     {
-        this.username = System.getenv("FORTIFY_USERNAME");
-        this.password = System.getenv("FORTIFY_PASSWORD");;
-        this.tenant = System.getenv("FORTIFY_TENANT");
-        this.scope = System.getenv("FORTIFY_SCOPE");
-        this.apiUrl = System.getenv("FORTIFY_API_URL");
-        this.issueUrl = System.getenv("FORTIFY_ISSUE_URL");
-        this.applicationIds = System.getenv("FORTIFY_APPLICATION_IDS") == null
-                              ? null
-                              : System.getenv("FORTIFY_APPLICATION_IDS").split(",");
+        super();
+        this.grantType = grantType;
+        this.id = id;
+        this.secret = secret;
+        this.scope = scope;
+        this.apiUrl = apiUrl;
+        this.issueUrl = issueUrl;
+        this.proxySettings = proxySettings;
+        this.applicationIds = applicationIds;
     }
 
-    public String getUsername()
+    GrantType getGrantType()
     {
-        return username;
+        return grantType;
     }
 
-    public String getPassword()
+    String getId()
     {
-        return password;
+        return id;
     }
 
-    public String getTenant()
+    String getSecret()
     {
-        return tenant;
+        return secret;
     }
 
-    public String getScope()
+    String getScope()
     {
         return scope;
     }
 
-    public String getApiUrl()
+    String getApiUrl()
     {
         return apiUrl;
     }
 
-    public String getIssueUrl()
+    String getIssueUrl()
     {
         return issueUrl;
     }
 
-    public String[] getApplicationIds()
+    Map<String, String> getProxySettings()
+    {
+        return proxySettings;
+    }
+
+    String[] getApplicationIds()
     {
         return applicationIds;
     }

@@ -24,11 +24,11 @@ public final class BugTrackerSettings
     private final String apiUrl;
     private final Map<String, String> proxySettings;
 
-    public BugTrackerSettings(final Map<String, String> proxySettings)
+    public BugTrackerSettings(final String username, final String password, final String apiUrl, final Map<String, String> proxySettings)
     {
-        this.username = System.getenv("BUG_TRACKER_USERNAME");
-        this.password = System.getenv("BUG_TRACKER_PASSWORD");
-        this.apiUrl = System.getenv("BUG_TRACKER_API_URL");
+        this.username = username;
+        this.password = password;
+        this.apiUrl = apiUrl;
         this.proxySettings = proxySettings;
     }
 

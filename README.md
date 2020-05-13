@@ -38,6 +38,27 @@ The script should return the payload for creating a bug in a bug tracking applic
 
 Here is a sample script file [getPayload.js](./fortify-issue-manager/src/test/resources/getPayload.js).
 
+### Configuration
+The following environment variables must be set:
+- `FORTIFY_GRANT_TYPE`
+    This property configures the Fortify on Demand authentication grant type. It must be set to `client_credentials` or `password`.
+    If grant type is `client_credentials` then `FORTIFY_CLIENT_ID` and `FORTIFY_CLIENT_SECRET` must be set.
+    If grant type is `password` then `FORTIFY_TENANT`, `FORTIFY_USERNAME` and `FORTIFY_PASSWORD` must be set.
+- `FORTIFY_SCOPE`
+    This property configures the Fortify on Demand scope. Example: api-tenant
+- `FORTIFY_API_URL`
+    This property configures the Fortify on Demand api url
+- `FORTIFY_ISSUE_URL`
+    This property configures the Fortify on Demand issue url
+- `FORTIFY_APPLICATION_IDS`
+    This property is a comma separated list of Fortify on Demand application ids
+- `BUG_TRACKER_USERNAME`
+    This property configures the bug tracker username
+- `BUG_TRACKER_PASSWORD`
+    This property configures the bug tracker password
+- `BUG_TRACKER_API_URL`
+    This property configures the bug tracker url
+
 Set the `FORTIFY_ISSUE_MANAGER_LOG_LEVEL` environment variable to configure the log level. Default is `INFO`.
 
 ### fortify-issue-manager-cli-image
@@ -47,6 +68,7 @@ Here is an example command:
 
 ```
 docker container run --rm \
+    -e FORTIFY_GRANT_TYPE=password \
     -e FORTIFY_USERNAME=<Fortify on Demand username> \
     -e FORTIFY_PASSWORD=<Fortify on Demand password> \
     -e FORTIFY_TENANT=<Fortify on Demand tenant> \

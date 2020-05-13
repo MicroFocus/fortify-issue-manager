@@ -41,6 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Joiner;
+import com.microfocus.security.automation.fortify.issue.manager.FortifyClient.GrantType;
 import com.microfocus.security.automation.fortify.issue.manager.models.Application;
 import com.microfocus.security.automation.fortify.issue.manager.models.Category;
 import com.microfocus.security.automation.fortify.issue.manager.models.Release;
@@ -83,16 +84,17 @@ public final class FortifyIssueManager
         }
         try
         {
+            final FortifyIssueManagerConfiguration config = loadConfiguration();
             LOGGER.info("Managing Fortify issues ...");
-            final FortifySettings fortifySettings = new FortifySettings();
-            final Map<String, String> proxySettings = getProxySetting("HTTP_PROXY");
-            final BugTrackerSettings bugTrackerSettings = new BugTrackerSettings(proxySettings);
+            final FortifySettings fortifySettings = config.getFortifySettings();
+            final BugTrackerSettings bugTrackerSettings = config.getBugTrackerSettings();
             final FortifyClient client = new FortifyClient(
-                                                        fortifySettings.getTenant() + "\\" + fortifySettings.getUsername(),
-                                                        fortifySettings.getPassword(),
+                                                        fortifySettings.getGrantType(),
+                                                        fortifySettings.getId(),
+                                                        fortifySettings.getSecret(),
                                                         fortifySettings.getApiUrl(),
                                                         fortifySettings.getScope(),
-                                                        proxySettings);
+                                                        fortifySettings.getProxySettings());
             client.authenticate();
             final FortifyIssueManager issueManager = new FortifyIssueManager(client,
                                                                              bugTrackerSettings,
@@ -100,13 +102,74 @@ public final class FortifyIssueManager
                                                                              fortifySettings.getIssueUrl());
             issueManager.linkIssuesToBugTracker(scriptFile);
         } catch (final IOException | ScriptNotFoundException | ScriptException
-                     | FortifyAuthenticationException | FortifyRequestException | NoSuchMethodException e)
+                     | FortifyAuthenticationException | FortifyRequestException | NoSuchMethodException | ConfigurationException e)
         {
             LOGGER.error("Error managing Fortify issues", e);
             hasErrors = true;
         }
         LOGGER.info("Managing Fortify issues completed with {}", hasErrors ? "errors." : "no errors.");
         return !hasErrors;
+    }
+
+    private static FortifyIssueManagerConfiguration loadConfiguration() throws ConfigurationException
+    {
+        final Map<String, String> proxySettings = getProxySetting("HTTP_PROXY");
+        final List<String> configErrors = new ArrayList<>();
+
+        // Get Fortify settings
+
+        final String grantType = System.getenv("FORTIFY_GRANT_TYPE");
+        final String fortifyId;
+        final GrantType fortifyGrantType;
+        final String fortifySecret;
+
+        if (GrantType.CLIENT_CREDENTIALS.name().equalsIgnoreCase(grantType)) {
+            fortifyGrantType = GrantType.CLIENT_CREDENTIALS;
+            fortifyId = getConfig("FORTIFY_CLIENT_ID", configErrors);
+            fortifySecret = getConfig("FORTIFY_CLIENT_SECRET", configErrors);
+        } else if (GrantType.PASSWORD.name().equalsIgnoreCase(grantType)) {
+            fortifyGrantType = GrantType.PASSWORD;
+            fortifyId = getConfig("FORTIFY_TENANT", configErrors) + "\\" + getConfig("FORTIFY_USERNAME", configErrors);
+            fortifySecret = getConfig("FORTIFY_PASSWORD", configErrors);
+        } else {
+            throw new ConfigurationException("Invalid Fortify grant type. Set FORTIFY_GRANT_TYPE to 'client_credentials' or 'password'");
+        }
+
+        final String fortifyScope = getConfig("FORTIFY_SCOPE", configErrors);
+        final String fortifyApiUrl = getConfig("FORTIFY_API_URL", configErrors);
+        final String fortifyIssueUrl = getConfig("FORTIFY_ISSUE_URL", configErrors);
+        final String fortifyApplicationIds[] = System.getenv("FORTIFY_APPLICATION_IDS") == null
+                              ? null
+                              : System.getenv("FORTIFY_APPLICATION_IDS").split(",");
+
+        // Get bug tracker settings
+
+        final String bugTrackerUsername = getConfig("BUG_TRACKER_USERNAME", configErrors);
+        final String bugTrackerPassword = getConfig("BUG_TRACKER_PASSWORD", configErrors);
+        final String bugTrackerApiUrl = getConfig("BUG_TRACKER_API_URL", configErrors);
+
+        if(!configErrors.isEmpty())
+        {
+            throw new ConfigurationException("Invalid configuration " + configErrors);
+        }
+
+        final FortifySettings fortifySettings = new FortifySettings(fortifyGrantType, fortifyId, fortifySecret, fortifyScope,
+                fortifyApiUrl, fortifyIssueUrl, proxySettings, fortifyApplicationIds);
+
+        final BugTrackerSettings bugTrackerSettings = new BugTrackerSettings(bugTrackerUsername, bugTrackerPassword,
+                                                                             bugTrackerApiUrl, proxySettings);
+
+        final FortifyIssueManagerConfiguration config = new FortifyIssueManagerConfiguration(fortifySettings, bugTrackerSettings);
+        return config;
+    }
+
+    private static String getConfig(final String configName, final List<String> errorConfigs) {
+        final String configValue = System.getenv(configName);
+        if(StringUtils.isEmpty(configValue))
+        {
+            errorConfigs.add(configName);
+        }
+        return configValue;
     }
 
     private void linkIssuesToBugTracker(final String scriptFile)
@@ -352,7 +415,7 @@ public final class FortifyIssueManager
                 LOGGER.error(ex.getMessage(), ex);
             }
         }
-        LOGGER.debug("proxySettings : {}", proxySettings);
         return proxySettings;
     }
+
 }
