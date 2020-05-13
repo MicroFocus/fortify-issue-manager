@@ -183,7 +183,7 @@ final class FortifyRequestHandler
         payload.addProperty("bugLink", bugLink);
         payload.add("vulnerabilityIds", vulnerabilityIds);
 
-        LOGGER.info("Updating vulnerabilities: POST {} with {}", updateVulnerabilityUrl, payload.toString());
+        LOGGER.debug("Updating vulnerabilities: POST {} with {}", updateVulnerabilityUrl, payload.toString());
 
         /*
         // TODO Update the Fortify issue with bug link

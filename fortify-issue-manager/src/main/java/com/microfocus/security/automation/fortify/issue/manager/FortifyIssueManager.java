@@ -135,6 +135,7 @@ public final class FortifyIssueManager
         // For each application get Releases where sdlcStatusType is set to "Production"
         for(final Application application : applications)
         {
+            LOGGER.info("---- Managing issues in application {} ----", application.getApplicationName());
             final List<Release> releases =  getReleases(application.getApplicationId());
             if(releases == null || releases.isEmpty())
             {
@@ -160,6 +161,7 @@ public final class FortifyIssueManager
                     createBugs(application, release.getReleaseId(), sortedIssues, bugPayloadScript);
                 }
             }
+            LOGGER.info("---- Managing issues in application {} completed. ----", application.getApplicationName());
         }
     }
 
@@ -239,7 +241,7 @@ public final class FortifyIssueManager
         {
             LOGGER.info("Creating bugs for Application:{} Release:{} {}...",
                         application.getApplicationId(), releaseId, category);
-            LOGGER.info("-----------------------------------------");
+            LOGGER.debug("-----------------------------------------");
             final List<Vulnerability> vulnerabilities = sortedIssues.get(category);
             final String bugDescription = category.getName().contains("Open Source")
                                             ? getOpenSourceIssueDescription(issueBaseUrl, vulnerabilities)
@@ -252,18 +254,18 @@ public final class FortifyIssueManager
                                                               category.getName(),
                                                               bugDescription);
 
-            LOGGER.info("{} BUG-{} : {}", category.getName(), counter++, bugDetails);
+            LOGGER.debug("{} BUG-{} : {}", category.getName(), counter++, bugDetails);
 
             try
             {
                 final String bugLink = this.bugTracker.createBug(bugDetails);
-                LOGGER.info("Updating vulnerabilities with bugLink {}...", bugLink);
                 final List<String> vulnerabilityIds = vulnerabilities.stream()
                                                                      .map(Vulnerability::getVulnId)
                                                                      .collect(Collectors.toList());
                 try
                 {
                     this.fortifyRequestHandler.updateVulnerability(releaseId, vulnerabilityIds, bugLink);
+                    LOGGER.info("Updated {} vulnerabilities with bugLink {}.", category.getName(), bugLink);
                 } catch (final IOException e)
                 {
                     LOGGER.error("Error updating vulnerability", e);
@@ -273,7 +275,7 @@ public final class FortifyIssueManager
                 LOGGER.error("Error creating bug", e);
                 hasErrors = true;
             }
-            LOGGER.info("-----------------------------------------");
+            LOGGER.debug("-----------------------------------------");
         }
     }
 

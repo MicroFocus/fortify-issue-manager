@@ -73,7 +73,7 @@ public final class Category
         final StringBuilder builder = new StringBuilder();
         builder.append("Category [");
         builder.append(name);
-        builder.append(", ");
+        builder.append(", severity: ");
         builder.append(severity);
         builder.append("]");
         return builder.toString();

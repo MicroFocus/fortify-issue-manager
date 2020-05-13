@@ -38,6 +38,8 @@ The script should return the payload for creating a bug in a bug tracking applic
 
 Here is a sample script file [getPayload.js](./fortify-issue-manager/src/test/resources/getPayload.js).
 
+Set the `FORTIFY_ISSUE_MANAGER_LOG_LEVEL` environment variable to configure the log level. Default is `INFO`.
+
 ### fortify-issue-manager-cli-image
 This module builds a Docker image for the command-line interface, potentially allowing for simpler usage in some environments.
 
