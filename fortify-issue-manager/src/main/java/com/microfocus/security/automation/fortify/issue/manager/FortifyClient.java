@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -71,6 +72,15 @@ final class FortifyClient
      * @throws FortifyAuthenticationException if user cannot be authenticated
      */
     public void authenticate() throws IOException, FortifyAuthenticationException {
+
+        if(StringUtils.isEmpty(username))
+        {
+            throw new FortifyAuthenticationException("Fortify username is invalid.");
+        }
+        if(StringUtils.isEmpty(password))
+        {
+            throw new FortifyAuthenticationException("Fortify password is invalid.");
+        }
 
         final RequestBody formBody = new FormBody.Builder()
                     .add("scope", scope)
