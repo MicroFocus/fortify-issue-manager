@@ -25,34 +25,40 @@ final class FilterList
 {
     private final Map<String, String> filters;
 
-    public FilterList() {
+    public FilterList()
+    {
         this.filters = new HashMap<>();
     }
 
-    public FilterList addFilter(final String key, final String value) {
+    public FilterList addFilter(final String key, final String value)
+    {
         this.filters.put(key, value);
         return this;
     }
 
-    public FilterList addFilter(final String key, final int value) {
+    public FilterList addFilter(final String key, final int value)
+    {
         this.filters.put(key, Integer.toString(value));
         return this;
     }
 
-    public FilterList addFilter(final String key, final boolean value) {
+    public FilterList addFilter(final String key, final boolean value)
+    {
         this.filters.put(key, Boolean.toString(value));
         return this;
     }
 
-    public FilterList removeFilter(final String key) {
-        if (filters.containsKey(key))
+    public FilterList removeFilter(final String key)
+    {
+        if (filters.containsKey(key)) {
             filters.remove(key);
+        }
         return this;
     }
 
     @Override
-    public String toString() {
-
+    public String toString()
+    {
         final Iterator<Map.Entry<String, String>> iterator = filters.entrySet().iterator();
 
         final List<String> list = new ArrayList<>();

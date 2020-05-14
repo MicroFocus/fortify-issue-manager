@@ -27,6 +27,7 @@ public final class JavaScriptFunctions
 
     /**
      * Invoke a function and return the stringified response.
+     *
      * @param scriptEngine Script Engine
      * @param functionName Name of function to invoke
      * @param args Arguments for the function
@@ -35,13 +36,13 @@ public final class JavaScriptFunctions
      * @throws ScriptException Throw if an error occurs during invocation of the method.
      */
     public static String invokeFunction(final ScriptEngine scriptEngine, final String functionName, final Object... args)
-            throws NoSuchMethodException, ScriptException
+        throws NoSuchMethodException, ScriptException
     {
-        final Invocable invocableScript = (Invocable)scriptEngine;
+        final Invocable invocableScript = (Invocable) scriptEngine;
         final Object responseObj = invocableScript.invokeFunction(functionName, args);
 
         final Object jsonObj = scriptEngine.get("JSON");
-        final String response = (String)invocableScript.invokeMethod(jsonObj, "stringify", responseObj);
+        final String response = (String) invocableScript.invokeMethod(jsonObj, "stringify", responseObj);
         return response;
     }
 }

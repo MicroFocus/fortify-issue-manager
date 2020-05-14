@@ -44,13 +44,13 @@ public class JavaScriptFunctionsTest
     {
         LOGGER.info("Running testInvokeFunction...");
         final String description = "||Issue Id||CVE ID||Component||"
-                                 + "\n|[103015915|CVE-2018-1270|com.acme.frontend.util:util-liquibase-installer@1.17.0-201|";
+            + "\n|[103015915|CVE-2018-1270|com.acme.frontend.util:util-liquibase-installer@1.17.0-201|";
         final ScriptEngine engine = getScriptEngine("/getPayload.js");
         final String responseJson = JavaScriptFunctions.invokeFunction(engine, "getPayload",
-                "Acme Front End",
-                4,
-                "Open Source",
-                description);
+                                                                       "Acme Front End",
+                                                                       4,
+                                                                       "Open Source",
+                                                                       description);
         LOGGER.info("Response: {}", responseJson);
 
         final JsonParser parser = new JsonParser();
@@ -67,8 +67,7 @@ public class JavaScriptFunctionsTest
     private ScriptEngine getScriptEngine(final String scriptFile) throws FileNotFoundException, IOException, ScriptException
     {
         LOGGER.info("Loding script from {}", scriptFile);
-        try(final InputStream inputStream = JavaScriptFunctionsTest.class.getResourceAsStream(scriptFile))
-        {
+        try (final InputStream inputStream = JavaScriptFunctionsTest.class.getResourceAsStream(scriptFile)) {
             final String script = IOUtils.toString(inputStream, "utf-8");
             final ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
             engine.eval(script);

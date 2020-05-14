@@ -23,23 +23,28 @@ public final class Release
     private String applicationName;
     private String sdlcStatusType;
 
-    public int getReleaseId() {
+    public int getReleaseId()
+    {
         return releaseId;
     }
 
-    public String getReleaseName() {
+    public String getReleaseName()
+    {
         return releaseName;
     }
 
-    public int getApplicationId() {
+    public int getApplicationId()
+    {
         return applicationId;
     }
 
-    public String getApplicationName() {
+    public String getApplicationName()
+    {
         return applicationName;
     }
 
-    public String getSdlcStatusType() {
+    public String getSdlcStatusType()
+    {
         return sdlcStatusType;
     }
 }

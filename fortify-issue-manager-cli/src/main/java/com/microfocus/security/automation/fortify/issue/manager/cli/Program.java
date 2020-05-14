@@ -55,17 +55,11 @@ public final class Program implements Callable<Integer>
         if (Objects.isNull(scriptFile)) {
             LOGGER.error("Script file with the `getPayload` function to create the bug details must be specified.");
             CommandLine.usage(new Program(), System.out);
+        } else if (FortifyIssueManager.manageIssues(scriptFile)) {
+            return 0;
         } else {
-            if(FortifyIssueManager.manageIssues(scriptFile))
-            {
-                return 0;
-            }
-            else
-            {
-                return -1;
-            }
+            return -1;
         }
         return null;
     }
-
 }

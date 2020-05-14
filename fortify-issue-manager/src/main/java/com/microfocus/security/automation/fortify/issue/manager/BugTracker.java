@@ -17,9 +17,9 @@ package com.microfocus.security.automation.fortify.issue.manager;
 
 public interface BugTracker
 {
-
     /**
      * Create a bug with specified details.
+     *
      * @param bugDetails Bug details
      * @return link to bug created
      * @throws BugTrackerException If a bug cannot be created in the bug tracker

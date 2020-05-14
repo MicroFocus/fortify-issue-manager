@@ -35,7 +35,11 @@ import okhttp3.Response;
 
 final class FortifyClient
 {
-    enum GrantType {CLIENT_CREDENTIALS, PASSWORD};
+    enum GrantType
+    {
+        CLIENT_CREDENTIALS, PASSWORD
+    };
+
     public final static int MAX_SIZE = 50;
     private final static int CONNECTION_TIMEOUT = 30; // seconds
     private final static int WRITE_TIMEOUT = 600; // seconds
@@ -54,9 +58,16 @@ final class FortifyClient
 
     /*
      * Constructor that encapsulates the connection to Fortify
-    */
-    FortifyClient(final GrantType grantType, final String id, final String secret, final String apiUrl, final String scope,
-            final Map<String, String> proxySettings) {
+     */
+    FortifyClient(
+        final GrantType grantType,
+        final String id,
+        final String secret,
+        final String apiUrl,
+        final String scope,
+        final Map<String, String> proxySettings
+    )
+    {
         this.grantType = grantType;
         this.id = id;
         this.secret = secret;
@@ -73,43 +84,43 @@ final class FortifyClient
      * @throws java.io.IOException in some circumstances
      * @throws FortifyAuthenticationException if user cannot be authenticated
      */
-    public void authenticate() throws IOException, FortifyAuthenticationException {
-
+    public void authenticate() throws IOException, FortifyAuthenticationException
+    {
         final RequestBody formBody;
         if (grantType == GrantType.CLIENT_CREDENTIALS) {
             formBody = new FormBody.Builder()
-                    .add("scope", scope)
-                    .add("grant_type", "client_credentials")
-                    .add("client_id", id)
-                    .add("client_secret", secret)
-                    .build();
+                .add("scope", scope)
+                .add("grant_type", "client_credentials")
+                .add("client_id", id)
+                .add("client_secret", secret)
+                .build();
         } else if (grantType == GrantType.PASSWORD) {
             formBody = new FormBody.Builder()
-                    .add("scope", scope)
-                    .add("grant_type", "password")
-                    .add("username", id)
-                    .add("password", secret)
-                    .build();
+                .add("scope", scope)
+                .add("grant_type", "password")
+                .add("username", id)
+                .add("password", secret)
+                .build();
         } else {
             throw new FortifyAuthenticationException("Invalid Grant Type");
         }
 
         final Request request = new Request.Builder()
-                .url(apiUrl + "/oauth/token")
-                .post(formBody)
-                .build();
+            .url(apiUrl + "/oauth/token")
+            .post(formBody)
+            .build();
         final Response response = client.newCall(request).execute();
 
-        if (!response.isSuccessful())
+        if (!response.isSuccessful()) {
             throw new IOException("Unexpected code " + response);
+        }
 
-        if(response.body() == null)
-        {
+        if (response.body() == null) {
             throw new FortifyAuthenticationException("Unable to authenticate Fortify user. Response is null for POST /oauth/token");
         }
 
         // Read the results and close the response
-        try(final InputStream responseStream = response.body().byteStream()) {
+        try (final InputStream responseStream = response.body().byteStream()) {
             final String content = IOUtils.toString(responseStream, "utf-8");
             // Parse the Response
             final JsonParser parser = new JsonParser();
@@ -123,30 +134,34 @@ final class FortifyClient
      *
      * @return returns a client object
      */
-    private OkHttpClient createClient() {
+    private OkHttpClient createClient()
+    {
         final OkHttpClient.Builder baseClient = new OkHttpClient().newBuilder()
-                .connectTimeout(CONNECTION_TIMEOUT, TimeUnit.SECONDS)
-                .writeTimeout(WRITE_TIMEOUT, TimeUnit.SECONDS)
-                .readTimeout(READ_TIMEOUT, TimeUnit.SECONDS);
+            .connectTimeout(CONNECTION_TIMEOUT, TimeUnit.SECONDS)
+            .writeTimeout(WRITE_TIMEOUT, TimeUnit.SECONDS)
+            .readTimeout(READ_TIMEOUT, TimeUnit.SECONDS);
 
         if (!proxySettings.isEmpty()) {
             final Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxySettings.get("host"),
-                    Integer.valueOf(proxySettings.get("port"))));
+                                                                                 Integer.valueOf(proxySettings.get("port"))));
             baseClient.proxy(proxy);
         }
 
         return baseClient.build();
     }
 
-    public String getToken() {
+    public String getToken()
+    {
         return token;
     }
 
-    public String getApiUrl() {
+    public String getApiUrl()
+    {
         return apiUrl;
     }
 
-    public OkHttpClient getClient() {
+    public OkHttpClient getClient()
+    {
         return client;
     }
 }

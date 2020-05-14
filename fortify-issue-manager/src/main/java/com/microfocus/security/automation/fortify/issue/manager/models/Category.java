@@ -49,21 +49,26 @@ public final class Category
     @Override
     public boolean equals(final Object obj)
     {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         Category other = (Category) obj;
-        if (name == null)
-        {
-            if (other.name != null)
+        if (name == null) {
+            if (other.name != null) {
                 return false;
-        } else if (!name.equals(other.name))
+            }
+        } else if (!name.equals(other.name)) {
             return false;
-        if (severity != other.severity)
+        }
+        if (severity != other.severity) {
             return false;
+        }
         return true;
     }
 

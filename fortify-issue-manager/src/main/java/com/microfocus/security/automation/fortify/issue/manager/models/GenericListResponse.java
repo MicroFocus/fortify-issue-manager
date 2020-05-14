@@ -18,15 +18,18 @@ package com.microfocus.security.automation.fortify.issue.manager.models;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class GenericListResponse<T> {
+public final class GenericListResponse<T>
+{
     private final List<T> items = new ArrayList<>();
     private int totalCount;
 
-    public int getTotalCount() {
+    public int getTotalCount()
+    {
         return totalCount;
     }
 
-    public List<T> getItems() {
+    public List<T> getItems()
+    {
         return items;
     }
 }

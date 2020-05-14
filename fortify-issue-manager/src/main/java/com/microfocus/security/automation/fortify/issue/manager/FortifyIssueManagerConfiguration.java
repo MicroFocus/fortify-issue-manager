@@ -35,5 +35,4 @@ final class FortifyIssueManagerConfiguration
     {
         return bugTrackerSettings;
     }
-
 }

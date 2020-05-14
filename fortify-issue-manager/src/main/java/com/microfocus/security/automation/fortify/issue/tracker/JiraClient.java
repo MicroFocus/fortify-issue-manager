@@ -36,7 +36,8 @@ final class JiraClient
 
     private final String encodedAuth;
 
-    JiraClient(final String username, final String password, final String apiUrl, final Map<String, String> proxySettings) {
+    JiraClient(final String username, final String password, final String apiUrl, final Map<String, String> proxySettings)
+    {
         this.apiUrl = apiUrl;
         this.proxySettings = proxySettings;
 
@@ -46,15 +47,16 @@ final class JiraClient
         encodedAuth = Base64.encodeAsString(auth.getBytes());
     }
 
-    private OkHttpClient createClient() {
+    private OkHttpClient createClient()
+    {
         final OkHttpClient.Builder baseClient = new OkHttpClient().newBuilder()
-                .connectTimeout(CONNECTION_TIMEOUT, TimeUnit.SECONDS)
-                .writeTimeout(WRITE_TIMEOUT, TimeUnit.SECONDS)
-                .readTimeout(READ_TIMEOUT, TimeUnit.SECONDS);
+            .connectTimeout(CONNECTION_TIMEOUT, TimeUnit.SECONDS)
+            .writeTimeout(WRITE_TIMEOUT, TimeUnit.SECONDS)
+            .readTimeout(READ_TIMEOUT, TimeUnit.SECONDS);
 
         if (!proxySettings.isEmpty()) {
             final Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxySettings.get("host"),
-                    Integer.valueOf(proxySettings.get("port"))));
+                                                                                 Integer.valueOf(proxySettings.get("port"))));
             baseClient.proxy(proxy);
         }
         return baseClient.build();
@@ -65,11 +67,13 @@ final class JiraClient
         return encodedAuth;
     }
 
-    String getApiUrl() {
+    String getApiUrl()
+    {
         return apiUrl;
     }
 
-    OkHttpClient getClient() {
+    OkHttpClient getClient()
+    {
         return client;
     }
 }

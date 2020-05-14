@@ -19,7 +19,8 @@ final class ConfigurationException extends Exception
 {
     private static final long serialVersionUID = -1990413390688297420L;
 
-    ConfigurationException(final String message) {
+    ConfigurationException(final String message)
+    {
         super(message);
     }
 }

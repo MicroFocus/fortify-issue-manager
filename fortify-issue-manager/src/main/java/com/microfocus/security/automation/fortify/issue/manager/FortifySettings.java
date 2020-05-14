@@ -30,9 +30,16 @@ final class FortifySettings
     private final Map<String, String> proxySettings;
     private final String[] applicationIds;
 
-    FortifySettings(final GrantType grantType, final String id, final String secret, final String scope,
-            final String apiUrl, final String issueUrl, final Map<String, String> proxySettings,
-            final  String[] applicationIds)
+    FortifySettings(
+        final GrantType grantType,
+        final String id,
+        final String secret,
+        final String scope,
+        final String apiUrl,
+        final String issueUrl,
+        final Map<String, String> proxySettings,
+        final String[] applicationIds
+    )
     {
         super();
         this.grantType = grantType;
@@ -84,5 +91,4 @@ final class FortifySettings
     {
         return applicationIds;
     }
-
 }
