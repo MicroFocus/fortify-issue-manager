@@ -52,12 +52,12 @@ The following environment variables must be set:
     This property configures the Fortify on Demand issue url
 - `FORTIFY_APPLICATION_IDS`
     This property is a comma separated list of Fortify on Demand application ids
-- `BUG_TRACKER_USERNAME`
-    This property configures the bug tracker username
-- `BUG_TRACKER_PASSWORD`
-    This property configures the bug tracker password
-- `BUG_TRACKER_API_URL`
-    This property configures the bug tracker url
+- `JIRA_USERNAME`
+    This property configures the Jira username
+- `JIRA_PASSWORD`
+    This property configures the Jira password
+- `JIRA_API_URL`
+    This property configures the Jira url
 
 Set the `FORTIFY_ISSUE_MANAGER_LOG_LEVEL` environment variable to configure the log level. Default is `INFO`.
 
@@ -76,9 +76,9 @@ docker container run --rm \
     -e FORTIFY_API_URL=<Fortify on Demand API URL> \
     -e FORTIFY_ISSUE_URL=<Fortify on Demand issue URL> \
     -e FORTIFY_APPLICATION_IDS=<Comma separated list of application ids> \
-    -e BUG_TRACKER_USERNAME=<Bug tracker username> \
-    -e BUG_TRACKER_PASSWORD=<Bug tracker password> \
-    -e BUG_TRACKER_API_URL=<Bug tracker URL> \
+    -e JIRA_USERNAME=<Jira username> \
+    -e JIRA_PASSWORD=<Jira password> \
+    -e JIRA_API_URL=<Jira URL> \
     -e HTTP_PROXY \
     -v $(pwd):/wd \
     microfocus/fortify-issue-manager \

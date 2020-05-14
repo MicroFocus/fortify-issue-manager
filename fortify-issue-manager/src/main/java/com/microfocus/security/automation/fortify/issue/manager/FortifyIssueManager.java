@@ -143,9 +143,9 @@ public final class FortifyIssueManager
 
         // Get bug tracker settings
 
-        final String bugTrackerUsername = getConfig("BUG_TRACKER_USERNAME", configErrors);
-        final String bugTrackerPassword = getConfig("BUG_TRACKER_PASSWORD", configErrors);
-        final String bugTrackerApiUrl = getConfig("BUG_TRACKER_API_URL", configErrors);
+        final String bugTrackerUsername = getConfig("JIRA_USERNAME", configErrors);
+        final String bugTrackerPassword = getConfig("JIRA_PASSWORD", configErrors);
+        final String bugTrackerApiUrl = getConfig("JIRA_API_URL", configErrors);
 
         if(!configErrors.isEmpty())
         {
