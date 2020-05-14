@@ -191,11 +191,11 @@ final class FortifyRequestHandler
         final RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), payload.toString());
 
         final Request request = new Request.Builder()
-                .url(updateVulnerabilityUrl)
-                .addHeader("Authorization", "Bearer " + fortifyClient.getToken())
-                .addHeader("Accept", "application/json")
-                .post(requestBody)
-                .build();
+            .url(updateVulnerabilityUrl)
+            .addHeader("Authorization", "Bearer " + fortifyClient.getToken())
+            .addHeader("Accept", "application/json")
+            .post(requestBody)
+            .build();
         final Response response = fortifyClient.getClient().newCall(request).execute();
 
         if (response.code() == HttpStatus.SC_UNAUTHORIZED || response.code() == HttpStatus.SC_FORBIDDEN) {
@@ -204,13 +204,13 @@ final class FortifyRequestHandler
         }
 
         // Read the result
-        if(response.body() == null)
-        {
+        final ResponseBody body = response.body();
+        if (body == null) {
             throw new FortifyRequestException("Unable to update vulnerability. Response is null for POST " + api);
         }
 
         // Read the result
-        try(final InputStream responseStream = response.body().byteStream()) {
+        try (final InputStream responseStream = body.byteStream()) {
             final String responseContent = IOUtils.toString(responseStream, "utf-8");
             LOGGER.info("Updated vulnerabilities with bugLink {}, response: {}", bugLink, responseContent);
         }
