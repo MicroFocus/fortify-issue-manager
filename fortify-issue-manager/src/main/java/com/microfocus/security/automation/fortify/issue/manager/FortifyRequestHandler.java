@@ -219,6 +219,7 @@ final class FortifyRequestHandler
                 final String responseContent = IOUtils.toString(responseStream, "utf-8");
                 if (!response.isSuccessful()) {
                     LOGGER.error("Updating vulnerabilities failed. POST {} with {}", updateVulnerabilityUrl, payload.toString());
+                    return false;
                 }
                 LOGGER.info("Updated vulnerabilities with bugLink {}, response: {}", bugLink, responseContent);
             }
