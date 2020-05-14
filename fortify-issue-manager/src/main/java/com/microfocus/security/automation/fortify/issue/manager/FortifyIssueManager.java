@@ -309,8 +309,7 @@ public final class FortifyIssueManager
                     .map(Vulnerability::getVulnId)
                     .collect(Collectors.toList());
                 final boolean issuesUpdated = this.fortifyRequestHandler.updateVulnerability(releaseId, vulnerabilityIds, bugLink);
-                if(!issuesUpdated)
-                {
+                if (!issuesUpdated) {
                     hasErrors = true;
                 }
                 LOGGER.info("Updated {} vulnerabilities with bugLink {}.", category.getName(), bugLink);
