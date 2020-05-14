@@ -28,7 +28,7 @@ var titleLookupMap = {
       4: "Critical"       // Critical
 };
 
-function getPayload(applicationId, applicationName, severity, category, description) {
+function getPayload(applicationName, severity, category, description) {
     return {
       fields: {
         project: {

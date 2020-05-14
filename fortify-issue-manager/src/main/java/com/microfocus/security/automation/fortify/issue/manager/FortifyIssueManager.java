@@ -310,7 +310,6 @@ public final class FortifyIssueManager
                                             : getIssueDescription(issueBaseUrl, vulnerabilities);
 
             final String bugDetails = JavaScriptFunctions.invokeFunction(getPayLoadScript, "getPayload",
-                                                              application.getApplicationId(),
                                                               application.getApplicationName(),
                                                               category.getSeverity(),
                                                               category.getName(),
