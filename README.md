@@ -81,6 +81,6 @@ docker container run --rm \
     -e BUG_TRACKER_API_URL=<Bug tracker URL> \
     -e HTTP_PROXY \
     -v $(pwd):/wd \
-    microfocus/fortify-issue-manager:<VERSION-NUMBER> \
+    microfocus/fortify-issue-manager \
     -s=/wd/getPayload.js
 ```
