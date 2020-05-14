@@ -14,34 +14,22 @@
  * limitations under the License.
  */
 
-//Fortify severity : Jira priority
-
-var prioritiesLookupMap = {
-      3: "3", // High
-      4: "2"  // Critical
+// Fortify Severity Id --> Severity Info
+var severityInfoLookup = {
+    3: {jiraPriorityId: "3", jiraTitle: "High Priority"},
+    4: {jiraPriorityId: "2", jiraTitle: "Critical"}
 };
 
-//Fortify severity : Jira title
+function getPayload(fortifyApplicationName, issueSeverityId, issueCategory, jiraDescription) {
+    var severityInfo = severityInfoLookup[issueSeverityId];
 
-var titleLookupMap = {
-      3: "High Priority", // High
-      4: "Critical"       // Critical
-};
-
-function getPayload(applicationName, severity, category, description) {
     return {
-      fields: {
-        project: {
-          key: "ACME"
-        },
-        issuetype: {
-            name: "Bug"
-        },
-        summary: "Fortify " + applicationName + " scan: " + titleLookupMap[severity] + " " + category + " issues",
-        description: description,
-        priority: {
-          id: prioritiesLookupMap[severity]
+        fields: {
+            project: {key: "ACME"},
+            issuetype: {name: "Bug"},
+            summary: "Fortify " + fortifyApplicationName + " scan: " + severityInfo.jiraTitle + " " + issueCategory + " issues",
+            description: jiraDescription,
+            priority: {id: severityInfo.jiraPriorityId}
         }
-      }
     };
 }
