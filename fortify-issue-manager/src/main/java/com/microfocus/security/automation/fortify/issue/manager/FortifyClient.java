@@ -32,12 +32,34 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 final class FortifyClient
 {
     enum GrantType
     {
-        CLIENT_CREDENTIALS, PASSWORD
+        CLIENT_CREDENTIALS
+        {
+            @Override
+            public void addCredentials(final FormBody.Builder builder, final String id, final String secret)
+            {
+                builder.add("grant_type", "client_credentials")
+                    .add("client_id", id)
+                    .add("client_secret", secret);
+            }
+        },
+        PASSWORD
+        {
+            @Override
+            public void addCredentials(final FormBody.Builder builder, final String id, final String secret)
+            {
+                builder.add("grant_type", "password")
+                    .add("username", id)
+                    .add("password", secret);
+            }
+        };
+
+        public abstract void addCredentials(FormBody.Builder builder, String id, String secret);
     };
 
     public final static int MAX_SIZE = 50;
@@ -86,28 +108,9 @@ final class FortifyClient
      */
     public void authenticate() throws IOException, FortifyAuthenticationException
     {
-        final RequestBody formBody;
-        if (grantType == GrantType.CLIENT_CREDENTIALS) {
-            formBody = new FormBody.Builder()
-                .add("scope", scope)
-                .add("grant_type", "client_credentials")
-                .add("client_id", id)
-                .add("client_secret", secret)
-                .build();
-        } else if (grantType == GrantType.PASSWORD) {
-            formBody = new FormBody.Builder()
-                .add("scope", scope)
-                .add("grant_type", "password")
-                .add("username", id)
-                .add("password", secret)
-                .build();
-        } else {
-            throw new FortifyAuthenticationException("Invalid Grant Type");
-        }
-
         final Request request = new Request.Builder()
             .url(apiUrl + "/oauth/token")
-            .post(formBody)
+            .post(createRequestBody())
             .build();
         final Response response = client.newCall(request).execute();
 
@@ -115,12 +118,13 @@ final class FortifyClient
             throw new IOException("Unexpected code " + response);
         }
 
-        if (response.body() == null) {
+        final ResponseBody body = response.body();
+        if (body == null) {
             throw new FortifyAuthenticationException("Unable to authenticate Fortify user. Response is null for POST /oauth/token");
         }
 
         // Read the results and close the response
-        try (final InputStream responseStream = response.body().byteStream()) {
+        try (final InputStream responseStream = body.byteStream()) {
             final String content = IOUtils.toString(responseStream, "utf-8");
             // Parse the Response
             final JsonParser parser = new JsonParser();
@@ -148,6 +152,15 @@ final class FortifyClient
         }
 
         return baseClient.build();
+    }
+
+    private RequestBody createRequestBody()
+    {
+        final FormBody.Builder builder = new FormBody.Builder();
+        builder.add("scope", scope);
+        grantType.addCredentials(builder, id, secret);
+
+        return builder.build();
     }
 
     public String getToken()

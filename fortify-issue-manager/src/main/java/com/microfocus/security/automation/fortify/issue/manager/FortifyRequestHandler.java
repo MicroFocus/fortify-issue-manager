@@ -39,6 +39,7 @@ import com.microfocus.security.automation.fortify.issue.manager.models.Vulnerabi
 import okhttp3.HttpUrl;
 import okhttp3.Request;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 final class FortifyRequestHandler
 {
@@ -155,12 +156,13 @@ final class FortifyRequestHandler
         }
 
         // Read the results and close the response
-        if (response.body() == null) {
+        final ResponseBody body = response.body();
+        if (body == null) {
             throw new FortifyRequestException("Unable to authenticate Fortify user. Response is null for GET " + url);
         }
 
         // Read the result
-        try (final InputStream responseStream = response.body().byteStream()) {
+        try (final InputStream responseStream = body.byteStream()) {
             final String responseContent = IOUtils.toString(responseStream, "utf-8");
             return responseContent;
         }
@@ -170,11 +172,11 @@ final class FortifyRequestHandler
         throws IOException, FortifyRequestException
     {
         final String api = "api/v3/releases/" + releaseId + "/vulnerabilities/bug-link";
-        final HttpUrl.Builder builder = HttpUrl.parse(fortifyClient.getApiUrl()).newBuilder().addPathSegments(api);
-        if (builder == null) {
+        final HttpUrl apiUrl = HttpUrl.parse(fortifyClient.getApiUrl());
+        if (apiUrl == null) {
             throw new FortifyRequestException("Invalid url : " + api);
         }
-        final String updateVulnerabilityUrl = builder.build().toString();
+        final String updateVulnerabilityUrl = apiUrl.newBuilder().addPathSegments(api).build().toString();
 
         final JsonArray vulnerabilityIds = new JsonArray();
         vulnerabilityIdList.stream().forEach(id -> vulnerabilityIds.add(id));
@@ -218,23 +220,24 @@ final class FortifyRequestHandler
     private String getUrl(final String api, final FilterList filters, final String fields, final String orderBy)
         throws FortifyRequestException
     {
-        HttpUrl.Builder builder = HttpUrl.parse(fortifyClient.getApiUrl()).newBuilder().addPathSegments(api);
-        if (builder == null) {
+        final HttpUrl apiUrl = HttpUrl.parse(fortifyClient.getApiUrl());
+        if (apiUrl == null) {
             throw new FortifyRequestException("Invalid url : " + api);
         }
+
+        final HttpUrl.Builder builder = apiUrl.newBuilder().addPathSegments(api);
         if (filters != null) {
-            builder = builder.addQueryParameter("filters", filters.toString());
+            builder.addQueryParameter("filters", filters.toString());
         }
 
         if (StringUtils.isNotEmpty(fields)) {
-            builder = builder.addQueryParameter("fields", fields);
+            builder.addQueryParameter("fields", fields);
         }
 
         if (StringUtils.isNotEmpty(orderBy)) {
-            builder = builder.addQueryParameter("orderBy", orderBy);
+            builder.addQueryParameter("orderBy", orderBy);
         }
 
-        final String url = builder.build().toString();
-        return url;
+        return builder.build().toString();
     }
 }

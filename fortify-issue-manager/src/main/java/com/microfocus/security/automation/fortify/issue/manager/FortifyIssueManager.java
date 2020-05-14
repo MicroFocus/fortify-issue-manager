@@ -101,7 +101,8 @@ public final class FortifyIssueManager
             final FortifyIssueManager issueManager = new FortifyIssueManager(
                 client, bugTrackerSettings, fortifySettings.getApplicationIds(), fortifySettings.getIssueUrl());
             issueManager.linkIssuesToBugTracker(scriptFile);
-        } catch (final IOException | ScriptNotFoundException | ScriptException | FortifyAuthenticationException | FortifyRequestException | NoSuchMethodException | ConfigurationException e) {
+        } catch (final IOException | ScriptNotFoundException | ScriptException | FortifyAuthenticationException |
+                       FortifyRequestException | NoSuchMethodException | ConfigurationException e) {
             LOGGER.error("Error managing Fortify issues", e);
             hasErrors = true;
         }
@@ -175,6 +176,7 @@ public final class FortifyIssueManager
             LOGGER.info("No application ids configured.");
             return;
         }
+
         // Get the list of configured Applications
         final FilterList filters = new FilterList();
         filters.addFilter("applicationId", Joiner.on('|').join(this.applicationIds));

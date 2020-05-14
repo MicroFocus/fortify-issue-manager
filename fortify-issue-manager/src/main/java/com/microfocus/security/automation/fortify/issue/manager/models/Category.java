@@ -58,7 +58,7 @@ public final class Category
         if (getClass() != obj.getClass()) {
             return false;
         }
-        Category other = (Category) obj;
+        final Category other = (Category) obj;
         if (name == null) {
             if (other.name != null) {
                 return false;
@@ -66,10 +66,7 @@ public final class Category
         } else if (!name.equals(other.name)) {
             return false;
         }
-        if (severity != other.severity) {
-            return false;
-        }
-        return true;
+        return severity == other.severity;
     }
 
     @Override

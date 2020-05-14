@@ -34,6 +34,7 @@ import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 public final class JiraRequestHandler implements BugTracker
 {
@@ -75,11 +76,11 @@ public final class JiraRequestHandler implements BugTracker
 
     private String performPostRequest(final String api, final String payload) throws IOException, BugTrackerException
     {
-        final HttpUrl.Builder builder = HttpUrl.parse(client.getApiUrl()).newBuilder().addPathSegments(api);
-        if (builder == null) {
+        final HttpUrl apiUrl = HttpUrl.parse(client.getApiUrl());
+        if (apiUrl == null) {
             throw new BugTrackerException("Invalid url : " + api);
         }
-        final String url = builder.build().toString();
+        final String url = apiUrl.newBuilder().addPathSegments(api).build().toString();
         LOGGER.debug("Performing request POST {}", url);
 
         final RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), payload);
@@ -91,12 +92,13 @@ public final class JiraRequestHandler implements BugTracker
             .build();
 
         final Response response = client.getClient().newCall(request).execute();
-        if (response.body() == null) {
+        final ResponseBody body = response.body();
+        if (body == null) {
             throw new BugTrackerException("Response is null for : " + api);
         }
 
         // Read the result
-        try (final InputStream responseStream = response.body().byteStream()) {
+        try (final InputStream responseStream = body.byteStream()) {
             final String responseContent = IOUtils.toString(responseStream, "utf-8");
             LOGGER.debug("performPostRequest response: {}", responseContent);
             return responseContent;
