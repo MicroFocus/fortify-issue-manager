@@ -308,12 +308,12 @@ public final class FortifyIssueManager
                 final List<String> vulnerabilityIds = vulnerabilities.stream()
                     .map(Vulnerability::getVulnId)
                     .collect(Collectors.toList());
-                try {
-                    this.fortifyRequestHandler.updateVulnerability(releaseId, vulnerabilityIds, bugLink);
-                    LOGGER.info("Updated {} vulnerabilities with bugLink {}.", category.getName(), bugLink);
-                } catch (final IOException e) {
-                    LOGGER.error("Error updating vulnerability", e);
+                final boolean issuesUpdated = this.fortifyRequestHandler.updateVulnerability(releaseId, vulnerabilityIds, bugLink);
+                if(!issuesUpdated)
+                {
+                    hasErrors = true;
                 }
+                LOGGER.info("Updated {} vulnerabilities with bugLink {}.", category.getName(), bugLink);
             } catch (final BugTrackerException e) {
                 LOGGER.error("Error creating bug", e);
                 hasErrors = true;

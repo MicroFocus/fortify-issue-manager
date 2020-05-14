@@ -37,7 +37,9 @@ import com.microfocus.security.automation.fortify.issue.manager.models.Release;
 import com.microfocus.security.automation.fortify.issue.manager.models.Vulnerability;
 
 import okhttp3.HttpUrl;
+import okhttp3.MediaType;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
@@ -168,26 +170,26 @@ final class FortifyRequestHandler
         }
     }
 
-    public void updateVulnerability(final int releaseId, final List<String> vulnerabilityIdList, final String bugLink)
-        throws IOException, FortifyRequestException
+    public boolean updateVulnerability(final int releaseId, final List<String> vulnerabilityIdList, final String bugLink)
+        throws FortifyRequestException
     {
-        final String api = "api/v3/releases/" + releaseId + "/vulnerabilities/bug-link";
-        final HttpUrl apiUrl = HttpUrl.parse(fortifyClient.getApiUrl());
-        if (apiUrl == null) {
-            throw new FortifyRequestException("Invalid url : " + api);
-        }
-        final String updateVulnerabilityUrl = apiUrl.newBuilder().addPathSegments(api).build().toString();
-
         final JsonArray vulnerabilityIds = new JsonArray();
         vulnerabilityIdList.stream().forEach(id -> vulnerabilityIds.add(id));
         final JsonObject payload = new JsonObject();
         payload.addProperty("bugLink", bugLink);
         payload.add("vulnerabilityIds", vulnerabilityIds);
 
+        final String api = "api/v3/releases/" + releaseId + "/vulnerabilities/bug-link";
+        final HttpUrl apiUrl = HttpUrl.parse(fortifyClient.getApiUrl());
+        if (apiUrl == null) {
+            LOGGER.error("Error updating vulnerabilities: {}", payload.toString());
+            throw new FortifyRequestException("Invalid url : " + api);
+        }
+        final String updateVulnerabilityUrl = apiUrl.newBuilder().addPathSegments(api).build().toString();
+
         LOGGER.debug("Updating vulnerabilities: POST {} with {}", updateVulnerabilityUrl, payload.toString());
 
-        /*
-        // TODO Update the Fortify issue with bug link
+        // Update the Fortify issue with bug link
         final RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), payload.toString());
 
         final Request request = new Request.Builder()
@@ -196,25 +198,36 @@ final class FortifyRequestHandler
             .addHeader("Accept", "application/json")
             .post(requestBody)
             .build();
-        final Response response = fortifyClient.getClient().newCall(request).execute();
 
-        if (response.code() == HttpStatus.SC_UNAUTHORIZED || response.code() == HttpStatus.SC_FORBIDDEN) {
-            // Re-authenticate
-            fortifyClient.authenticate();
-        }
+        try {
+            final Response response = fortifyClient.getClient().newCall(request).execute();
 
-        // Read the result
-        final ResponseBody body = response.body();
-        if (body == null) {
-            throw new FortifyRequestException("Unable to update vulnerability. Response is null for POST " + api);
-        }
+            if (response.code() == HttpURLConnection.HTTP_UNAUTHORIZED || response.code() == HttpURLConnection.HTTP_FORBIDDEN) {
+                // Re-authenticate
+                fortifyClient.authenticate();
+            }
 
-        // Read the result
-        try (final InputStream responseStream = body.byteStream()) {
-            final String responseContent = IOUtils.toString(responseStream, "utf-8");
-            LOGGER.info("Updated vulnerabilities with bugLink {}, response: {}", bugLink, responseContent);
+            // Read the result
+            final ResponseBody body = response.body();
+            if (body == null) {
+                LOGGER.error("Error updating vulnerabilities: {}", payload.toString());
+                throw new FortifyRequestException("Unable to update vulnerability. Response is null for POST " + api);
+            }
+
+            // Read the result
+            try (final InputStream responseStream = body.byteStream()) {
+                final String responseContent = IOUtils.toString(responseStream, "utf-8");
+                if(response.code() != 204)
+                {
+                    LOGGER.error("Updating vulnerabilities failed. POST {} with {}", updateVulnerabilityUrl, payload.toString());
+                }
+                LOGGER.info("Updated vulnerabilities with bugLink {}, response: {}", bugLink, responseContent);
+            }
+        } catch (final IOException | FortifyAuthenticationException e) {
+            LOGGER.error("Error updating vulnerabilities POST {} with {}", updateVulnerabilityUrl, payload.toString(), e);
+            return false;
         }
-         */
+        return true;
     }
 
     private String getUrl(final String api, final FilterList filters, final String fields, final String orderBy)
