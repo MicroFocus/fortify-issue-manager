@@ -200,6 +200,9 @@ final class FortifyRequestHandler
             .build();
 
         try {
+            // Sleep 6s between POST requests
+            Thread.sleep(6 * 1000);
+
             final Response response = fortifyClient.getClient().newCall(request).execute();
 
             if (response.code() == HttpURLConnection.HTTP_UNAUTHORIZED || response.code() == HttpURLConnection.HTTP_FORBIDDEN) {
@@ -223,7 +226,7 @@ final class FortifyRequestHandler
                 }
                 LOGGER.info("Updated vulnerabilities with bugLink {}, response: {}", bugLink, responseContent);
             }
-        } catch (final IOException | FortifyAuthenticationException e) {
+        } catch (final IOException | FortifyAuthenticationException | InterruptedException e) {
             LOGGER.error("Error updating vulnerabilities POST {} with {}", updateVulnerabilityUrl, payload.toString(), e);
             return false;
         }
