@@ -40,23 +40,37 @@ Here is a sample script file [getPayload.js](./fortify-issue-manager/src/test/re
 
 ### Configuration
 The following environment variables must be set:
-- `FORTIFY_GRANT_TYPE`
-    This property configures the Fortify on Demand authentication grant type. It must be set to `client_credentials` or `password`.
-    If grant type is `client_credentials` then `FORTIFY_CLIENT_ID` and `FORTIFY_CLIENT_SECRET` must be set.
-    If grant type is `password` then `FORTIFY_TENANT`, `FORTIFY_USERNAME` and `FORTIFY_PASSWORD` must be set.
-- `FORTIFY_SCOPE`
+- `FORTIFY_GRANT_TYPE`  
+    This property configures the Fortify on Demand authentication grant type.  
+    It must be set to `client_credentials` or `password`.
+
+    If grant type is `client_credentials` then the following environment variables must be set:
+     - `FORTIFY_CLIENT_ID`
+     - `FORTIFY_CLIENT_SECRET`
+
+    If grant type is `password` then the following environment variables must be set:
+     - `FORTIFY_USERNAME`
+     - `FORTIFY_PASSWORD`
+
+- `FORTIFY_SCOPE`  
     This property configures the Fortify on Demand scope. Example: api-tenant
-- `FORTIFY_API_URL`
+
+- `FORTIFY_API_URL`  
     This property configures the Fortify on Demand api url
-- `FORTIFY_ISSUE_URL`
+
+- `FORTIFY_ISSUE_URL`  
     This property configures the Fortify on Demand issue url
-- `FORTIFY_APPLICATION_IDS`
+
+- `FORTIFY_APPLICATION_IDS`  
     This property is a comma separated list of Fortify on Demand application ids
-- `JIRA_USERNAME`
+
+- `JIRA_USERNAME`  
     This property configures the Jira username
-- `JIRA_PASSWORD`
+
+- `JIRA_PASSWORD`  
     This property configures the Jira password
-- `JIRA_API_URL`
+
+- `JIRA_API_URL`  
     This property configures the Jira url
 
 Set the `FORTIFY_ISSUE_MANAGER_LOG_LEVEL` environment variable to configure the log level. Default is `INFO`.
