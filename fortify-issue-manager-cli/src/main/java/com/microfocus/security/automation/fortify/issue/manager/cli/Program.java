@@ -33,6 +33,14 @@ public final class Program implements Callable<Integer>
     private static final Logger LOGGER = LoggerFactory.getLogger(Program.class);
 
     @Option(
+        names = {"-d", "--dryRun"},
+        paramLabel = "<dryRun>",
+        defaultValue = "false",
+        description = "If true, the tool lists the bug details but does not create them. Defaults to false."
+    )
+    private boolean dryRun;
+
+    @Option(
         names = {"-s", "--scriptFile"},
         paramLabel = "<scriptFile>",
         description = "Script file with the `getPayload` function to create the bug details"
@@ -55,7 +63,7 @@ public final class Program implements Callable<Integer>
         if (Objects.isNull(scriptFile)) {
             LOGGER.error("Script file with the `getPayload` function to create the bug details must be specified.");
             CommandLine.usage(new Program(), System.out);
-        } else if (FortifyIssueManager.manageIssues(scriptFile)) {
+        } else if (FortifyIssueManager.manageIssues(dryRun, scriptFile)) {
             return 0;
         } else {
             return -1;

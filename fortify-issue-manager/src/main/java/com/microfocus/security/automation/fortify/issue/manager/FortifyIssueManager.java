@@ -58,15 +58,18 @@ public final class FortifyIssueManager
     private final BugTracker bugTracker;
     private final String[] applicationIds;
     private final String issueUrl;
+    private final boolean dryRun;
     private static boolean hasErrors;
 
     private FortifyIssueManager(
+        final boolean dryRun,
         final FortifyClient client,
         final BugTrackerSettings bugTrackerSettings,
         final String[] applicationIds,
         final String issueUrl
     )
     {
+        this.dryRun = dryRun;
         this.fortifyRequestHandler = new FortifyRequestHandler(client);
         this.bugTracker = new JiraRequestHandler(bugTrackerSettings);
         this.applicationIds = applicationIds;
@@ -76,10 +79,11 @@ public final class FortifyIssueManager
     /**
      * Create bugs for Fortify issues.
      *
+     * @param dryRun If true, the tool lists the bug details but does not create them.
      * @param scriptFile Script file to create the bug payload
      * @return true if there were no errors when managing issues
      */
-    public static boolean manageIssues(final String scriptFile)
+    public static boolean manageIssues(final boolean dryRun, final String scriptFile)
     {
         // Check that the required parameters have been specified
         if (Objects.isNull(scriptFile)) {
@@ -87,7 +91,10 @@ public final class FortifyIssueManager
         }
         try {
             final FortifyIssueManagerConfiguration config = loadConfiguration();
-            LOGGER.info("Managing Fortify issues ...");
+            LOGGER.info("Managing Fortify issues. {}",
+                    dryRun
+                    ? "This is a dry run. No bugs will actually be created nor Fortify issues updated."
+                    : "Bugs will be created and Fortify issues will be updated with the corresponding link to the bug.");
             final FortifySettings fortifySettings = config.getFortifySettings();
             final BugTrackerSettings bugTrackerSettings = config.getBugTrackerSettings();
             final FortifyClient client = new FortifyClient(
@@ -99,7 +106,7 @@ public final class FortifyIssueManager
                 fortifySettings.getProxySettings());
             client.authenticate();
             final FortifyIssueManager issueManager = new FortifyIssueManager(
-                client, bugTrackerSettings, fortifySettings.getApplicationIds(), fortifySettings.getIssueUrl());
+                dryRun, client, bugTrackerSettings, fortifySettings.getApplicationIds(), fortifySettings.getIssueUrl());
             issueManager.linkIssuesToBugTracker(scriptFile);
         } catch (final IOException | ScriptNotFoundException | ScriptException | FortifyAuthenticationException |
                        FortifyRequestException | NoSuchMethodException | ConfigurationException e) {
@@ -301,21 +308,26 @@ public final class FortifyIssueManager
                                                                          category.getName(),
                                                                          bugDescription);
 
-            LOGGER.debug("{} BUG-{} : {}", category.getName(), counter++, bugDetails);
+            if(dryRun) {
+                LOGGER.info("{} BUG-{} : {}", category.getName(), counter++, bugDetails);
+            }
+            else {
+                LOGGER.debug("{} BUG-{} : {}", category.getName(), counter++, bugDetails);
 
-            try {
-                final String bugLink = this.bugTracker.createBug(bugDetails);
-                final List<String> vulnerabilityIds = vulnerabilities.stream()
-                    .map(Vulnerability::getVulnId)
-                    .collect(Collectors.toList());
-                final boolean issuesUpdated = this.fortifyRequestHandler.updateVulnerability(releaseId, vulnerabilityIds, bugLink);
-                if (!issuesUpdated) {
+                try {
+                    final String bugLink = this.bugTracker.createBug(bugDetails);
+                    final List<String> vulnerabilityIds = vulnerabilities.stream()
+                        .map(Vulnerability::getVulnId)
+                        .collect(Collectors.toList());
+                    final boolean issuesUpdated = this.fortifyRequestHandler.updateVulnerability(releaseId, vulnerabilityIds, bugLink);
+                    if (!issuesUpdated) {
+                        hasErrors = true;
+                    }
+                    LOGGER.info("Updated {} vulnerabilities with bugLink {}.", category.getName(), bugLink);
+                } catch (final BugTrackerException e) {
+                    LOGGER.error("Error creating bug", e);
                     hasErrors = true;
                 }
-                LOGGER.info("Updated {} vulnerabilities with bugLink {}.", category.getName(), bugLink);
-            } catch (final BugTrackerException e) {
-                LOGGER.error("Error creating bug", e);
-                hasErrors = true;
             }
             LOGGER.debug("-----------------------------------------");
         }

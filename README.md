@@ -14,14 +14,16 @@ It can be used from another Java project by including the following dependency:
 It makes the following `static` method available in the `FortifyIssueManager` class:
 
 ```java
-public static boolean manageIssues(final String scriptFile)
+public static boolean manageIssues(final boolean dryRun, final String scriptFile)
 ```
 
 ### fortify-java-issue-manager-cli
 
 This modules provides a simple command-line interface which wraps the `manageIssues()` function.
 
-    Usage: fortify-issue-manager -s=<scriptFile>
+    Usage: fortify-issue-manager [-d] -s=<scriptFile>
+      -d, --dryRun
+             If true, the tool lists the bug details but does not create them. Defaults to false.
       -s, --scriptFile=<scriptFile>
              Specifies the script file with the `getPayload` function to create the bug details
 
