@@ -99,7 +99,7 @@ public final class FortifyIssueManager
             final FortifyIssueManagerConfiguration config = loadConfiguration();
             LOGGER.info("Managing Fortify issues. {}",
                     dryRun
-                    ? "This is a dry run. No bugs will actually be created nor Fortify issues updated."
+                    ? "This is a dry run. No bugs will actually be created."
                     : "Bugs will be created and Fortify issues will be updated with the corresponding link to the bug.");
             final FortifySettings fortifySettings = config.getFortifySettings();
             final BugTrackerSettings bugTrackerSettings = config.getBugTrackerSettings();
