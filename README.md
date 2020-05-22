@@ -66,6 +66,16 @@ The following environment variables must be set:
 - `FORTIFY_APPLICATION_IDS`  
     This property is a comma separated list of Fortify on Demand application ids
 
+- `FORTIFY_RELEASE_FILTERS`  
+    This property is a delimited list of field filters for Fortify on Demand releases.  
+    If no release filters are specified, the following filter is applied:  
+    `sdlcStatusType:Production`
+
+- `FORTIFY_ISSUE_FILTERS`  
+    This property is a delimited list of field filters for Fortify on Demand issues.  
+    If no issue filters are specified, the following filters are applied:  
+    `severityString:Critical|High+auditorStatus:Remediation Required`
+
 - `JIRA_USERNAME`  
     This property configures the Jira username
 
@@ -76,6 +86,14 @@ The following environment variables must be set:
     This property configures the Jira url
 
 Set the `FORTIFY_ISSUE_MANAGER_LOG_LEVEL` environment variable to configure the log level. Default is `INFO`.
+
+#### Note
+Fortify on Demand field filters are specified as follows:  
+Field name and value should be separated by a colon (:). Multiple fields should be separated by a plus (+). Multiple fields are treated as an AND condition.  
+Example, `fieldname1:value+fieldname2:value`  
+Multiple values for a field should be separated by a pipe (|).  
+Mulitple values for a field are treated as an OR condition.  
+Example, `fieldname1:value1|value2`
 
 ### fortify-issue-manager-cli-image
 This module builds a Docker image for the command-line interface, potentially allowing for simpler usage in some environments.
@@ -92,6 +110,8 @@ docker container run --rm \
     -e FORTIFY_API_URL=<Fortify on Demand API URL> \
     -e FORTIFY_ISSUE_URL=<Fortify on Demand issue URL> \
     -e FORTIFY_APPLICATION_IDS=<Comma separated list of application ids> \
+    -e FORTIFY_RELEASE_FILTERS=<Delimited list of release field filters> \
+    -e FORTIFY_ISSUE_FILTERS=<Delimited list of issue field filters> \
     -e JIRA_USERNAME=<Jira username> \
     -e JIRA_PASSWORD=<Jira password> \
     -e JIRA_API_URL=<Jira URL> \
