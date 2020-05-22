@@ -16,6 +16,8 @@
 
 // Fortify Severity Id --> Severity Info
 var severityInfoLookup = {
+    1: {jiraPriorityId: "5", jiraTitle: "Low Priority"},
+    2: {jiraPriorityId: "4", jiraTitle: "Medium Priority"},
     3: {jiraPriorityId: "3", jiraTitle: "High Priority"},
     4: {jiraPriorityId: "2", jiraTitle: "Critical"}
 };
