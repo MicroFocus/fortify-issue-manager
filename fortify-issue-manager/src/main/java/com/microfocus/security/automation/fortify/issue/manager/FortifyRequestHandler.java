@@ -57,7 +57,7 @@ final class FortifyRequestHandler
         this.gson = new Gson();
     }
 
-    public List<Application> getApplications(final FilterList filters, final String fields)
+    public List<Application> getApplications(final String filters, final String fields)
         throws IOException, FortifyAuthenticationException, FortifyRequestException
     {
         final String url = getUrl("api/v3/applications", filters, fields, "applicationId");
@@ -77,7 +77,7 @@ final class FortifyRequestHandler
         }
     }
 
-    public List<Release> getReleases(final FilterList filters, final String fields)
+    public List<Release> getReleases(final String filters, final String fields)
         throws IOException, FortifyAuthenticationException, FortifyRequestException
     {
         final String url = getUrl("api/v3/releases", filters, fields, "releaseId");
@@ -96,7 +96,7 @@ final class FortifyRequestHandler
         }
     }
 
-    public List<Vulnerability> getVulnerabilities(final int releaseId, final FilterList filters, final String fields)
+    public List<Vulnerability> getVulnerabilities(final int releaseId, final String filters, final String fields)
         throws IOException, FortifyAuthenticationException, FortifyRequestException
     {
         final String url = getUrl("api/v3/releases/" + releaseId + "/vulnerabilities", filters, fields, "id");
@@ -233,7 +233,7 @@ final class FortifyRequestHandler
         return true;
     }
 
-    private String getUrl(final String api, final FilterList filters, final String fields, final String orderBy)
+    private String getUrl(final String api, final String filters, final String fields, final String orderBy)
         throws FortifyRequestException
     {
         final HttpUrl apiUrl = HttpUrl.parse(fortifyClient.getApiUrl());
@@ -242,8 +242,8 @@ final class FortifyRequestHandler
         }
 
         final HttpUrl.Builder builder = apiUrl.newBuilder().addPathSegments(api);
-        if (filters != null) {
-            builder.addQueryParameter("filters", filters.toString());
+        if (StringUtils.isNotEmpty(filters)) {
+            builder.addQueryParameter("filters", filters);
         }
 
         if (StringUtils.isNotEmpty(fields)) {

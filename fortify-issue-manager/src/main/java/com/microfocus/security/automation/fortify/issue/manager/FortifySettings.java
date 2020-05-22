@@ -29,6 +29,8 @@ final class FortifySettings
     private final String issueUrl;
     private final Map<String, String> proxySettings;
     private final String[] applicationIds;
+    private final String releaseFilters;
+    private final String issueFilters;
 
     FortifySettings(
         final GrantType grantType,
@@ -38,7 +40,9 @@ final class FortifySettings
         final String apiUrl,
         final String issueUrl,
         final Map<String, String> proxySettings,
-        final String[] applicationIds
+        final String[] applicationIds,
+        final String releaseFilters,
+        final String issueFilters
     )
     {
         super();
@@ -50,6 +54,8 @@ final class FortifySettings
         this.issueUrl = issueUrl;
         this.proxySettings = proxySettings;
         this.applicationIds = applicationIds;
+        this.releaseFilters = releaseFilters;
+        this.issueFilters = issueFilters;
     }
 
     GrantType getGrantType()
@@ -90,5 +96,13 @@ final class FortifySettings
     String[] getApplicationIds()
     {
         return applicationIds;
+    }
+
+    String getReleaseFilters() {
+        return releaseFilters;
+    }
+
+    String getIssueFilters() {
+        return issueFilters;
     }
 }
