@@ -7,6 +7,8 @@ You will need to configure the Fortify on Demand application to `Enable Bug Trac
 
 ![Settings](images/FoDsettings.png)
 
+### fortify-java-issue-manager
+
 It can be used from another Java project by including the following dependency:
 
 ```xml
