@@ -1,6 +1,13 @@
 # Fortify Issue Manager
 
-This is a utility to find issues created by Fortify on Demand scans and create corresponding bugs in a bug tracker like Jira. Once the bugs are created they are linked back to the Fortify on Demand issue.
+This is a utility to find issues created by Fortify on Demand scans and create corresponding bugs in a bug tracker like Jira. Once the bugs are created they are linked back to the Fortify on Demand issue. Users can then click the `View Bug` button in Fortify on Demand to navigate to the corresponding bug.
+
+### Fortify on Demand Configuration
+You will need to configure the Fortify on Demand application to `Enable Bug Tracker Integration` and set `Bug Tracker` to `Other`. This can be done from the Fortify on Demand Applications view > Settings > Bug Tracker tab.
+
+![Settings](images/FoDsettings.png)
+
+### fortify-java-issue-manager
 
 It can be used from another Java project by including the following dependency:
 
