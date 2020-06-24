@@ -1,4 +1,4 @@
-# Fortify Issue Manager
+# Fortify Issue Manager-
 
 This is a utility to find issues created by Fortify on Demand scans and create corresponding bugs in a bug tracker like Jira. Once the bugs are created they are linked back to the Fortify on Demand issue. Users can then click the `View Bug` button in Fortify on Demand to navigate to the corresponding bug.
 
