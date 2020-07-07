@@ -78,6 +78,7 @@
                                 <entryPoint>
                                     <arg>/tini</arg>
                                     <arg>--</arg>
+                                    <arg>/startup/startup.sh</arg>
                                     <arg>java</arg>
                                     <arg>-jar</arg>
                                     <arg>/maven/fortify-issue-manager-cli-${project.version}.jar</arg>
