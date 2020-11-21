@@ -24,7 +24,7 @@
     <parent>
         <groupId>com.microfocus.security.automation.fortify</groupId>
         <artifactId>fortify-issue-manager-aggregator</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.0.0-95</version>
     </parent>
 
     <artifactId>fortify-issue-manager-cli-image</artifactId>

@@ -29,7 +29,7 @@
 
     <groupId>com.microfocus.security.automation.fortify</groupId>
     <artifactId>fortify-issue-manager-aggregator</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0-95</version>
     <packaging>pom</packaging>
 
     <name>Fortify Issue Manager</name>
@@ -95,12 +95,12 @@
             <dependency>
                 <groupId>com.microfocus.security.automation.fortify</groupId>
                 <artifactId>fortify-issue-manager</artifactId>
-                <version>1.0.0-SNAPSHOT</version>
+                <version>1.0.0-95</version>
             </dependency>
             <dependency>
                 <groupId>com.microfocus.security.automation.fortify</groupId>
                 <artifactId>fortify-issue-manager-cli</artifactId>
-                <version>1.0.0-SNAPSHOT</version>
+                <version>1.0.0-95</version>
             </dependency>
             <dependency>
                 <groupId>com.squareup.okhttp3</groupId>
