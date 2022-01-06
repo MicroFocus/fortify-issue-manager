@@ -1,6 +1,6 @@
 # Fortify Issue Manager
 
-This is a utility to find issues created by Fortify on Demand scans and create corresponding bugs in a bug tracker like Jira. Once the bugs are created they are linked back to the Fortify on Demand issue. Users can then click the `View Bug` button in Fortify on Demand to navigate to the corresponding bug.
+This is a utility to find issues created by Fortify on Demand scans and create corresponding bugs in a bug tracker like Octane. Once the bugs are created they are linked back to the Fortify on Demand issue. Users can then click the `View Bug` button in Fortify on Demand to navigate to the corresponding bug.
 
 ### Fortify on Demand Configuration
 You will need to configure the Fortify on Demand application to `Enable Bug Tracker Integration` and set `Bug Tracker` to `Other`. This can be done from the Fortify on Demand Applications view > Settings > Bug Tracker tab.
@@ -82,15 +82,18 @@ The following environment variables must be set:
     This property is a delimited list of field filters for Fortify on Demand issues.  
     If no issue filters are specified, the following filters are applied:  
     `severityString:Critical|High+auditorStatus:Remediation Required`
+- `ISSUE_TRACKER`
+    This property defines the issue tracker to use.
+    Supported trackers: JIRA, OCTANE
 
-- `JIRA_USERNAME`  
-    This property configures the Jira username
+- `TRACKER_USERNAME`  
+    This property configures the issue tracker username
 
-- `JIRA_PASSWORD`  
-    This property configures the Jira password
+- `TRACKER_PASSWORD`  
+    This property configures the issue tracker password
 
-- `JIRA_API_URL`  
-    This property configures the Jira url
+- `TRACKER_API_URL`  
+    This property configures the issue tracker url
 
 Set the `FORTIFY_ISSUE_MANAGER_LOG_LEVEL` environment variable to configure the log level. Default is `INFO`.
 
@@ -119,9 +122,9 @@ docker container run --rm \
     -e FORTIFY_APPLICATION_IDS=<Comma separated list of application ids> \
     -e FORTIFY_RELEASE_FILTERS=<Delimited list of release field filters> \
     -e FORTIFY_ISSUE_FILTERS=<Delimited list of issue field filters> \
-    -e JIRA_USERNAME=<Jira username> \
-    -e JIRA_PASSWORD=<Jira password> \
-    -e JIRA_API_URL=<Jira URL> \
+    -e TRACKER_USERNAME=<username> \
+    -e TRACKER_PASSWORD=<password> \
+    -e TRACKER_API_URL=<URL> \
     -e HTTP_PROXY \
     -v $(pwd):/wd \
     microfocus/fortify-issue-manager \

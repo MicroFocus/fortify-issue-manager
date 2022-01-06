@@ -19,8 +19,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -35,6 +33,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
+import com.microfocus.security.automation.fortify.issue.tracker.BugTrackerFactory;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -47,7 +46,9 @@ import com.microfocus.security.automation.fortify.issue.manager.models.Category;
 import com.microfocus.security.automation.fortify.issue.manager.models.Release;
 import com.microfocus.security.automation.fortify.issue.manager.models.Vulnerability;
 import com.microfocus.security.automation.fortify.issue.manager.utils.JavaScriptFunctions;
-import com.microfocus.security.automation.fortify.issue.tracker.JiraRequestHandler;
+
+import static com.microfocus.security.automation.fortify.issue.manager.ConfigurationManager.getConfig;
+import static com.microfocus.security.automation.fortify.issue.manager.ConfigurationManager.getProxySetting;
 
 public final class FortifyIssueManager
 {
@@ -66,16 +67,15 @@ public final class FortifyIssueManager
     private FortifyIssueManager(
         final boolean dryRun,
         final FortifyClient client,
-        final BugTrackerSettings bugTrackerSettings,
         final String[] applicationIds,
         final String releaseFilter,
         final String issueFilter,
-        final String issueUrl
-    )
-    {
+        final String issueUrl,
+        final String targetTracker
+    ) throws ConfigurationException {
         this.dryRun = dryRun;
         this.fortifyRequestHandler = new FortifyRequestHandler(client);
-        this.bugTracker = new JiraRequestHandler(bugTrackerSettings);
+        this.bugTracker = BugTrackerFactory.getTracker(targetTracker);
         this.applicationIds = applicationIds;
         this.releaseFilter = releaseFilter;
         this.issueFilter = issueFilter;
@@ -102,7 +102,6 @@ public final class FortifyIssueManager
                     ? "This is a dry run. No bugs will actually be created."
                     : "Bugs will be created and Fortify issues will be updated with the corresponding link to the bug.");
             final FortifySettings fortifySettings = config.getFortifySettings();
-            final BugTrackerSettings bugTrackerSettings = config.getBugTrackerSettings();
             final FortifyClient client = new FortifyClient(
                 fortifySettings.getGrantType(),
                 fortifySettings.getId(),
@@ -112,11 +111,12 @@ public final class FortifyIssueManager
                 fortifySettings.getProxySettings());
             client.authenticate();
             final FortifyIssueManager issueManager = new FortifyIssueManager(
-                dryRun, client, bugTrackerSettings,
+                dryRun, client,
                 fortifySettings.getApplicationIds(),
                 fortifySettings.getReleaseFilters(),
                 fortifySettings.getIssueFilters(),
-                fortifySettings.getIssueUrl());
+                fortifySettings.getIssueUrl(),
+                config.getIssueTracker());
             issueManager.linkIssuesToBugTracker(scriptFile);
         } catch (final IOException | ScriptNotFoundException | ScriptException | FortifyAuthenticationException |
                        FortifyRequestException | NoSuchMethodException | ConfigurationException e) {
@@ -158,12 +158,7 @@ public final class FortifyIssueManager
             : System.getenv("FORTIFY_APPLICATION_IDS").split(",");
         final String fortifyReleaseFilters = System.getenv("FORTIFY_RELEASE_FILTERS");
         final String fortifyIssueFilters = System.getenv("FORTIFY_ISSUE_FILTERS");
-
-        // Get bug tracker settings
-        final String bugTrackerUsername = getConfig("JIRA_USERNAME", configErrors);
-        final String bugTrackerPassword = getConfig("JIRA_PASSWORD", configErrors);
-        final String bugTrackerApiUrl = getConfig("JIRA_API_URL", configErrors);
-
+        final String issueTracker = System.getenv("ISSUE_TRACKER");
         if (!configErrors.isEmpty()) {
             throw new ConfigurationException("Invalid configuration " + configErrors);
         }
@@ -173,20 +168,9 @@ public final class FortifyIssueManager
             fortifyApiUrl, fortifyIssueUrl, proxySettings,
             fortifyApplicationIds, fortifyReleaseFilters, fortifyIssueFilters);
 
-        final BugTrackerSettings bugTrackerSettings = new BugTrackerSettings(
-            bugTrackerUsername, bugTrackerPassword, bugTrackerApiUrl, proxySettings);
-
-        final FortifyIssueManagerConfiguration config = new FortifyIssueManagerConfiguration(fortifySettings, bugTrackerSettings);
+        final FortifyIssueManagerConfiguration config = new FortifyIssueManagerConfiguration(
+                fortifySettings, issueTracker);
         return config;
-    }
-
-    private static String getConfig(final String configName, final List<String> errorConfigs)
-    {
-        final String configValue = System.getenv(configName);
-        if (StringUtils.isEmpty(configValue)) {
-            errorConfigs.add(configName);
-        }
-        return configValue;
     }
 
     private void linkIssuesToBugTracker(final String scriptFile)
@@ -241,7 +225,7 @@ public final class FortifyIssueManager
     private ScriptEngine getBugPayloadScript(final String scriptFile)
         throws ScriptNotFoundException, ScriptException, FileNotFoundException, IOException
     {
-        LOGGER.info("Loding script from {}", scriptFile);
+        LOGGER.info("Loading script from {}", scriptFile);
         try (final InputStream inputStream = new FileInputStream(scriptFile)) {
             final String getPayloadScript = IOUtils.toString(inputStream, "utf-8");
             if (StringUtils.isEmpty(getPayloadScript)) {
@@ -420,26 +404,4 @@ public final class FortifyIssueManager
         return issues.toString();
     }
 
-    private static Map<String, String> getProxySetting(final String proxyEnvVariable)
-    {
-        final Map<String, String> proxySettings = new HashMap<>();
-
-        final String proxy = System.getenv(proxyEnvVariable);
-        if (proxy != null) {
-            try {
-                final URI uri = new URI(proxy);
-                final String host = uri.getHost();
-                if (host != null) {
-                    proxySettings.put("host", host);
-                    final int port = uri.getPort();
-                    proxySettings.put("port", port != -1 ? port + "" : "80");
-                } else {
-                    LOGGER.error("Misconfigured {}, host name can't be null.", proxyEnvVariable);
-                }
-            } catch (final URISyntaxException ex) {
-                LOGGER.error(ex.getMessage(), ex);
-            }
-        }
-        return proxySettings;
-    }
 }

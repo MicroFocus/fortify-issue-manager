@@ -15,11 +15,11 @@
  */
 package com.microfocus.security.automation.fortify.issue.manager;
 
-final class ConfigurationException extends Exception
+public final class ConfigurationException extends Exception
 {
     private static final long serialVersionUID = -1990413390688297420L;
 
-    ConfigurationException(final String message)
+    public ConfigurationException(final String message)
     {
         super(message);
     }

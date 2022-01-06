@@ -24,7 +24,7 @@ import org.glassfish.jersey.internal.util.Base64;
 
 import okhttp3.OkHttpClient;
 
-final class JiraClient
+final class TrackerClient
 {
     private final static int CONNECTION_TIMEOUT = 30; // seconds
     private final static int WRITE_TIMEOUT = 600; // seconds
@@ -36,7 +36,7 @@ final class JiraClient
 
     private final String encodedAuth;
 
-    JiraClient(final String username, final String password, final String apiUrl, final Map<String, String> proxySettings)
+    TrackerClient(final String username, final String password, final String apiUrl, final Map<String, String> proxySettings)
     {
         this.apiUrl = apiUrl;
         this.proxySettings = proxySettings;

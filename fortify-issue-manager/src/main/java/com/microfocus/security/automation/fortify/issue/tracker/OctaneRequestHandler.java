@@ -15,22 +15,23 @@
  */
 package com.microfocus.security.automation.fortify.issue.tracker;
 
-import java.io.IOException;
-
-import com.microfocus.security.automation.fortify.issue.manager.*;
-
 import com.google.common.net.UrlEscapers;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.microfocus.security.automation.fortify.issue.manager.BugTracker;
+import com.microfocus.security.automation.fortify.issue.manager.BugTrackerException;
+import com.microfocus.security.automation.fortify.issue.manager.BugTrackerSettings;
+import com.microfocus.security.automation.fortify.issue.manager.ConfigurationException;
 
-public final class JiraRequestHandler extends BaseRequestHandler implements BugTracker
+import java.io.IOException;
+
+public final class OctaneRequestHandler extends BaseRequestHandler implements BugTracker
 {
     private final TrackerClient client;
     final JsonParser parser;
 
-    public JiraRequestHandler() throws ConfigurationException
+    public OctaneRequestHandler() throws ConfigurationException
     {
-        super();
         final BugTrackerSettings bugTrackerSettings = loadConfiguration();
         this.client = getClient(bugTrackerSettings);
         this.parser = new JsonParser();
@@ -40,14 +41,18 @@ public final class JiraRequestHandler extends BaseRequestHandler implements BugT
     public String createBug(final String payload) throws BugTrackerException
     {
         try {
+            // DDD replace this with correct api call
             final String issue = performPostRequest(client,"rest/api/2/issue", payload);
 
             // Parse the Response
             final JsonObject response = parser.parse(issue).getAsJsonObject();
+            //  DDD what do we expect in the response from octane
             if (response.has("key")) {
                 final String bugLink = response.get("key").getAsString();
+                // DDD and this should be?
                 return client.getApiUrl() + "/browse/" + UrlEscapers.urlPathSegmentEscaper().escape(bugLink);
             } else {
+                // DDD how are errors communicated
                 final String errors = response.get("errors").toString();
                 throw new BugTrackerException(errors);
             }
