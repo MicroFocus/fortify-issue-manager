@@ -48,7 +48,6 @@ public final class OctaneRequestHandler extends BaseRequestHandler implements Bu
             //  DDD what do we expect in the response from octane
             if (response.has("key")) {
                 final String bugLink = response.get("key").getAsString();
-                // DDD and this should be?
                 return client.getApiUrl() + "/browse/" + UrlEscapers.urlPathSegmentEscaper().escape(bugLink);
             } else {
                 // DDD how are errors communicated
