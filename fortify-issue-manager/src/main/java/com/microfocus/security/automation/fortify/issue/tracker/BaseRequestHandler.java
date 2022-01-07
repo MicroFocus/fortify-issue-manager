@@ -19,7 +19,13 @@ import com.microfocus.security.automation.fortify.issue.manager.BugTrackerExcept
 import com.microfocus.security.automation.fortify.issue.manager.BugTrackerSettings;
 import com.microfocus.security.automation.fortify.issue.manager.ConfigurationException;
 import com.microfocus.security.automation.fortify.issue.manager.ConfigurationManager;
-import okhttp3.*;
+
+import okhttp3.HttpUrl;
+import okhttp3.MediaType;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,15 +40,15 @@ import static com.microfocus.security.automation.fortify.issue.manager.Configura
 
 public class BaseRequestHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseRequestHandler.class);
-    protected final Map<String, String> proxySettings;
-    protected final List<String> configErrors;
+    protected Map<String, String> proxySettings;
+    protected List<String> configErrors;
+    protected BugTrackerSettings bugTrackerSettings;
 
-    BaseRequestHandler() {
-        proxySettings = ConfigurationManager.getProxySetting("HTTP_PROXY");
-        configErrors = new ArrayList<>();
+    BaseRequestHandler() throws ConfigurationException {
+        loadConfiguration();
     }
 
-    protected TrackerClient getClient(final BugTrackerSettings bugTrackerSettings)
+    protected TrackerClient getClient()
     {
         return new TrackerClient(
                 bugTrackerSettings.getUsername(),
@@ -86,8 +92,11 @@ public class BaseRequestHandler {
         }
     }
 
-    protected BugTrackerSettings loadConfiguration() throws ConfigurationException
+    private void loadConfiguration() throws ConfigurationException
     {
+        proxySettings = ConfigurationManager.getProxySetting("HTTP_PROXY");
+        configErrors = new ArrayList<>();
+
         // Get bug tracker settings
         final String bugTrackerUsername = getConfig("TRACKER_USERNAME", configErrors);
         final String bugTrackerPassword = getConfig("TRACKER_PASSWORD", configErrors);
@@ -97,9 +106,11 @@ public class BaseRequestHandler {
             throw new ConfigurationException("Invalid configuration " + configErrors);
         }
 
-        final BugTrackerSettings bugTrackerSettings = new BugTrackerSettings(
-                bugTrackerUsername, bugTrackerPassword, bugTrackerApiUrl, proxySettings);
-
-        return bugTrackerSettings;
+        bugTrackerSettings = new BugTrackerSettings(
+            bugTrackerUsername,
+            bugTrackerPassword,
+            bugTrackerApiUrl,
+            proxySettings
+        );
     }
 }

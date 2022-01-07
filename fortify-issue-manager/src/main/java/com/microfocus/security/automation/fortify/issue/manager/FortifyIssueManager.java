@@ -158,7 +158,7 @@ public final class FortifyIssueManager
             : System.getenv("FORTIFY_APPLICATION_IDS").split(",");
         final String fortifyReleaseFilters = System.getenv("FORTIFY_RELEASE_FILTERS");
         final String fortifyIssueFilters = System.getenv("FORTIFY_ISSUE_FILTERS");
-        final String issueTracker = System.getenv("ISSUE_TRACKER");
+        final String issueTracker = System.getenv("TRACKER");
         if (!configErrors.isEmpty()) {
             throw new ConfigurationException("Invalid configuration " + configErrors);
         }
@@ -359,7 +359,7 @@ public final class FortifyIssueManager
     {
         Collections.sort(vulnerabilities,
                          Comparator.comparing(Vulnerability::getPrimaryLocation).thenComparing(Vulnerability::getId));
-
+        // DDD is the markup the same in jira and Octane
         final StringBuilder issues = new StringBuilder();
         issues.append("||Issue Id||Description||");
         for (final Vulnerability vulnerability : vulnerabilities) {
@@ -382,7 +382,7 @@ public final class FortifyIssueManager
     private String getOpenSourceIssueDescription(final String issueBaseUrl, final List<Vulnerability> vulnerabilities)
     {
         vulnerabilities.sort(Comparator.comparing(Vulnerability::getPrimaryLocation));
-
+        // DDD is the markup the same in jira and Octane
         final StringBuilder issues = new StringBuilder();
         issues.append("||Issue Id||CVE ID||Component||");
         for (final Vulnerability vulnerability : vulnerabilities) {

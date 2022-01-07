@@ -82,7 +82,8 @@ The following environment variables must be set:
     This property is a delimited list of field filters for Fortify on Demand issues.  
     If no issue filters are specified, the following filters are applied:  
     `severityString:Critical|High+auditorStatus:Remediation Required`
-- `ISSUE_TRACKER`
+
+- `TRACKER`
     This property defines the issue tracker to use.
     Supported trackers: JIRA, OCTANE
 
@@ -122,6 +123,7 @@ docker container run --rm \
     -e FORTIFY_APPLICATION_IDS=<Comma separated list of application ids> \
     -e FORTIFY_RELEASE_FILTERS=<Delimited list of release field filters> \
     -e FORTIFY_ISSUE_FILTERS=<Delimited list of issue field filters> \
+    -e TRACKER=<JIRA|OCTANE> \
     -e TRACKER_USERNAME=<username> \
     -e TRACKER_PASSWORD=<password> \
     -e TRACKER_API_URL=<URL> \

@@ -17,7 +17,9 @@ package com.microfocus.security.automation.fortify.issue.tracker;
 
 import java.io.IOException;
 
-import com.microfocus.security.automation.fortify.issue.manager.*;
+import com.microfocus.security.automation.fortify.issue.manager.BugTracker;
+import com.microfocus.security.automation.fortify.issue.manager.ConfigurationException;
+import com.microfocus.security.automation.fortify.issue.manager.BugTrackerException;
 
 import com.google.common.net.UrlEscapers;
 import com.google.gson.JsonObject;
@@ -26,13 +28,12 @@ import com.google.gson.JsonParser;
 public final class JiraRequestHandler extends BaseRequestHandler implements BugTracker
 {
     private final TrackerClient client;
-    final JsonParser parser;
+    private final JsonParser parser;
 
     public JiraRequestHandler() throws ConfigurationException
     {
         super();
-        final BugTrackerSettings bugTrackerSettings = loadConfiguration();
-        this.client = getClient(bugTrackerSettings);
+        this.client = getClient();
         this.parser = new JsonParser();
     }
 

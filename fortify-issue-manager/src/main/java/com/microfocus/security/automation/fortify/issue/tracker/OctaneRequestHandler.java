@@ -20,7 +20,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.microfocus.security.automation.fortify.issue.manager.BugTracker;
 import com.microfocus.security.automation.fortify.issue.manager.BugTrackerException;
-import com.microfocus.security.automation.fortify.issue.manager.BugTrackerSettings;
 import com.microfocus.security.automation.fortify.issue.manager.ConfigurationException;
 
 import java.io.IOException;
@@ -32,8 +31,8 @@ public final class OctaneRequestHandler extends BaseRequestHandler implements Bu
 
     public OctaneRequestHandler() throws ConfigurationException
     {
-        final BugTrackerSettings bugTrackerSettings = loadConfiguration();
-        this.client = getClient(bugTrackerSettings);
+        super();
+        this.client = getClient();
         this.parser = new JsonParser();
     }
 

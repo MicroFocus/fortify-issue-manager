@@ -20,9 +20,9 @@ import com.microfocus.security.automation.fortify.issue.manager.ConfigurationExc
 
 public class BugTrackerFactory {
     public static BugTracker getTracker(final String name) throws ConfigurationException {
-        if (name.equalsIgnoreCase("jira")) {
+        if (name.equalsIgnoreCase("JIRA")) {
             return new JiraRequestHandler();
-        } else if (name.equalsIgnoreCase("octane")) {
+        } else if (name.equalsIgnoreCase("OCTANE")) {
             return new OctaneRequestHandler();
         } else {
             throw new ConfigurationException("Tracker:" + name + "has not been configured");
