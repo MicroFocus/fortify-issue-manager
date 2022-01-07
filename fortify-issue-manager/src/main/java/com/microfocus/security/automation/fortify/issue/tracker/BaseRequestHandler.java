@@ -50,12 +50,7 @@ public class BaseRequestHandler {
 
     protected TrackerClient getClient()
     {
-        return new TrackerClient(
-                bugTrackerSettings.getUsername(),
-                bugTrackerSettings.getPassword(),
-                bugTrackerSettings.getApiUrl(),
-                bugTrackerSettings.getProxySettings()
-        );
+        return new TrackerClient(bugTrackerSettings);
     }
 
     protected String performPostRequest(

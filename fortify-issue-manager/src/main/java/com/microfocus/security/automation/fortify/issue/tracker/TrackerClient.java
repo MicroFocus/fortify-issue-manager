@@ -20,6 +20,7 @@ import java.net.Proxy;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import com.microfocus.security.automation.fortify.issue.manager.BugTrackerSettings;
 import org.glassfish.jersey.internal.util.Base64;
 
 import okhttp3.OkHttpClient;
@@ -36,14 +37,14 @@ final class TrackerClient
 
     private final String encodedAuth;
 
-    TrackerClient(final String username, final String password, final String apiUrl, final Map<String, String> proxySettings)
+    TrackerClient(final BugTrackerSettings bugTrackerSettings)
     {
-        this.apiUrl = apiUrl;
-        this.proxySettings = proxySettings;
+        this.apiUrl = bugTrackerSettings.getApiUrl();
+        this.proxySettings = bugTrackerSettings.getProxySettings();
 
         client = createClient();
 
-        final String auth = username + ":" + password;
+        final String auth = bugTrackerSettings.getUsername() + ":" + bugTrackerSettings.getPassword();
         encodedAuth = Base64.encodeAsString(auth.getBytes());
     }
 

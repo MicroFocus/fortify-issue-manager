@@ -56,7 +56,7 @@ public final class FortifyIssueManager
     private final String FORTIFY_ISSUE_LINK_FORMAT = "%s/Releases/%s/Issues/";
 
     private final FortifyRequestHandler fortifyRequestHandler;
-    private final BugTracker bugTracker;
+    private final BugTracker trackerRequestHandler;
     private final String[] applicationIds;
     private final String releaseFilter;
     private final String issueFilter;
@@ -71,11 +71,11 @@ public final class FortifyIssueManager
         final String releaseFilter,
         final String issueFilter,
         final String issueUrl,
-        final String targetTracker
+        final BugTracker targetTracker
     ) throws ConfigurationException {
         this.dryRun = dryRun;
         this.fortifyRequestHandler = new FortifyRequestHandler(client);
-        this.bugTracker = BugTrackerFactory.getTracker(targetTracker);
+        this.trackerRequestHandler = targetTracker;
         this.applicationIds = applicationIds;
         this.releaseFilter = releaseFilter;
         this.issueFilter = issueFilter;
@@ -116,7 +116,7 @@ public final class FortifyIssueManager
                 fortifySettings.getReleaseFilters(),
                 fortifySettings.getIssueFilters(),
                 fortifySettings.getIssueUrl(),
-                config.getIssueTracker());
+                BugTrackerFactory.getTracker(config.getBugTrackerName()));
             issueManager.linkIssuesToBugTracker(scriptFile);
         } catch (final IOException | ScriptNotFoundException | ScriptException | FortifyAuthenticationException |
                        FortifyRequestException | NoSuchMethodException | ConfigurationException e) {
@@ -153,12 +153,13 @@ public final class FortifyIssueManager
         final String fortifyScope = getConfig("FORTIFY_SCOPE", configErrors);
         final String fortifyApiUrl = getConfig("FORTIFY_API_URL", configErrors);
         final String fortifyIssueUrl = getConfig("FORTIFY_ISSUE_URL", configErrors);
+        final String trackerName = getConfig("TRACKER", configErrors);
         final String fortifyApplicationIds[] = System.getenv("FORTIFY_APPLICATION_IDS") == null
             ? null
             : System.getenv("FORTIFY_APPLICATION_IDS").split(",");
         final String fortifyReleaseFilters = System.getenv("FORTIFY_RELEASE_FILTERS");
         final String fortifyIssueFilters = System.getenv("FORTIFY_ISSUE_FILTERS");
-        final String issueTracker = System.getenv("TRACKER");
+
         if (!configErrors.isEmpty()) {
             throw new ConfigurationException("Invalid configuration " + configErrors);
         }
@@ -169,7 +170,7 @@ public final class FortifyIssueManager
             fortifyApplicationIds, fortifyReleaseFilters, fortifyIssueFilters);
 
         final FortifyIssueManagerConfiguration config = new FortifyIssueManagerConfiguration(
-                fortifySettings, issueTracker);
+                fortifySettings, trackerName);
         return config;
     }
 
@@ -337,7 +338,7 @@ public final class FortifyIssueManager
                 LOGGER.debug("{} BUG-{} : {}", category.getName(), counter++, bugDetails);
 
                 try {
-                    final String bugLink = this.bugTracker.createBug(bugDetails);
+                    final String bugLink = this.trackerRequestHandler.createBug(bugDetails);
                     final List<String> vulnerabilityIds = vulnerabilities.stream()
                         .map(Vulnerability::getVulnId)
                         .collect(Collectors.toList());
