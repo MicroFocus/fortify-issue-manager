@@ -56,8 +56,13 @@ final class TrackerClient
             .readTimeout(READ_TIMEOUT, TimeUnit.SECONDS);
 
         if (!proxySettings.isEmpty()) {
-            final Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxySettings.get("host"),
-                                                                                 Integer.valueOf(proxySettings.get("port"))));
+            final Proxy proxy = new Proxy(
+                    Proxy.Type.HTTP,
+                    new InetSocketAddress(
+                            proxySettings.get("host"),
+                            Integer.valueOf(proxySettings.get("port"))
+                    )
+            );
             baseClient.proxy(proxy);
         }
         return baseClient.build();

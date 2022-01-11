@@ -42,7 +42,11 @@ public final class OctaneTracker extends BaseTracker implements BugTracker
     public String createBug(final String payload) throws BugTrackerException
     {
         try {
-            final String issue = performPostRequest(client,"/api/shared_spaces/131002/workspaces/6001/defects", payload);
+            final String issue = performPostRequest(
+                    client,
+                    "/api/shared_spaces/131002/workspaces/6001/defects",
+                    payload
+            );
 
             // Parse the Response
             final JsonObject response = parser.parse(issue).getAsJsonObject();

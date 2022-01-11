@@ -20,7 +20,8 @@ import com.microfocus.security.automation.fortify.issue.manager.BugTrackerDescri
 import com.microfocus.security.automation.fortify.issue.manager.ConfigurationException;
 
 public class BugTrackerFactory {
-    public static BugTracker getTracker(final String name) throws ConfigurationException {
+    public static BugTracker getTracker(final String name) throws ConfigurationException
+    {
         if (name.equalsIgnoreCase("JIRA")) {
             return new JiraTracker();
         } else if (name.equalsIgnoreCase("OCTANE")) {
@@ -30,7 +31,8 @@ public class BugTrackerFactory {
         }
     }
 
-    public static BugTrackerDescriptionBuilder getDescriptionBuilder(final String name) throws ConfigurationException {
+    public static BugTrackerDescriptionBuilder getDescriptionBuilder(final String name) throws ConfigurationException
+    {
         if (name.equalsIgnoreCase("JIRA")) {
             return new JiraTrackerDescriptionBuilder();
         } else if (name.equalsIgnoreCase("OCTANE")) {

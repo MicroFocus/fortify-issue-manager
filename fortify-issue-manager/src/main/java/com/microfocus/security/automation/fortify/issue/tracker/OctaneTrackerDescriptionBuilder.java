@@ -33,7 +33,11 @@ public class OctaneTrackerDescriptionBuilder implements BugTrackerDescriptionBui
         issues.append("<table><body><tr><th>&nbsp;Issue Id&nbsp;</th><th>&nbsp;Description&nbsp;</th></tr>");
         for (final Vulnerability vulnerability : vulnerabilities) {
             issues.append("<tr>")
-                    .append("<td>&nbsp;<a href=\"" + issueBaseUrl + vulnerability.getId() + "\">" + vulnerability.getId() + "</a>&nbsp;</td>")
+                    .append("<td>&nbsp;<a href=\""
+                            + issueBaseUrl
+                            + vulnerability.getId()
+                            + "\">" + vulnerability.getId()
+                            + "</a>&nbsp;</td>")
                     .append("<td>&nbsp;" + vulnerability.getPrimaryLocation());
             if (vulnerability.getLineNumber() != null) {
                 issues.append(" : ")
@@ -50,10 +54,16 @@ public class OctaneTrackerDescriptionBuilder implements BugTrackerDescriptionBui
     {
         vulnerabilities.sort(Comparator.comparing(Vulnerability::getPrimaryLocation));
         final StringBuilder issues = new StringBuilder();
-        issues.append("<table><body><tr><th>&nbsp;Issue Id&nbsp;</th><th>&nbsp;CVE ID&nbsp;</th><th>&nbsp;Component&nbsp;</th></tr>");
+        issues.append("<table><body><tr><th>&nbsp;Issue Id&nbsp;</th><th>&nbsp;CVE ID&nbsp;"
+                + "</th><th>&nbsp;Component&nbsp;</th></tr>");
         for (final Vulnerability vulnerability : vulnerabilities) {
             issues.append("<tr>")
-                    .append("<td>&nbsp;<a href=\"" + issueBaseUrl + vulnerability.getId() + "\">" + vulnerability.getId() + "</a>&nbsp;</td>")
+                    .append("<td>&nbsp;<a href=\""
+                            + issueBaseUrl
+                            + vulnerability.getId()
+                            + "\">"
+                            + vulnerability.getId()
+                            + "</a>&nbsp;</td>")
                     .append("<td>&nbsp;" + vulnerability.getCheckId() + "&nbsp;</td>")
                     .append("<td>&nbsp;" + vulnerability.getPrimaryLocation());
             if (vulnerability.getLineNumber() != null) {
