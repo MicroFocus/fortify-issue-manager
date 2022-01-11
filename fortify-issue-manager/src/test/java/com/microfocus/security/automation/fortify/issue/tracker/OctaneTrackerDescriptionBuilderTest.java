@@ -46,9 +46,9 @@ public class OctaneTrackerDescriptionBuilderTest {
         vulnerabilities = new ArrayList<>();
         tables = new HashMap<>();
         tables.put("OSJ", "||Issue Id||CVE ID||Component||");
-        tables.put("OSO", "<table><body><tr><th>Issue Id</th><th>CVE ID</th><th>Component</th></tr></body></table>");
+        tables.put("OSO", "<table><body><tr><th>&nbsp;Issue Id&nbsp;</th><th>&nbsp;CVE ID&nbsp;</th><th>&nbsp;Component&nbsp;</th></tr></body></table>");
         tables.put("NOSJ", "||Issue Id||Description||");
-        tables.put("NOSO", "<table><body><tr><th>Issue Id</th><th>Description</th></tr></body></table>");
+        tables.put("NOSO", "<table><body><tr><th>&nbsp;Issue Id&nbsp;</th><th>&nbsp;Description&nbsp;</th></tr></body></table>");
     }
 
     @Rule

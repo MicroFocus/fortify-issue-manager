@@ -30,16 +30,16 @@ public class OctaneTrackerDescriptionBuilder implements BugTrackerDescriptionBui
         Collections.sort(vulnerabilities,
                 Comparator.comparing(Vulnerability::getPrimaryLocation).thenComparing(Vulnerability::getId));
         final StringBuilder issues = new StringBuilder();
-        issues.append("<table><body><tr><th>Issue Id</th><th>Description</th></tr>");
+        issues.append("<table><body><tr><th>&nbsp;Issue Id&nbsp;</th><th>&nbsp;Description&nbsp;</th></tr>");
         for (final Vulnerability vulnerability : vulnerabilities) {
             issues.append("<tr>")
-                    .append("<td><a href=\"" + issueBaseUrl + vulnerability.getId() + "\">" + vulnerability.getId() + "</a></td>")
-                    .append("<td>" + vulnerability.getPrimaryLocation());
+                    .append("<td>&nbsp;<a href=\"" + issueBaseUrl + vulnerability.getId() + "\">" + vulnerability.getId() + "</a>&nbsp;</td>")
+                    .append("<td>&nbsp;" + vulnerability.getPrimaryLocation());
             if (vulnerability.getLineNumber() != null) {
                 issues.append(" : ")
                         .append(vulnerability.getLineNumber());
             }
-            issues.append("</td></tr>");
+            issues.append("&nbsp;</td></tr>");
         }
         issues.append("</body></table>");
         return issues.toString();
@@ -50,17 +50,17 @@ public class OctaneTrackerDescriptionBuilder implements BugTrackerDescriptionBui
     {
         vulnerabilities.sort(Comparator.comparing(Vulnerability::getPrimaryLocation));
         final StringBuilder issues = new StringBuilder();
-        issues.append("<table><body><tr><th>Issue Id</th><th>CVE ID</th><th>Component</th></tr>");
+        issues.append("<table><body><tr><th>&nbsp;Issue Id&nbsp;</th><th>&nbsp;CVE ID&nbsp;</th><th>&nbsp;Component&nbsp;</th></tr>");
         for (final Vulnerability vulnerability : vulnerabilities) {
             issues.append("<tr>")
-                    .append("<td><a href=\"" + issueBaseUrl + vulnerability.getId() + "\">" + vulnerability.getId() + "</a></td>")
-                    .append("<td>" + vulnerability.getCheckId() + "</td>")
-                    .append("<td>" + vulnerability.getPrimaryLocation());
+                    .append("<td>&nbsp;<a href=\"" + issueBaseUrl + vulnerability.getId() + "\">" + vulnerability.getId() + "</a>&nbsp;</td>")
+                    .append("<td>&nbsp;" + vulnerability.getCheckId() + "&nbsp;</td>")
+                    .append("<td>&nbsp;" + vulnerability.getPrimaryLocation());
             if (vulnerability.getLineNumber() != null) {
                 issues.append(" : ")
                         .append(vulnerability.getLineNumber());
             }
-            issues.append("</td></tr>");
+            issues.append("&nbsp;</td></tr>");
         }
         issues.append("</body></table>");
         return issues.toString();
