@@ -55,7 +55,7 @@ public final class OctaneTracker extends BaseTracker implements BugTracker
                 if (data.size() == 0) {
                     throw new BugTrackerException("Issue was not created from payload: " + payload);
                 }
-                JsonObject object = data.get(0).getAsJsonObject();
+                final JsonObject object = data.get(0).getAsJsonObject();
                 final String bugLink = object.get("id").getAsString();
                 return client.getApiUrl() + browseUrl + UrlEscapers.urlPathSegmentEscaper().escape(bugLink);
             } else {
