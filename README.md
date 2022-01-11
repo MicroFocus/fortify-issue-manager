@@ -103,7 +103,7 @@ Fortify on Demand field filters are specified as follows:
 Field name and value should be separated by a colon (:). Multiple fields should be separated by a plus (+). Multiple fields are treated as an AND condition.  
 Example, `fieldname1:value+fieldname2:value`  
 Multiple values for a field should be separated by a pipe (|).  
-Mulitple values for a field are treated as an OR condition.  
+Multiple values for a field are treated as an OR condition.  
 Example, `fieldname1:value1|value2`
 
 ### fortify-issue-manager-cli-image

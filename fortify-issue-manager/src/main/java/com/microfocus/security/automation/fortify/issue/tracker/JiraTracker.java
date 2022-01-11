@@ -15,21 +15,22 @@
  */
 package com.microfocus.security.automation.fortify.issue.tracker;
 
+import java.io.IOException;
+
+import com.microfocus.security.automation.fortify.issue.manager.BugTracker;
+import com.microfocus.security.automation.fortify.issue.manager.ConfigurationException;
+import com.microfocus.security.automation.fortify.issue.manager.BugTrackerException;
+
 import com.google.common.net.UrlEscapers;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.microfocus.security.automation.fortify.issue.manager.BugTracker;
-import com.microfocus.security.automation.fortify.issue.manager.BugTrackerException;
-import com.microfocus.security.automation.fortify.issue.manager.ConfigurationException;
 
-import java.io.IOException;
-
-public final class OctaneRequestHandler extends BaseRequestHandler implements BugTracker
+public final class JiraTracker extends BaseTracker implements BugTracker
 {
     private final TrackerClient client;
-    final JsonParser parser;
+    private final JsonParser parser;
 
-    public OctaneRequestHandler() throws ConfigurationException
+    public JiraTracker() throws ConfigurationException
     {
         super();
         this.client = getClient();
@@ -40,17 +41,14 @@ public final class OctaneRequestHandler extends BaseRequestHandler implements Bu
     public String createBug(final String payload) throws BugTrackerException
     {
         try {
-            // DDD replace this with correct api call
             final String issue = performPostRequest(client,"rest/api/2/issue", payload);
 
             // Parse the Response
             final JsonObject response = parser.parse(issue).getAsJsonObject();
-            //  DDD what do we expect in the response from octane
             if (response.has("key")) {
                 final String bugLink = response.get("key").getAsString();
                 return client.getApiUrl() + "/browse/" + UrlEscapers.urlPathSegmentEscaper().escape(bugLink);
             } else {
-                // DDD how are errors communicated
                 final String errors = response.get("errors").toString();
                 throw new BugTrackerException(errors);
             }

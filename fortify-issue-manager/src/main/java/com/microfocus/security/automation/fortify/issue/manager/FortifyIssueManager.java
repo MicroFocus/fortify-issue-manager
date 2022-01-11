@@ -20,8 +20,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,13 +48,14 @@ import com.microfocus.security.automation.fortify.issue.manager.utils.JavaScript
 import static com.microfocus.security.automation.fortify.issue.manager.ConfigurationManager.getConfig;
 import static com.microfocus.security.automation.fortify.issue.manager.ConfigurationManager.getProxySetting;
 
-public final class FortifyIssueManager
+public class FortifyIssueManager
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(FortifyIssueManager.class);
     private final String FORTIFY_ISSUE_LINK_FORMAT = "%s/Releases/%s/Issues/";
 
     private final FortifyRequestHandler fortifyRequestHandler;
-    private final BugTracker trackerRequestHandler;
+    private final BugTracker bugTracker;
+    private final BugTrackerDescriptionBuilder trackerDescriptionBuilder;
     private final String[] applicationIds;
     private final String releaseFilter;
     private final String issueFilter;
@@ -71,11 +70,12 @@ public final class FortifyIssueManager
         final String releaseFilter,
         final String issueFilter,
         final String issueUrl,
-        final BugTracker targetTracker
+        final String targetTrackerName
     ) throws ConfigurationException {
         this.dryRun = dryRun;
         this.fortifyRequestHandler = new FortifyRequestHandler(client);
-        this.trackerRequestHandler = targetTracker;
+        this.bugTracker = BugTrackerFactory.getTracker(targetTrackerName);
+        this.trackerDescriptionBuilder = BugTrackerFactory.getDescriptionBuilder(targetTrackerName);
         this.applicationIds = applicationIds;
         this.releaseFilter = releaseFilter;
         this.issueFilter = issueFilter;
@@ -116,7 +116,7 @@ public final class FortifyIssueManager
                 fortifySettings.getReleaseFilters(),
                 fortifySettings.getIssueFilters(),
                 fortifySettings.getIssueUrl(),
-                BugTrackerFactory.getTracker(config.getBugTrackerName()));
+                config.getBugTrackerName());
             issueManager.linkIssuesToBugTracker(scriptFile);
         } catch (final IOException | ScriptNotFoundException | ScriptException | FortifyAuthenticationException |
                        FortifyRequestException | NoSuchMethodException | ConfigurationException e) {
@@ -322,8 +322,8 @@ public final class FortifyIssueManager
             LOGGER.debug("-----------------------------------------");
             final List<Vulnerability> vulnerabilities = sortedIssues.get(category);
             final String bugDescription = category.getName().contains("Open Source")
-                ? getOpenSourceIssueDescription(issueBaseUrl, vulnerabilities)
-                : getIssueDescription(issueBaseUrl, vulnerabilities);
+                ? trackerDescriptionBuilder.getOpenSourceIssueDescription(issueBaseUrl, vulnerabilities)
+                : trackerDescriptionBuilder.getIssueDescription(issueBaseUrl, vulnerabilities);
 
             final String bugDetails = JavaScriptFunctions.invokeFunction(getPayLoadScript, "getPayload",
                                                                          application.getApplicationName(),
@@ -338,7 +338,7 @@ public final class FortifyIssueManager
                 LOGGER.debug("{} BUG-{} : {}", category.getName(), counter++, bugDetails);
 
                 try {
-                    final String bugLink = this.trackerRequestHandler.createBug(bugDetails);
+                    final String bugLink = this.bugTracker.createBug(bugDetails);
                     final List<String> vulnerabilityIds = vulnerabilities.stream()
                         .map(Vulnerability::getVulnId)
                         .collect(Collectors.toList());
@@ -355,54 +355,4 @@ public final class FortifyIssueManager
             LOGGER.debug("-----------------------------------------");
         }
     }
-
-    private String getIssueDescription(final String issueBaseUrl, final List<Vulnerability> vulnerabilities)
-    {
-        Collections.sort(vulnerabilities,
-                         Comparator.comparing(Vulnerability::getPrimaryLocation).thenComparing(Vulnerability::getId));
-        // DDD is the markup the same in jira and Octane
-        final StringBuilder issues = new StringBuilder();
-        issues.append("||Issue Id||Description||");
-        for (final Vulnerability vulnerability : vulnerabilities) {
-            issues.append("\n|[")
-                .append(vulnerability.getId())
-                .append("|")
-                .append(issueBaseUrl)
-                .append(vulnerability.getId())
-                .append("]|")
-                .append(vulnerability.getPrimaryLocation());
-            if (vulnerability.getLineNumber() != null) {
-                issues.append(" : ")
-                    .append(vulnerability.getLineNumber());
-            }
-            issues.append("|");
-        }
-        return issues.toString();
-    }
-
-    private String getOpenSourceIssueDescription(final String issueBaseUrl, final List<Vulnerability> vulnerabilities)
-    {
-        vulnerabilities.sort(Comparator.comparing(Vulnerability::getPrimaryLocation));
-        // DDD is the markup the same in jira and Octane
-        final StringBuilder issues = new StringBuilder();
-        issues.append("||Issue Id||CVE ID||Component||");
-        for (final Vulnerability vulnerability : vulnerabilities) {
-            issues.append("\n|[")
-                .append(vulnerability.getId())
-                .append("|")
-                .append(issueBaseUrl)
-                .append(vulnerability.getId())
-                .append("]|")
-                .append(vulnerability.getCheckId())
-                .append("|")
-                .append(vulnerability.getPrimaryLocation());
-            if (vulnerability.getLineNumber() != null) {
-                issues.append(" : ")
-                    .append(vulnerability.getLineNumber());
-            }
-            issues.append("|");
-        }
-        return issues.toString();
-    }
-
 }

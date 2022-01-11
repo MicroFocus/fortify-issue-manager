@@ -15,22 +15,23 @@
  */
 package com.microfocus.security.automation.fortify.issue.tracker;
 
-import java.io.IOException;
-
-import com.microfocus.security.automation.fortify.issue.manager.BugTracker;
-import com.microfocus.security.automation.fortify.issue.manager.ConfigurationException;
-import com.microfocus.security.automation.fortify.issue.manager.BugTrackerException;
-
 import com.google.common.net.UrlEscapers;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.microfocus.security.automation.fortify.issue.manager.BugTracker;
+import com.microfocus.security.automation.fortify.issue.manager.BugTrackerException;
+import com.microfocus.security.automation.fortify.issue.manager.ConfigurationException;
 
-public final class JiraRequestHandler extends BaseRequestHandler implements BugTracker
+import java.io.IOException;
+
+public final class OctaneTracker extends BaseTracker implements BugTracker
 {
     private final TrackerClient client;
     private final JsonParser parser;
+    private final static String browseUrl = "ui/entity-navigation?p=131002/6001&entityType=work_item&id=";
 
-    public JiraRequestHandler() throws ConfigurationException
+    public OctaneTracker() throws ConfigurationException
     {
         super();
         this.client = getClient();
@@ -41,13 +42,18 @@ public final class JiraRequestHandler extends BaseRequestHandler implements BugT
     public String createBug(final String payload) throws BugTrackerException
     {
         try {
-            final String issue = performPostRequest(client,"rest/api/2/issue", payload);
+            final String issue = performPostRequest(client,"/api/shared_spaces/131002/workspaces/6001/defects", payload);
 
             // Parse the Response
             final JsonObject response = parser.parse(issue).getAsJsonObject();
-            if (response.has("key")) {
-                final String bugLink = response.get("key").getAsString();
-                return client.getApiUrl() + "/browse/" + UrlEscapers.urlPathSegmentEscaper().escape(bugLink);
+            if (response.has("data") && response.get("data").isJsonArray()) {
+                final JsonArray data = response.getAsJsonArray("data");
+                if (data.size() == 0) {
+                    throw new BugTrackerException("Issue was not created from payload: " + payload);
+                }
+                JsonObject object = data.get(0).getAsJsonObject();
+                final String bugLink = object.get("id").getAsString();
+                return client.getApiUrl() + browseUrl + UrlEscapers.urlPathSegmentEscaper().escape(bugLink);
             } else {
                 final String errors = response.get("errors").toString();
                 throw new BugTrackerException(errors);

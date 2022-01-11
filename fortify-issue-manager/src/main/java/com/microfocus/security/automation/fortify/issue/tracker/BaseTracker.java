@@ -38,13 +38,13 @@ import java.util.Map;
 
 import static com.microfocus.security.automation.fortify.issue.manager.ConfigurationManager.getConfig;
 
-public class BaseRequestHandler {
-    private static final Logger LOGGER = LoggerFactory.getLogger(BaseRequestHandler.class);
+public class BaseTracker {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BaseTracker.class);
     protected Map<String, String> proxySettings;
     protected List<String> configErrors;
     protected BugTrackerSettings bugTrackerSettings;
 
-    BaseRequestHandler() throws ConfigurationException {
+    BaseTracker() throws ConfigurationException {
         loadConfiguration();
     }
 
