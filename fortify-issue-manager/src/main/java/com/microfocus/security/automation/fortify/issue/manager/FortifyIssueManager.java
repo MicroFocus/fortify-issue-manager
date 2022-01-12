@@ -72,7 +72,7 @@ public class FortifyIssueManager
         final String issueUrl,
         final String targetTrackerName
     ) throws ConfigurationException {
-        this.dryRun = true;
+        this.dryRun = dryRun;
         this.fortifyRequestHandler = new FortifyRequestHandler(client);
         this.bugTracker = BugTrackerFactory.getTracker(targetTrackerName);
         this.trackerDescriptionBuilder = BugTrackerFactory.getDescriptionBuilder(targetTrackerName);
