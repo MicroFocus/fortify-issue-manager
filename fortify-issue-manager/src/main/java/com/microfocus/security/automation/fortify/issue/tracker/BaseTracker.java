@@ -36,19 +36,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static com.microfocus.security.automation.fortify.issue.manager.ConfigurationManager.getConfig;
-
 public class BaseTracker {
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseTracker.class);
     protected Map<String, String> proxySettings;
     protected List<String> configErrors;
-    protected BugTrackerSettings bugTrackerSettings;
+    protected String bugTrackerUsername;
+    protected String bugTrackerPassword;
+    protected String bugTrackerApiUrl;
+    protected final ConfigurationManager configurationManager;
 
-    BaseTracker() throws ConfigurationException {
+    BaseTracker(final ConfigurationManager cfg) throws ConfigurationException {
+        configurationManager = cfg;
         loadConfiguration();
     }
 
-    protected TrackerClient getClient()
+    protected TrackerClient getClient(final BugTrackerSettings bugTrackerSettings)
     {
         return new TrackerClient(bugTrackerSettings);
     }
@@ -87,25 +89,22 @@ public class BaseTracker {
         }
     }
 
+    /**
+     * Load common cfg.
+     * @throws ConfigurationException
+     */
     private void loadConfiguration() throws ConfigurationException
     {
-        proxySettings = ConfigurationManager.getProxySetting("HTTP_PROXY");
+        proxySettings = configurationManager.getProxySetting("HTTP_PROXY");
         configErrors = new ArrayList<>();
 
         // Get bug tracker settings
-        final String bugTrackerUsername = getConfig("TRACKER_USERNAME", configErrors);
-        final String bugTrackerPassword = getConfig("TRACKER_PASSWORD", configErrors);
-        final String bugTrackerApiUrl = getConfig("TRACKER_API_URL", configErrors);
+        bugTrackerUsername = configurationManager.getConfig("TRACKER_USERNAME", configErrors);
+        bugTrackerPassword = configurationManager.getConfig("TRACKER_PASSWORD", configErrors);
+        bugTrackerApiUrl = configurationManager.getConfig("TRACKER_API_URL", configErrors);
 
         if (!configErrors.isEmpty()) {
             throw new ConfigurationException("Invalid configuration " + configErrors);
         }
-
-        bugTrackerSettings = new BugTrackerSettings(
-            bugTrackerUsername,
-            bugTrackerPassword,
-            bugTrackerApiUrl,
-            proxySettings
-        );
     }
 }

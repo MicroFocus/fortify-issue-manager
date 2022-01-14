@@ -17,42 +17,29 @@ package com.microfocus.security.automation.fortify.issue.manager;
 
 import java.util.Map;
 
-public class BugTrackerSettings
+public final class OctaneBugTrackerSettings extends BugTrackerSettings
 {
-    private final String username;
-    private final String password;
-    private final String apiUrl;
-    private final Map<String, String> proxySettings;
+    private final String sharedSpaceId;
+    private final String workspaceId;
 
-    public BugTrackerSettings(
+    public OctaneBugTrackerSettings(
             final String username,
             final String password,
             final String apiUrl,
+            final String sharedSpaceId,
+            final String workspaceId,
             final Map<String, String> proxySettings)
     {
-        this.username = username;
-        this.password = password;
-        this.apiUrl = apiUrl;
-        this.proxySettings = proxySettings;
+        super(username, password, apiUrl, proxySettings);
+        this.sharedSpaceId = sharedSpaceId;
+        this.workspaceId = workspaceId;
     }
 
-    public String getUsername()
-    {
-        return username;
+    public String getSharedSpaceId() {
+        return sharedSpaceId;
     }
 
-    public String getPassword()
-    {
-        return password;
-    }
-
-    public String getApiUrl()
-    {
-        return apiUrl;
-    }
-
-    public Map<String, String> getProxySettings()
-    {
-        return proxySettings;
+    public String getWorkspaceId() {
+        return workspaceId;
     }
 }

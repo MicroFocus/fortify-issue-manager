@@ -16,33 +16,40 @@
 package com.microfocus.security.automation.fortify.issue.tracker;
 
 
-import com.microfocus.security.automation.fortify.issue.manager.BugTrackerDescriptionBuilder;
+import com.microfocus.security.automation.fortify.issue.manager.BugTracker;
 import com.microfocus.security.automation.fortify.issue.manager.ConfigurationException;
+import com.microfocus.security.automation.fortify.issue.manager.ConfigurationManager;
 import com.microfocus.security.automation.fortify.issue.manager.models.Vulnerability;
 import org.hamcrest.CoreMatchers;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.Assert;
 import org.junit.rules.ErrorCollector;
+import org.mockito.Mockito;
+import org.mockito.internal.matchers.Any;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.mockito.Mockito.*;
+
 public class OctaneTrackerDescriptionBuilderTest {
 
     private static List<Vulnerability> vulnerabilities;
     private static Map<String, String> tables;
+    private static ConfigurationManager mockCfg = mock(ConfigurationManager.class);
 
-    public static BugTrackerDescriptionBuilder descriptionBuilder(final String trackerName)
+    public static BugTracker descriptionBuilder(final String trackerName)
             throws ConfigurationException {
-        return BugTrackerFactory.getDescriptionBuilder(trackerName);
+        return BugTrackerFactory.getTracker(trackerName, mockCfg);
     }
 
     @BeforeClass
-    public static void setup() {
+    public static void setupClass() {
         vulnerabilities = new ArrayList<>();
         tables = new HashMap<>();
         tables.put("OSJ", "||Issue Id||CVE ID||Component||");
@@ -51,6 +58,12 @@ public class OctaneTrackerDescriptionBuilderTest {
         tables.put("NOSJ", "||Issue Id||Description||");
         tables.put("NOSO", "<table><body><tr><th>&nbsp;Issue Id&nbsp;</th><th>&nbsp;Description&nbsp;"
                 + "</th></tr></body></table>");
+    }
+
+    @Before
+    public void setupTest() {
+        when(mockCfg.getConfig(Mockito.anyString(), Mockito.any())).thenReturn("TESTDATA");
+        when(mockCfg.getProxySetting(Mockito.anyString())).thenCallRealMethod();
     }
 
     @Rule
@@ -73,7 +86,7 @@ public class OctaneTrackerDescriptionBuilderTest {
     }
 
     public void testGetIssueDescription(final String tracker, final String src) {
-        final BugTrackerDescriptionBuilder builder;
+        final BugTracker builder;
         try {
             builder = descriptionBuilder(tracker);
             Assert.assertNotNull("Description build should not be null", builder);
@@ -86,7 +99,7 @@ public class OctaneTrackerDescriptionBuilderTest {
     }
 
     public void testGetOpenSourceIssueDescription(final String tracker, final String src) {
-        final BugTrackerDescriptionBuilder builder;
+        final BugTracker builder;
         try {
             builder = descriptionBuilder(tracker);
             Assert.assertNotNull("Description build should not be null", builder);

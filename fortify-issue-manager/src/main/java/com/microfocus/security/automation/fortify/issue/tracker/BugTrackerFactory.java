@@ -16,27 +16,16 @@
 package com.microfocus.security.automation.fortify.issue.tracker;
 
 import com.microfocus.security.automation.fortify.issue.manager.BugTracker;
-import com.microfocus.security.automation.fortify.issue.manager.BugTrackerDescriptionBuilder;
 import com.microfocus.security.automation.fortify.issue.manager.ConfigurationException;
+import com.microfocus.security.automation.fortify.issue.manager.ConfigurationManager;
 
 public class BugTrackerFactory {
-    public static BugTracker getTracker(final String name) throws ConfigurationException
+    public static BugTracker getTracker(final String name, final ConfigurationManager cfg) throws ConfigurationException
     {
         if (name.equalsIgnoreCase("JIRA")) {
-            return new JiraTracker();
+            return new JiraTracker(cfg);
         } else if (name.equalsIgnoreCase("OCTANE")) {
-            return new OctaneTracker();
-        } else {
-            throw new ConfigurationException("Tracker:" + name + "has not been configured");
-        }
-    }
-
-    public static BugTrackerDescriptionBuilder getDescriptionBuilder(final String name) throws ConfigurationException
-    {
-        if (name.equalsIgnoreCase("JIRA")) {
-            return new JiraTrackerDescriptionBuilder();
-        } else if (name.equalsIgnoreCase("OCTANE")) {
-            return new OctaneTrackerDescriptionBuilder();
+            return new OctaneTracker(cfg);
         } else {
             throw new ConfigurationException("Tracker:" + name + "has not been configured");
         }

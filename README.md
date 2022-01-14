@@ -96,6 +96,13 @@ The following environment variables must be set:
 - `TRACKER_API_URL`  
     This property configures the issue tracker url
 
+#### Octane required configuration
+- `TRACKER_WORKSPACE_ID`  
+  This property configures the octane workspace id.
+
+- `TRACKER_SHARED_SPACE_ID`  
+  This property configures the octane shared space id.
+
 Set the `FORTIFY_ISSUE_MANAGER_LOG_LEVEL` environment variable to configure the log level. Default is `INFO`.
 
 #### Note

@@ -16,24 +16,36 @@
 package com.microfocus.security.automation.fortify.issue.tracker;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import com.microfocus.security.automation.fortify.issue.manager.BugTracker;
+import com.microfocus.security.automation.fortify.issue.manager.BugTrackerSettings;
 import com.microfocus.security.automation.fortify.issue.manager.ConfigurationException;
 import com.microfocus.security.automation.fortify.issue.manager.BugTrackerException;
 
 import com.google.common.net.UrlEscapers;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.microfocus.security.automation.fortify.issue.manager.ConfigurationManager;
+import com.microfocus.security.automation.fortify.issue.manager.models.Vulnerability;
 
 public final class JiraTracker extends BaseTracker implements BugTracker
 {
     private final TrackerClient client;
     private final JsonParser parser;
 
-    public JiraTracker() throws ConfigurationException
+    public JiraTracker(final ConfigurationManager cfg) throws ConfigurationException
     {
-        super();
-        this.client = getClient();
+        super(cfg);
+        final BugTrackerSettings bugTrackerSettings = new BugTrackerSettings(
+                bugTrackerUsername,
+                bugTrackerPassword,
+                bugTrackerApiUrl,
+                proxySettings
+        );
+        this.client = getClient(bugTrackerSettings);
         this.parser = new JsonParser();
     }
 
@@ -41,7 +53,7 @@ public final class JiraTracker extends BaseTracker implements BugTracker
     public String createBug(final String payload) throws BugTrackerException
     {
         try {
-            final String issue = performPostRequest(client,"rest/api/2/issue", payload);
+            final String issue = performPostRequest(client, "/rest/api/2/issue", payload);
 
             // Parse the Response
             final JsonObject response = parser.parse(issue).getAsJsonObject();
@@ -55,5 +67,56 @@ public final class JiraTracker extends BaseTracker implements BugTracker
         } catch (final IOException e) {
             throw new BugTrackerException(e);
         }
+    }
+
+    @Override
+    public String getIssueDescription(final String issueBaseUrl, final List<Vulnerability> vulnerabilities)
+    {
+        Collections.sort(vulnerabilities,
+                Comparator.comparing(Vulnerability::getPrimaryLocation).thenComparing(Vulnerability::getId));
+
+        final StringBuilder issues = new StringBuilder();
+        issues.append("||Issue Id||Description||");
+        for (final Vulnerability vulnerability : vulnerabilities) {
+            issues.append("\n|[")
+                    .append(vulnerability.getId())
+                    .append("|")
+                    .append(issueBaseUrl)
+                    .append(vulnerability.getId())
+                    .append("]|")
+                    .append(vulnerability.getPrimaryLocation());
+            if (vulnerability.getLineNumber() != null) {
+                issues.append(" : ")
+                        .append(vulnerability.getLineNumber());
+            }
+            issues.append("|");
+        }
+        return issues.toString();
+    }
+
+    @Override
+    public String getOpenSourceIssueDescription(final String issueBaseUrl, final List<Vulnerability> vulnerabilities)
+    {
+        vulnerabilities.sort(Comparator.comparing(Vulnerability::getPrimaryLocation));
+
+        final StringBuilder issues = new StringBuilder();
+        issues.append("||Issue Id||CVE ID||Component||");
+        for (final Vulnerability vulnerability : vulnerabilities) {
+            issues.append("\n|[")
+                    .append(vulnerability.getId())
+                    .append("|")
+                    .append(issueBaseUrl)
+                    .append(vulnerability.getId())
+                    .append("]|")
+                    .append(vulnerability.getCheckId())
+                    .append("|")
+                    .append(vulnerability.getPrimaryLocation());
+            if (vulnerability.getLineNumber() != null) {
+                issues.append(" : ")
+                        .append(vulnerability.getLineNumber());
+            }
+            issues.append("|");
+        }
+        return issues.toString();
     }
 }

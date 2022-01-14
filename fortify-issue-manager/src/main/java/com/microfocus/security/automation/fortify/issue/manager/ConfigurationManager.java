@@ -25,10 +25,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public final class ConfigurationManager {
+public class ConfigurationManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationManager.class);
 
-    public static Map<String, String> getProxySetting(final String proxyEnvVariable)
+    public Map<String, String> getProxySetting(final String proxyEnvVariable)
     {
         final Map<String, String> proxySettings = new HashMap<>();
 
@@ -51,7 +51,7 @@ public final class ConfigurationManager {
         return proxySettings;
     }
 
-    public static String getConfig(final String configName, final List<String> errorConfigs)
+    public String getConfig(final String configName, final List<String> errorConfigs)
     {
         final String configValue = System.getenv(configName);
         if (StringUtils.isEmpty(configValue)) {
