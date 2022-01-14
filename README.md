@@ -97,6 +97,8 @@ The following environment variables must be set:
     This property configures the issue tracker url
 
 #### Octane required configuration
+###### Note that the username and password must be generated for the shared_space and workspace
+
 - `TRACKER_WORKSPACE_ID`  
   This property configures the octane workspace id.
 
