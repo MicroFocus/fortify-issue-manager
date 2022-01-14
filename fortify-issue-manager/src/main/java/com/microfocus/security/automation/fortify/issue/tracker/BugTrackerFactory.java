@@ -20,8 +20,9 @@ import com.microfocus.security.automation.fortify.issue.manager.ConfigurationExc
 import com.microfocus.security.automation.fortify.issue.manager.ConfigurationManager;
 
 public class BugTrackerFactory {
-    public static BugTracker getTracker(final String name, final ConfigurationManager cfg) throws ConfigurationException
-    {
+    public static BugTracker getTracker(
+            final String name,
+            final ConfigurationManager cfg) throws ConfigurationException {
         if (name.equalsIgnoreCase("JIRA")) {
             return new JiraTracker(cfg);
         } else if (name.equalsIgnoreCase("OCTANE")) {

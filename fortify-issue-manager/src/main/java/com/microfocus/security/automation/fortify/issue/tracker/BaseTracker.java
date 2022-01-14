@@ -16,28 +16,15 @@
 package com.microfocus.security.automation.fortify.issue.tracker;
 
 import com.microfocus.security.automation.fortify.issue.manager.BugTrackerException;
-import com.microfocus.security.automation.fortify.issue.manager.BugTrackerSettings;
 import com.microfocus.security.automation.fortify.issue.manager.ConfigurationException;
 import com.microfocus.security.automation.fortify.issue.manager.ConfigurationManager;
 
-import okhttp3.HttpUrl;
-import okhttp3.MediaType;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-import okhttp3.ResponseBody;
-import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class BaseTracker {
-    private static final Logger LOGGER = LoggerFactory.getLogger(BaseTracker.class);
     protected Map<String, String> proxySettings;
     protected List<String> configErrors;
     protected String bugTrackerUsername;
@@ -50,51 +37,12 @@ public class BaseTracker {
         loadConfiguration();
     }
 
-    protected TrackerClient getClient(final BugTrackerSettings bugTrackerSettings)
-    {
-        return new TrackerClient(bugTrackerSettings);
-    }
-
-    protected String performPostRequest(
-            final TrackerClient client,
-            final String api,
-            final String payload) throws IOException, BugTrackerException
-    {
-        final HttpUrl apiUrl = HttpUrl.parse(client.getApiUrl());
-        if (apiUrl == null) {
-            throw new BugTrackerException("Invalid url : " + api);
-        }
-        final String url = apiUrl.newBuilder().addPathSegments(api).build().toString();
-        LOGGER.debug("Performing request POST {}", url);
-
-        final RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), payload);
-
-        final Request request = new Request.Builder()
-                .url(url)
-                .addHeader("Authorization", "Basic " + client.getBasicAuthToken())
-                .post(requestBody)
-                .build();
-
-        final Response response = client.getClient().newCall(request).execute();
-        final ResponseBody body = response.body();
-        if (body == null) {
-            throw new BugTrackerException("Response is null for : " + api);
-        }
-
-        // Read the result
-        try (final InputStream responseStream = body.byteStream()) {
-            final String responseContent = IOUtils.toString(responseStream, "utf-8");
-            LOGGER.debug("performPostRequest response: {}", responseContent);
-            return responseContent;
-        }
-    }
-
     /**
      * Load common cfg.
+     *
      * @throws ConfigurationException
      */
-    private void loadConfiguration() throws ConfigurationException
-    {
+    private void loadConfiguration() throws ConfigurationException {
         proxySettings = configurationManager.getProxySetting("HTTP_PROXY");
         configErrors = new ArrayList<>();
 

@@ -62,7 +62,7 @@ public class OctaneTrackerDescriptionBuilderTest {
 
     @Before
     public void setupTest() {
-        when(mockCfg.getConfig(Mockito.anyString(), Mockito.any())).thenReturn("TESTDATA");
+        when(mockCfg.getConfig(Mockito.anyString(), Mockito.any())).thenReturn("http://google.com/");
         when(mockCfg.getProxySetting(Mockito.anyString())).thenCallRealMethod();
     }
 
@@ -93,7 +93,8 @@ public class OctaneTrackerDescriptionBuilderTest {
             final String description = builder.getIssueDescription("baseUrl/for/test", vulnerabilities);
             errorCollector.checkThat("Failed to build description", description, CoreMatchers.notNullValue());
             errorCollector.checkThat("Failed to build description", description, CoreMatchers.is(tables.get(src)));
-        } catch (final ConfigurationException e) {
+        } catch (final ConfigurationException | NullPointerException e) {
+            e.printStackTrace();
             errorCollector.addError(new AssertionError("Failed to load description builder"));
         }
     }

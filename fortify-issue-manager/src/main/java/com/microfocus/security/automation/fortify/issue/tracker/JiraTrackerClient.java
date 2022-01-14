@@ -25,7 +25,7 @@ import org.glassfish.jersey.internal.util.Base64;
 
 import okhttp3.OkHttpClient;
 
-final class TrackerClient
+final class JiraTrackerClient
 {
     private final static int CONNECTION_TIMEOUT = 30; // seconds
     private final static int WRITE_TIMEOUT = 600; // seconds
@@ -37,7 +37,7 @@ final class TrackerClient
 
     private final String encodedAuth;
 
-    TrackerClient(final BugTrackerSettings bugTrackerSettings)
+    JiraTrackerClient(final BugTrackerSettings bugTrackerSettings)
     {
         this.apiUrl = bugTrackerSettings.getApiUrl();
         this.proxySettings = bugTrackerSettings.getProxySettings();
@@ -68,17 +68,17 @@ final class TrackerClient
         return baseClient.build();
     }
 
-    String getBasicAuthToken()
+    public String getBasicAuthToken()
     {
         return encodedAuth;
     }
 
-    String getApiUrl()
+    public String getApiUrl()
     {
         return apiUrl;
     }
 
-    OkHttpClient getClient()
+    public OkHttpClient getClient()
     {
         return client;
     }
