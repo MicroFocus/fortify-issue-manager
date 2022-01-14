@@ -118,7 +118,7 @@ Example, `fieldname1:value1|value2`
 ### fortify-issue-manager-cli-image
 This module builds a Docker image for the command-line interface, potentially allowing for simpler usage in some environments.
 
-Here is an example command:
+Here is an example command specific to Octane:
 
 ```
 docker container run --rm \
@@ -136,6 +136,8 @@ docker container run --rm \
     -e TRACKER_USERNAME=<username> \
     -e TRACKER_PASSWORD=<password> \
     -e TRACKER_API_URL=<URL> \
+    -e TRACKER_WORKSPACE_ID=<id> \
+    -e TRACKER_SHARED_SPACE_ID=<id> \
     -e HTTP_PROXY \
     -v $(pwd):/wd \
     microfocus/fortify-issue-manager \
