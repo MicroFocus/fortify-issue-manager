@@ -86,7 +86,6 @@ public final class OctaneTracker extends BaseTracker implements BugTracker
         }
     }
 
-
     @Override
     public String getIssueDescription(final String issueBaseUrl, final List<Vulnerability> vulnerabilities)
     {
