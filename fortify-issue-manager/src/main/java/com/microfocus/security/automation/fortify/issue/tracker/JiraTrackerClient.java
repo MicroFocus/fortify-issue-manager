@@ -15,18 +15,30 @@
  */
 package com.microfocus.security.automation.fortify.issue.tracker;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import com.microfocus.security.automation.fortify.issue.manager.BugTrackerException;
 import com.microfocus.security.automation.fortify.issue.manager.BugTrackerSettings;
+import okhttp3.HttpUrl;
+import okhttp3.MediaType;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.internal.util.Base64;
 
 import okhttp3.OkHttpClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-final class JiraTrackerClient
-{
+final class JiraTrackerClient {
+    private static final Logger LOGGER = LoggerFactory.getLogger(JiraTrackerClient.class);
+
     private final static int CONNECTION_TIMEOUT = 30; // seconds
     private final static int WRITE_TIMEOUT = 600; // seconds
     private final static int READ_TIMEOUT = 600; // seconds
@@ -37,8 +49,9 @@ final class JiraTrackerClient
 
     private final String encodedAuth;
 
-    JiraTrackerClient(final BugTrackerSettings bugTrackerSettings)
-    {
+    private final static String restApiPath = "/rest/api/2/issue";
+
+    JiraTrackerClient(final BugTrackerSettings bugTrackerSettings) {
         this.apiUrl = bugTrackerSettings.getApiUrl();
         this.proxySettings = bugTrackerSettings.getProxySettings();
 
@@ -48,8 +61,34 @@ final class JiraTrackerClient
         encodedAuth = Base64.encodeAsString(auth.getBytes());
     }
 
-    private OkHttpClient createClient()
-    {
+
+    public String performPostRequest(final String payload) throws IOException, BugTrackerException {
+        final HttpUrl apiUrl = HttpUrl.parse(getApiUrl());
+        final String url = apiUrl.newBuilder().addPathSegments(restApiPath).build().toString();
+        LOGGER.debug("Performing request POST {}", url);
+
+        final RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), payload);
+
+        final Request request = new Request.Builder()
+            .url(url)
+            .addHeader("Authorization", "Basic " + getBasicAuthToken())
+            .post(requestBody)
+            .build();
+
+        final Response response = client.newCall(request).execute();
+        if (!response.isSuccessful()) {
+            throw new BugTrackerException("Failed to create issue for payload : " + payload);
+        }
+
+        // Read the result
+        try (final InputStream responseStream = response.body().byteStream()) {
+            final String responseContent = IOUtils.toString(responseStream, "utf-8");
+            LOGGER.debug("performPostRequest response: {}", responseContent);
+            return responseContent;
+        }
+    }
+
+    private OkHttpClient createClient() {
         final OkHttpClient.Builder baseClient = new OkHttpClient().newBuilder()
             .connectTimeout(CONNECTION_TIMEOUT, TimeUnit.SECONDS)
             .writeTimeout(WRITE_TIMEOUT, TimeUnit.SECONDS)
@@ -57,29 +96,26 @@ final class JiraTrackerClient
 
         if (!proxySettings.isEmpty()) {
             final Proxy proxy = new Proxy(
-                    Proxy.Type.HTTP,
-                    new InetSocketAddress(
-                            proxySettings.get("host"),
-                            Integer.valueOf(proxySettings.get("port"))
-                    )
+                Proxy.Type.HTTP,
+                new InetSocketAddress(
+                    proxySettings.get("host"),
+                    Integer.valueOf(proxySettings.get("port"))
+                )
             );
             baseClient.proxy(proxy);
         }
         return baseClient.build();
     }
 
-    public String getBasicAuthToken()
-    {
+    public String getBasicAuthToken() {
         return encodedAuth;
     }
 
-    public String getApiUrl()
-    {
+    public String getApiUrl() {
         return apiUrl;
     }
 
-    public OkHttpClient getClient()
-    {
+    public OkHttpClient getClient() {
         return client;
     }
 }

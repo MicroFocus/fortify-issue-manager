@@ -15,6 +15,7 @@
  */
 package com.microfocus.security.automation.fortify.issue.tracker;
 
+import com.microfocus.security.automation.fortify.issue.manager.BugTrackerException;
 import com.microfocus.security.automation.fortify.issue.manager.BugTrackerSettings;
 import com.microfocus.security.automation.fortify.issue.manager.OctaneLoginException;
 import okhttp3.Cookie;
@@ -25,8 +26,12 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.ArrayList;
@@ -37,12 +42,13 @@ import java.util.concurrent.TimeUnit;
 
 public class OctaneTrackerClient {
 
-    private static final String URI_AUTHENTICATION = "authentication/sign_in";
+    private static final Logger LOGGER = LoggerFactory.getLogger(OctaneTrackerClient.class);
+
+    private static final String URI_AUTHENTICATION = "/authentication/sign_in";
     private final static int CONNECTION_TIMEOUT = 30; // seconds
     private final static int WRITE_TIMEOUT = 600; // seconds
     private final static int READ_TIMEOUT = 600; // seconds
 
-    private final String apiUrl;
     private final OkHttpClient client;
     private final Map<String, String> proxySettings;
     private final BugTrackerSettings bugTrackerSettings;
@@ -50,17 +56,17 @@ public class OctaneTrackerClient {
 
     public OctaneTrackerClient(final BugTrackerSettings bugTrackerSettings) {
         this.bugTrackerSettings = bugTrackerSettings;
-        this.apiUrl = bugTrackerSettings.getApiUrl();
         this.proxySettings = bugTrackerSettings.getProxySettings();
         client = createClient();
     }
 
-    public void login() throws IOException {
-        final HttpUrl url = HttpUrl.parse(this.apiUrl + URI_AUTHENTICATION);
-        String payload = "{\"client_id\":\""
-            + bugTrackerSettings.getUsername()
-            + "\",\"client_secret\":\""
-            + bugTrackerSettings.getPassword() + "\"}";
+    public String performPostRequest(
+        final String defectUrl,
+        final String payload) throws IOException, BugTrackerException {
+        login();
+        final HttpUrl apiUrl = HttpUrl.parse(getApiUrl());
+        final String url = apiUrl.newBuilder().addPathSegments(defectUrl).build().toString();
+        LOGGER.debug("Performing request POST {}", url);
 
         final RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), payload);
 
@@ -69,10 +75,16 @@ public class OctaneTrackerClient {
             .post(requestBody)
             .build();
 
-        final Response response;
-        response = client.newCall(request).execute();
+        final Response response = client.newCall(request).execute();
         if (!response.isSuccessful()) {
-            throw new OctaneLoginException("Authentication failed: code=" + response.code());
+            throw new BugTrackerException("Failed to create issue for payload : " + payload);
+        }
+
+        // Read the result
+        try (final InputStream responseStream = response.body().byteStream()) {
+            final String responseContent = IOUtils.toString(responseStream, "utf-8");
+            LOGGER.debug("performPostRequest response: {}", responseContent);
+            return responseContent;
         }
     }
 
@@ -81,13 +93,15 @@ public class OctaneTrackerClient {
             .cookieJar(new CookieJar() {
                 @Override
                 public void saveFromResponse(HttpUrl httpUrl, List<Cookie> list) {
+                    list.forEach(System.out::println);
                     cookieStore.put(httpUrl.host(), list);
                 }
 
                 @Override
                 public List<Cookie> loadForRequest(HttpUrl httpUrl) {
                     List<Cookie> cookies = cookieStore.get(httpUrl.host());
-                    return cookies != null ? cookies : new ArrayList<Cookie>();
+                    System.out.println("Loading cookies:" + cookies);
+                    return cookies != null ? cookies : new ArrayList<>();
                 }
             })
             .connectTimeout(CONNECTION_TIMEOUT, TimeUnit.SECONDS)
@@ -107,11 +121,28 @@ public class OctaneTrackerClient {
         return builder.build();
     }
 
-    public String getApiUrl() {
-        return apiUrl;
+    private void login() throws IOException {
+        final HttpUrl url = HttpUrl.parse(bugTrackerSettings.getApiUrl() + URI_AUTHENTICATION);
+        String payload = "{\"client_id\":\""
+            + bugTrackerSettings.getUsername()
+            + "\",\"client_secret\":\""
+            + bugTrackerSettings.getPassword() + "\"}";
+
+        final RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), payload);
+
+        final Request request = new Request.Builder()
+            .url(url)
+            .post(requestBody)
+            .build();
+
+        final Response response;
+        response = client.newCall(request).execute();
+        if (!response.isSuccessful()) {
+            throw new OctaneLoginException("Authentication failed: code=" + response.code());
+        }
     }
 
-    public OkHttpClient getClient() {
-        return client;
+    public String getApiUrl() {
+        return bugTrackerSettings.getApiUrl();
     }
 }

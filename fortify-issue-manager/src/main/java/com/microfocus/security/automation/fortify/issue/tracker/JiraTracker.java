@@ -24,25 +24,17 @@ import com.microfocus.security.automation.fortify.issue.manager.BugTrackerSettin
 import com.microfocus.security.automation.fortify.issue.manager.ConfigurationException;
 import com.microfocus.security.automation.fortify.issue.manager.ConfigurationManager;
 import com.microfocus.security.automation.fortify.issue.manager.models.Vulnerability;
-import okhttp3.HttpUrl;
-import okhttp3.MediaType;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public final class JiraTracker extends BaseTracker implements BugTracker {
-    private static final Logger LOGGER = LoggerFactory.getLogger(JiraTracker.class);
+public final class JiraTracker extends TrackerConfiguration implements BugTracker {
+
     private final JiraTrackerClient client;
-    private final JsonParser parser;
+    private final static JsonParser parser = new JsonParser();
+
 
     public JiraTracker(final ConfigurationManager cfg) throws ConfigurationException {
         super(cfg);
@@ -53,13 +45,12 @@ public final class JiraTracker extends BaseTracker implements BugTracker {
             proxySettings
         );
         this.client = new JiraTrackerClient(bugTrackerSettings);
-        this.parser = new JsonParser();
     }
 
     @Override
     public String createBug(final String payload) throws BugTrackerException {
         try {
-            final String issue = performPostRequest(client, "/rest/api/2/issue", payload);
+            final String issue = client.performPostRequest(payload);
 
             // Parse the Response
             final JsonObject response = parser.parse(issue).getAsJsonObject();
@@ -122,37 +113,5 @@ public final class JiraTracker extends BaseTracker implements BugTracker {
             issues.append("|");
         }
         return issues.toString();
-    }
-
-    private String performPostRequest(
-        final JiraTrackerClient client,
-        final String api,
-        final String payload) throws IOException, BugTrackerException {
-        final HttpUrl apiUrl = HttpUrl.parse(client.getApiUrl());
-        if (apiUrl == null) {
-            throw new BugTrackerException("Invalid url : " + api);
-        }
-        final String url = apiUrl.newBuilder().addPathSegments(api).build().toString();
-        LOGGER.debug("Performing request POST {}", url);
-
-        final RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), payload);
-
-        final Request request = new Request.Builder()
-            .url(url)
-            .addHeader("Authorization", "Basic " + client.getBasicAuthToken())
-            .post(requestBody)
-            .build();
-
-        final Response response = client.getClient().newCall(request).execute();
-        if (!response.isSuccessful()) {
-            throw new BugTrackerException("Failed to create issue for payload : " + payload);
-        }
-
-        // Read the result
-        try (final InputStream responseStream = response.body().byteStream()) {
-            final String responseContent = IOUtils.toString(responseStream, "utf-8");
-            LOGGER.debug("performPostRequest response: {}", responseContent);
-            return responseContent;
-        }
     }
 }

@@ -25,83 +25,39 @@ import com.microfocus.security.automation.fortify.issue.manager.ConfigurationExc
 import com.microfocus.security.automation.fortify.issue.manager.ConfigurationManager;
 import com.microfocus.security.automation.fortify.issue.manager.OctaneBugTrackerSettings;
 import com.microfocus.security.automation.fortify.issue.manager.models.Vulnerability;
-import okhttp3.HttpUrl;
-import okhttp3.MediaType;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public final class OctaneTracker extends BaseTracker implements BugTracker {
-    private static final Logger LOGGER = LoggerFactory.getLogger(OctaneTracker.class);
-    private final OctaneTrackerClient client;
-    private final JsonParser parser;
-    private static String browseUrl;
-    private static String defectUrl;
-    private static OctaneBugTrackerSettings bugTrackerSettings;
+public final class OctaneTracker extends TrackerConfiguration implements BugTracker {
+    private final static JsonParser parser = new JsonParser();
+    private final String browseUrl;
+    private final String defectUrl;
+    private final OctaneBugTrackerSettings bugTrackerSettings;
 
     public OctaneTracker(final ConfigurationManager cfg) throws ConfigurationException {
         super(cfg);
-        loadConfiguration();
+        bugTrackerSettings = loadTrackerSettings();
+
         browseUrl = String.format(
             "ui/entity-navigation?p=%s/%s&entityType=work_item&id=",
             bugTrackerSettings.getSharedSpaceId(),
             bugTrackerSettings.getWorkspaceId()
         );
         defectUrl = String.format(
-            "/api/shared_spaces/%s/workspaces/%s/defects",
+            "api/shared_spaces/%s/workspaces/%s/defects",
             bugTrackerSettings.getSharedSpaceId(),
             bugTrackerSettings.getWorkspaceId()
         );
-
-        this.client = new OctaneTrackerClient(bugTrackerSettings);
-        this.parser = new JsonParser();
-    }
-
-    private String performPostRequest(
-        final OctaneTrackerClient client,
-        final String api,
-        final String payload) throws IOException, BugTrackerException {
-        client.login();
-        final HttpUrl apiUrl = HttpUrl.parse(client.getApiUrl());
-        if (apiUrl == null) {
-            throw new BugTrackerException("Invalid url : " + api);
-        }
-        final String url = apiUrl.newBuilder().addPathSegments(api).build().toString();
-        LOGGER.debug("Performing request POST {}", url);
-
-        final RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), payload);
-
-        final Request request = new Request.Builder()
-            .url(url)
-            .post(requestBody)
-            .build();
-
-        final Response response = client.getClient().newCall(request).execute();
-        if (!response.isSuccessful()) {
-            throw new BugTrackerException("Failed to create issue for payload : " + payload);
-        }
-
-        // Read the result
-        try (final InputStream responseStream = response.body().byteStream()) {
-            final String responseContent = IOUtils.toString(responseStream, "utf-8");
-            LOGGER.debug("performPostRequest response: {}", responseContent);
-            return responseContent;
-        }
     }
 
     @Override
     public String createBug(final String payload) throws BugTrackerException {
         try {
-            final String issue = performPostRequest(client, defectUrl, payload);
+            final OctaneTrackerClient client = new OctaneTrackerClient(bugTrackerSettings);
+            final String issue = client.performPostRequest(defectUrl, payload);
 
             // Parse the Response
             final JsonObject response = parser.parse(issue).getAsJsonObject();
@@ -123,7 +79,7 @@ public final class OctaneTracker extends BaseTracker implements BugTracker {
     }
 
     @Override
-    public String getIssueDescription(final String issueBaseUrl, final List<Vulnerability> vulnerabilities) {
+    public String getIssueDescription(final String fortifyIssueUrl, final List<Vulnerability> vulnerabilities) {
         Collections.sort(vulnerabilities,
             Comparator.comparing(Vulnerability::getPrimaryLocation).thenComparing(Vulnerability::getId));
         final StringBuilder issues = new StringBuilder();
@@ -131,7 +87,7 @@ public final class OctaneTracker extends BaseTracker implements BugTracker {
         for (final Vulnerability vulnerability : vulnerabilities) {
             issues.append("<tr>")
                 .append("<td>&nbsp;<a href=\""
-                    + issueBaseUrl
+                    + fortifyIssueUrl
                     + vulnerability.getId()
                     + "\">" + vulnerability.getId()
                     + "</a>&nbsp;</td>")
@@ -147,7 +103,7 @@ public final class OctaneTracker extends BaseTracker implements BugTracker {
     }
 
     @Override
-    public String getOpenSourceIssueDescription(final String issueBaseUrl, final List<Vulnerability> vulnerabilities) {
+    public String getOpenSourceIssueDescription(final String fortifyIssueUrl, final List<Vulnerability> vulnerabilities) {
         vulnerabilities.sort(Comparator.comparing(Vulnerability::getPrimaryLocation));
         final StringBuilder issues = new StringBuilder();
         issues.append("<table><body><tr><th>&nbsp;Issue Id&nbsp;</th><th>&nbsp;CVE ID&nbsp;"
@@ -155,7 +111,7 @@ public final class OctaneTracker extends BaseTracker implements BugTracker {
         for (final Vulnerability vulnerability : vulnerabilities) {
             issues.append("<tr>")
                 .append("<td>&nbsp;<a href=\""
-                    + issueBaseUrl
+                    + fortifyIssueUrl
                     + vulnerability.getId()
                     + "\">"
                     + vulnerability.getId()
@@ -172,7 +128,7 @@ public final class OctaneTracker extends BaseTracker implements BugTracker {
         return issues.toString();
     }
 
-    private void loadConfiguration() throws ConfigurationException {
+    private OctaneBugTrackerSettings loadTrackerSettings() throws ConfigurationException {
         final String workspaceId = configurationManager.getConfig("TRACKER_WORKSPACE_ID", configErrors);
         final String sharedSpaceId = configurationManager.getConfig("TRACKER_SHARED_SPACE_ID", configErrors);
 
@@ -180,7 +136,7 @@ public final class OctaneTracker extends BaseTracker implements BugTracker {
             throw new ConfigurationException("Invalid configuration " + configErrors);
         }
 
-        bugTrackerSettings = new OctaneBugTrackerSettings(
+        return new OctaneBugTrackerSettings(
             bugTrackerUsername,
             bugTrackerPassword,
             bugTrackerApiUrl,

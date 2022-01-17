@@ -15,16 +15,14 @@
  */
 package com.microfocus.security.automation.fortify.issue.tracker;
 
-import com.microfocus.security.automation.fortify.issue.manager.BugTrackerException;
 import com.microfocus.security.automation.fortify.issue.manager.ConfigurationException;
 import com.microfocus.security.automation.fortify.issue.manager.ConfigurationManager;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class BaseTracker {
+public class TrackerConfiguration {
     protected Map<String, String> proxySettings;
     protected List<String> configErrors;
     protected String bugTrackerUsername;
@@ -32,7 +30,7 @@ public class BaseTracker {
     protected String bugTrackerApiUrl;
     protected final ConfigurationManager configurationManager;
 
-    BaseTracker(final ConfigurationManager cfg) throws ConfigurationException {
+    TrackerConfiguration(final ConfigurationManager cfg) throws ConfigurationException {
         configurationManager = cfg;
         loadConfiguration();
     }
