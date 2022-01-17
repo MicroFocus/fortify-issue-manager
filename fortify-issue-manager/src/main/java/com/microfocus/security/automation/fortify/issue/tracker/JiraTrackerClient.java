@@ -114,8 +114,4 @@ final class JiraTrackerClient {
     public String getApiUrl() {
         return apiUrl;
     }
-
-    public OkHttpClient getClient() {
-        return client;
-    }
 }

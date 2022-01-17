@@ -92,15 +92,13 @@ public class OctaneTrackerClient {
         final OkHttpClient.Builder builder = new OkHttpClient.Builder()
             .cookieJar(new CookieJar() {
                 @Override
-                public void saveFromResponse(HttpUrl httpUrl, List<Cookie> list) {
-                    list.forEach(System.out::println);
+                public void saveFromResponse(final HttpUrl httpUrl, final List<Cookie> list) {
                     cookieStore.put(httpUrl.host(), list);
                 }
 
                 @Override
-                public List<Cookie> loadForRequest(HttpUrl httpUrl) {
+                public List<Cookie> loadForRequest(final HttpUrl httpUrl) {
                     List<Cookie> cookies = cookieStore.get(httpUrl.host());
-                    System.out.println("Loading cookies:" + cookies);
                     return cookies != null ? cookies : new ArrayList<>();
                 }
             })

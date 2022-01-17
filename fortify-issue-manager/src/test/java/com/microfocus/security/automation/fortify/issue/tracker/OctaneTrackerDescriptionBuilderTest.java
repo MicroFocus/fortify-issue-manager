@@ -21,27 +21,27 @@ import com.microfocus.security.automation.fortify.issue.manager.ConfigurationExc
 import com.microfocus.security.automation.fortify.issue.manager.ConfigurationManager;
 import com.microfocus.security.automation.fortify.issue.manager.models.Vulnerability;
 import org.hamcrest.CoreMatchers;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.Assert;
 import org.junit.rules.ErrorCollector;
 import org.mockito.Mockito;
-import org.mockito.internal.matchers.Any;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class OctaneTrackerDescriptionBuilderTest {
 
     private static List<Vulnerability> vulnerabilities;
     private static Map<String, String> tables;
-    private static ConfigurationManager mockCfg = mock(ConfigurationManager.class);
+    private final static ConfigurationManager mockCfg = mock(ConfigurationManager.class);
 
     public static BugTracker descriptionBuilder(final String trackerName)
             throws ConfigurationException {
@@ -62,7 +62,7 @@ public class OctaneTrackerDescriptionBuilderTest {
 
     @Before
     public void setupTest() {
-        when(mockCfg.getConfig(Mockito.anyString(), Mockito.any())).thenReturn("http://google.com/");
+        when(mockCfg.getConfig(Mockito.anyString(), Mockito.any())).thenReturn("https://google.com/");
         when(mockCfg.getProxySetting(Mockito.anyString())).thenCallRealMethod();
     }
 
