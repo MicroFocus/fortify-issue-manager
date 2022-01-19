@@ -47,6 +47,11 @@ public class OctaneTrackerDescriptionBuilderTest {
 
     @BeforeClass
     public static void setupClass() {
+        final MockedStatic<ConfigurationManager> mockCfg = Mockito.mockStatic(ConfigurationManager.class);
+            mockCfg.when(() -> ConfigurationManager.getConfig(Mockito.anyString(), Mockito.any()))
+                .thenReturn("https://google.com/");
+            mockCfg.when(() -> ConfigurationManager.getProxySetting(Mockito.anyString()))
+                .thenCallRealMethod();
         vulnerabilities = new ArrayList<>();
         tables = new HashMap<>();
         tables.put("OSJ", "||Issue Id||CVE ID||Component||");
@@ -78,11 +83,7 @@ public class OctaneTrackerDescriptionBuilderTest {
 
     public void testGetIssueDescription(final String tracker, final String src) {
         final BugTracker builder;
-        try (MockedStatic<ConfigurationManager> mockCfg = Mockito.mockStatic(ConfigurationManager.class)) {
-            mockCfg.when(() -> ConfigurationManager.getConfig(Mockito.anyString(), Mockito.any()))
-                .thenReturn("https://google.com/");
-            mockCfg.when(() -> ConfigurationManager.getProxySetting(Mockito.anyString()))
-                .thenCallRealMethod();
+        try {
             builder = descriptionBuilder(tracker);
             Assert.assertNotNull("Description build should not be null", builder);
             final String description = builder.getIssueDescription("baseUrl/for/test", vulnerabilities);
@@ -96,11 +97,7 @@ public class OctaneTrackerDescriptionBuilderTest {
 
     public void testGetOpenSourceIssueDescription(final String tracker, final String src) {
         final BugTracker builder;
-        try (MockedStatic<ConfigurationManager> mockCfg = Mockito.mockStatic(ConfigurationManager.class)) {
-            mockCfg.when(() -> ConfigurationManager.getConfig(Mockito.anyString(), Mockito.any()))
-                .thenReturn("https://google.com/");
-            mockCfg.when(() -> ConfigurationManager.getProxySetting(Mockito.anyString()))
-                .thenCallRealMethod();
+        try {
             builder = descriptionBuilder(tracker);
             Assert.assertNotNull("Description build should not be null", builder);
             final String description = builder.getOpenSourceIssueDescription("baseUrl/for/test", vulnerabilities);
