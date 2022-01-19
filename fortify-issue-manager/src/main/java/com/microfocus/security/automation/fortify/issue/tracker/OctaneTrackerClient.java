@@ -121,7 +121,7 @@ public class OctaneTrackerClient {
 
     private void login() throws IOException {
         final HttpUrl url = HttpUrl.parse(bugTrackerSettings.getApiUrl() + URI_AUTHENTICATION);
-        String payload = "{\"client_id\":\""
+        final String payload = "{\"client_id\":\""
             + bugTrackerSettings.getUsername()
             + "\",\"client_secret\":\""
             + bugTrackerSettings.getPassword() + "\"}";
