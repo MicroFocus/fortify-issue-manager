@@ -22,16 +22,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class TrackerConfiguration {
+public class BaseTracker {
     protected Map<String, String> proxySettings;
     protected List<String> configErrors;
     protected String bugTrackerUsername;
     protected String bugTrackerPassword;
     protected String bugTrackerApiUrl;
-    protected final ConfigurationManager configurationManager;
 
-    TrackerConfiguration(final ConfigurationManager cfg) throws ConfigurationException {
-        configurationManager = cfg;
+    BaseTracker() throws ConfigurationException {
         loadConfiguration();
     }
 
@@ -41,13 +39,13 @@ public class TrackerConfiguration {
      * @throws ConfigurationException
      */
     private void loadConfiguration() throws ConfigurationException {
-        proxySettings = configurationManager.getProxySetting("HTTP_PROXY");
+        proxySettings = ConfigurationManager.getProxySetting("HTTP_PROXY");
         configErrors = new ArrayList<>();
 
         // Get bug tracker settings
-        bugTrackerUsername = configurationManager.getConfig("TRACKER_USERNAME", configErrors);
-        bugTrackerPassword = configurationManager.getConfig("TRACKER_PASSWORD", configErrors);
-        bugTrackerApiUrl = configurationManager.getConfig("TRACKER_API_URL", configErrors);
+        bugTrackerUsername = ConfigurationManager.getConfig("TRACKER_USERNAME", configErrors);
+        bugTrackerPassword = ConfigurationManager.getConfig("TRACKER_PASSWORD", configErrors);
+        bugTrackerApiUrl = ConfigurationManager.getConfig("TRACKER_API_URL", configErrors);
 
         if (!configErrors.isEmpty()) {
             throw new ConfigurationException("Invalid configuration " + configErrors);

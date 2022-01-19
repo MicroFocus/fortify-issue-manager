@@ -58,7 +58,6 @@ public class FortifyIssueManager
     private final String issueUrl;
     private final boolean dryRun;
     private static boolean hasErrors;
-    private final static ConfigurationManager configurationManager = new ConfigurationManager();
 
     private FortifyIssueManager(
         final boolean dryRun,
@@ -71,7 +70,7 @@ public class FortifyIssueManager
     ) throws ConfigurationException {
         this.dryRun = dryRun;
         this.fortifyRequestHandler = new FortifyRequestHandler(client);
-        this.bugTracker = BugTrackerFactory.getTracker(targetTrackerName, configurationManager);
+        this.bugTracker = BugTrackerFactory.getTracker(targetTrackerName);
         this.applicationIds = applicationIds;
         this.releaseFilter = releaseFilter;
         this.issueFilter = issueFilter;
@@ -125,7 +124,7 @@ public class FortifyIssueManager
 
     private static FortifyIssueManagerConfiguration loadConfiguration() throws ConfigurationException
     {
-        final Map<String, String> proxySettings = configurationManager.getProxySetting("HTTP_PROXY");
+        final Map<String, String> proxySettings = ConfigurationManager.getProxySetting("HTTP_PROXY");
         final List<String> configErrors = new ArrayList<>();
 
         // Get Fortify settings
@@ -136,20 +135,20 @@ public class FortifyIssueManager
 
         if (GrantType.CLIENT_CREDENTIALS.name().equalsIgnoreCase(grantType)) {
             fortifyGrantType = GrantType.CLIENT_CREDENTIALS;
-            fortifyId = configurationManager.getConfig("FORTIFY_CLIENT_ID", configErrors);
-            fortifySecret = configurationManager.getConfig("FORTIFY_CLIENT_SECRET", configErrors);
+            fortifyId = ConfigurationManager.getConfig("FORTIFY_CLIENT_ID", configErrors);
+            fortifySecret = ConfigurationManager.getConfig("FORTIFY_CLIENT_SECRET", configErrors);
         } else if (GrantType.PASSWORD.name().equalsIgnoreCase(grantType)) {
             fortifyGrantType = GrantType.PASSWORD;
-            fortifyId = configurationManager.getConfig("FORTIFY_TENANT", configErrors) + "\\" + configurationManager.getConfig("FORTIFY_USERNAME", configErrors);
-            fortifySecret = configurationManager.getConfig("FORTIFY_PASSWORD", configErrors);
+            fortifyId = ConfigurationManager.getConfig("FORTIFY_TENANT", configErrors) + "\\" + ConfigurationManager.getConfig("FORTIFY_USERNAME", configErrors);
+            fortifySecret = ConfigurationManager.getConfig("FORTIFY_PASSWORD", configErrors);
         } else {
             throw new ConfigurationException("Invalid Fortify grant type. Set FORTIFY_GRANT_TYPE to 'client_credentials' or 'password'");
         }
 
-        final String fortifyScope = configurationManager.getConfig("FORTIFY_SCOPE", configErrors);
-        final String fortifyApiUrl = configurationManager.getConfig("FORTIFY_API_URL", configErrors);
-        final String fortifyIssueUrl = configurationManager.getConfig("FORTIFY_ISSUE_URL", configErrors);
-        final String trackerName = configurationManager.getConfig("TRACKER", configErrors);
+        final String fortifyScope = ConfigurationManager.getConfig("FORTIFY_SCOPE", configErrors);
+        final String fortifyApiUrl = ConfigurationManager.getConfig("FORTIFY_API_URL", configErrors);
+        final String fortifyIssueUrl = ConfigurationManager.getConfig("FORTIFY_ISSUE_URL", configErrors);
+        final String trackerName = ConfigurationManager.getConfig("TRACKER", configErrors);
         final String fortifyApplicationIds[] = System.getenv("FORTIFY_APPLICATION_IDS") == null
             ? null
             : System.getenv("FORTIFY_APPLICATION_IDS").split(",");

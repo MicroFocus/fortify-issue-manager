@@ -31,14 +31,14 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public final class OctaneTracker extends TrackerConfiguration implements BugTracker {
+public final class OctaneTracker extends BaseTracker implements BugTracker {
     private final static JsonParser parser = new JsonParser();
     private final String browseUrl;
     private final String defectUrl;
     private final OctaneBugTrackerSettings bugTrackerSettings;
 
-    public OctaneTracker(final ConfigurationManager cfg) throws ConfigurationException {
-        super(cfg);
+    public OctaneTracker() throws ConfigurationException {
+        super();
         bugTrackerSettings = loadTrackerSettings();
 
         browseUrl = String.format(
@@ -129,8 +129,8 @@ public final class OctaneTracker extends TrackerConfiguration implements BugTrac
     }
 
     private OctaneBugTrackerSettings loadTrackerSettings() throws ConfigurationException {
-        final String workspaceId = configurationManager.getConfig("TRACKER_WORKSPACE_ID", configErrors);
-        final String sharedSpaceId = configurationManager.getConfig("TRACKER_SHARED_SPACE_ID", configErrors);
+        final String workspaceId = ConfigurationManager.getConfig("TRACKER_WORKSPACE_ID", configErrors);
+        final String sharedSpaceId = ConfigurationManager.getConfig("TRACKER_SHARED_SPACE_ID", configErrors);
 
         if (!configErrors.isEmpty()) {
             throw new ConfigurationException("Invalid configuration " + configErrors);

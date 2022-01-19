@@ -22,11 +22,11 @@ import com.microfocus.security.automation.fortify.issue.manager.ConfigurationMan
 import com.microfocus.security.automation.fortify.issue.manager.models.Vulnerability;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
@@ -34,18 +34,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class OctaneTrackerDescriptionBuilderTest {
 
     private static List<Vulnerability> vulnerabilities;
     private static Map<String, String> tables;
-    private final static ConfigurationManager mockCfg = mock(ConfigurationManager.class);
 
     public static BugTracker descriptionBuilder(final String trackerName)
             throws ConfigurationException {
-        return BugTrackerFactory.getTracker(trackerName, mockCfg);
+        return BugTrackerFactory.getTracker(trackerName);
     }
 
     @BeforeClass
@@ -58,12 +55,6 @@ public class OctaneTrackerDescriptionBuilderTest {
         tables.put("NOSJ", "||Issue Id||Description||");
         tables.put("NOSO", "<table><body><tr><th>&nbsp;Issue Id&nbsp;</th><th>&nbsp;Description&nbsp;"
                 + "</th></tr></body></table>");
-    }
-
-    @Before
-    public void setupTest() {
-        when(mockCfg.getConfig(Mockito.anyString(), Mockito.any())).thenReturn("https://google.com/");
-        when(mockCfg.getProxySetting(Mockito.anyString())).thenCallRealMethod();
     }
 
     @Rule
@@ -87,7 +78,11 @@ public class OctaneTrackerDescriptionBuilderTest {
 
     public void testGetIssueDescription(final String tracker, final String src) {
         final BugTracker builder;
-        try {
+        try (MockedStatic<ConfigurationManager> mockCfg = Mockito.mockStatic(ConfigurationManager.class)) {
+            mockCfg.when(() -> ConfigurationManager.getConfig(Mockito.anyString(), Mockito.any()))
+                .thenReturn("https://google.com/");
+            mockCfg.when(() -> ConfigurationManager.getProxySetting(Mockito.anyString()))
+                .thenCallRealMethod();
             builder = descriptionBuilder(tracker);
             Assert.assertNotNull("Description build should not be null", builder);
             final String description = builder.getIssueDescription("baseUrl/for/test", vulnerabilities);
@@ -101,7 +96,11 @@ public class OctaneTrackerDescriptionBuilderTest {
 
     public void testGetOpenSourceIssueDescription(final String tracker, final String src) {
         final BugTracker builder;
-        try {
+        try (MockedStatic<ConfigurationManager> mockCfg = Mockito.mockStatic(ConfigurationManager.class)) {
+            mockCfg.when(() -> ConfigurationManager.getConfig(Mockito.anyString(), Mockito.any()))
+                .thenReturn("https://google.com/");
+            mockCfg.when(() -> ConfigurationManager.getProxySetting(Mockito.anyString()))
+                .thenCallRealMethod();
             builder = descriptionBuilder(tracker);
             Assert.assertNotNull("Description build should not be null", builder);
             final String description = builder.getOpenSourceIssueDescription("baseUrl/for/test", vulnerabilities);

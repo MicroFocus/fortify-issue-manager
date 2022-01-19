@@ -30,14 +30,14 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public final class JiraTracker extends TrackerConfiguration implements BugTracker {
+public final class JiraTracker extends BaseTracker implements BugTracker {
 
     private final JiraTrackerClient client;
     private final static JsonParser parser = new JsonParser();
 
 
-    public JiraTracker(final ConfigurationManager cfg) throws ConfigurationException {
-        super(cfg);
+    public JiraTracker() throws ConfigurationException {
+        super();
         final BugTrackerSettings bugTrackerSettings = new BugTrackerSettings(
             bugTrackerUsername,
             bugTrackerPassword,
