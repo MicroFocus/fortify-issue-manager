@@ -37,7 +37,7 @@ public final class OctaneTracker implements BugTracker {
     public OctaneTracker(final OctaneBugTrackerSettings bugTrackerSettings) {
         apiUrl = bugTrackerSettings.getApiUrl();
         browseUrl = String.format(
-            "ui/entity-navigation?p=%s/%s&entityType=work_item&id=",
+            "/ui/entity-navigation?p=%s/%s&entityType=work_item&id=",
             bugTrackerSettings.getSharedSpaceId(),
             bugTrackerSettings.getWorkspaceId()
         );
