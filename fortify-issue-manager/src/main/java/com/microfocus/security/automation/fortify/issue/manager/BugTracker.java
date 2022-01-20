@@ -30,6 +30,8 @@ public interface BugTracker
      * @throws BugTrackerException If a bug cannot be created in the bug tracker
      */
     String createBug(String bugDetails) throws BugTrackerException;
+
     String getIssueDescription(final String issueBaseUrl, final List<Vulnerability> vulnerabilities);
+
     String getOpenSourceIssueDescription(final String issueBaseUrl, final List<Vulnerability> vulnerabilities);
 }
