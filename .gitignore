@@ -1,1 +1,15 @@
 target/
+**/.idea/*
+*.iml
+*.ipr
+*.iws
+
+# Eclipse
+.settings/
+.settings
+.project
+.classpath
+bin
+
+*.log
+*.bat
