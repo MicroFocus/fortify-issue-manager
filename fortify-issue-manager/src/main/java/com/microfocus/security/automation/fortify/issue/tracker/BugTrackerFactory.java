@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class BugTrackerFactory {
+public final class BugTrackerFactory {
 
     private final static Map<String, String> proxySettings = ConfigurationManager.getProxySetting("HTTP_PROXY");;
     private final static List<String> configErrors = new ArrayList<>();;

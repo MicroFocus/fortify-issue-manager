@@ -29,11 +29,13 @@ import java.util.List;
 
 public final class OctaneTracker implements BugTracker {
     private final static JsonParser parser = new JsonParser();
+    private final String apiUrl;
     private final String browseUrl;
     private final String defectUrl;
     private final OctaneTrackerClient client;
 
     public OctaneTracker(final OctaneBugTrackerSettings bugTrackerSettings) {
+        apiUrl = bugTrackerSettings.getApiUrl();
         browseUrl = String.format(
             "ui/entity-navigation?p=%s/%s&entityType=work_item&id=",
             bugTrackerSettings.getSharedSpaceId(),
@@ -61,7 +63,7 @@ public final class OctaneTracker implements BugTracker {
                 }
                 final JsonObject object = data.get(0).getAsJsonObject();
                 final String bugLink = object.get("id").getAsString();
-                return client.getApiUrl() + browseUrl + UrlEscapers.urlPathSegmentEscaper().escape(bugLink);
+                return apiUrl + browseUrl + UrlEscapers.urlPathSegmentEscaper().escape(bugLink);
             } else {
                 final String errors = response.get("errors").toString();
                 throw new BugTrackerException(errors);

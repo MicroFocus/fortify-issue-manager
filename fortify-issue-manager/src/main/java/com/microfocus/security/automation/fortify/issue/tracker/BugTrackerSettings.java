@@ -17,7 +17,7 @@ package com.microfocus.security.automation.fortify.issue.tracker;
 
 import java.util.Map;
 
-public class BugTrackerSettings
+class BugTrackerSettings
 {
     private final String username;
     private final String password;

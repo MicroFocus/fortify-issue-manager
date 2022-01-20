@@ -60,7 +60,7 @@ final class JiraTrackerClient {
     }
 
 
-    public String performPostRequest(final String payload) throws IOException, BugTrackerException {
+    String performPostRequest(final String payload) throws IOException, BugTrackerException {
         final HttpUrl httpUrl = HttpUrl.parse(apiUrl);
         final String url = httpUrl.newBuilder().addPathSegments(restApiPath).build().toString();
         LOGGER.debug("Performing request POST {}", url);
@@ -86,7 +86,7 @@ final class JiraTrackerClient {
         }
     }
 
-    private OkHttpClient createClient() {
+    OkHttpClient createClient() {
         final OkHttpClient.Builder baseClient = new OkHttpClient().newBuilder()
             .connectTimeout(CONNECTION_TIMEOUT, TimeUnit.SECONDS)
             .writeTimeout(WRITE_TIMEOUT, TimeUnit.SECONDS)

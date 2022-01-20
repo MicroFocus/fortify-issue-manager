@@ -17,7 +17,7 @@ package com.microfocus.security.automation.fortify.issue.tracker;
 
 import java.util.Map;
 
-public final class OctaneBugTrackerSettings extends BugTrackerSettings
+final class OctaneBugTrackerSettings extends BugTrackerSettings
 {
     private final String sharedSpaceId;
     private final String workspaceId;

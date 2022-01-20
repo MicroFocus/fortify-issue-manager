@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-public class OctaneTrackerClient {
+final class OctaneTrackerClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OctaneTrackerClient.class);
 
@@ -51,17 +51,17 @@ public class OctaneTrackerClient {
     private final BugTrackerSettings bugTrackerSettings;
     private final HashMap<String, List<Cookie>> cookieStore = new HashMap<>();
 
-    public OctaneTrackerClient(final BugTrackerSettings bugTrackerSettings) {
+    OctaneTrackerClient(final BugTrackerSettings bugTrackerSettings) {
         this.bugTrackerSettings = bugTrackerSettings;
         this.proxySettings = bugTrackerSettings.getProxySettings();
         client = createClient();
     }
 
-    public String performPostRequest(
+    String performPostRequest(
         final String defectUrl,
         final String payload) throws IOException, BugTrackerException {
         login();
-        final HttpUrl apiUrl = HttpUrl.parse(getApiUrl());
+        final HttpUrl apiUrl = HttpUrl.parse(bugTrackerSettings.getApiUrl());
         final String url = apiUrl.newBuilder().addPathSegments(defectUrl).build().toString();
         LOGGER.debug("Performing request POST {}", url);
 
@@ -137,7 +137,4 @@ public class OctaneTrackerClient {
         }
     }
 
-    public String getApiUrl() {
-        return bugTrackerSettings.getApiUrl();
-    }
 }
