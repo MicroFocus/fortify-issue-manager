@@ -61,15 +61,15 @@ final class JiraTrackerClient {
 
 
     public String performPostRequest(final String payload) throws IOException, BugTrackerException {
-        final HttpUrl apiUrl = HttpUrl.parse(getApiUrl());
-        final String url = apiUrl.newBuilder().addPathSegments(restApiPath).build().toString();
+        final HttpUrl httpUrl = HttpUrl.parse(apiUrl);
+        final String url = httpUrl.newBuilder().addPathSegments(restApiPath).build().toString();
         LOGGER.debug("Performing request POST {}", url);
 
         final RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), payload);
 
         final Request request = new Request.Builder()
             .url(url)
-            .addHeader("Authorization", "Basic " + getBasicAuthToken())
+            .addHeader("Authorization", "Basic " + encodedAuth)
             .post(requestBody)
             .build();
 
@@ -103,13 +103,5 @@ final class JiraTrackerClient {
             baseClient.proxy(proxy);
         }
         return baseClient.build();
-    }
-
-    public String getBasicAuthToken() {
-        return encodedAuth;
-    }
-
-    public String getApiUrl() {
-        return apiUrl;
     }
 }

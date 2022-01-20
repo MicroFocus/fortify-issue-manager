@@ -53,7 +53,7 @@ public final class JiraTracker extends BaseTracker implements BugTracker {
             final JsonObject response = parser.parse(issue).getAsJsonObject();
             if (response.has("key")) {
                 final String bugLink = response.get("key").getAsString();
-                return client.getApiUrl() + "/browse/" + UrlEscapers.urlPathSegmentEscaper().escape(bugLink);
+                return bugTrackerApiUrl + "/browse/" + UrlEscapers.urlPathSegmentEscaper().escape(bugLink);
             } else {
                 final String errors = response.get("errors").toString();
                 throw new BugTrackerException(errors);
