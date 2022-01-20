@@ -31,6 +31,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
+import com.microfocus.security.automation.fortify.issue.tracker.BugTrackerException;
 import com.microfocus.security.automation.fortify.issue.tracker.BugTrackerFactory;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;

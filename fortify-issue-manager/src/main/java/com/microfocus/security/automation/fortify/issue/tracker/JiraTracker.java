@@ -19,8 +19,6 @@ import com.google.common.net.UrlEscapers;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.microfocus.security.automation.fortify.issue.manager.BugTracker;
-import com.microfocus.security.automation.fortify.issue.manager.BugTrackerException;
-import com.microfocus.security.automation.fortify.issue.manager.BugTrackerSettings;
 import com.microfocus.security.automation.fortify.issue.manager.ConfigurationException;
 import com.microfocus.security.automation.fortify.issue.manager.models.Vulnerability;
 

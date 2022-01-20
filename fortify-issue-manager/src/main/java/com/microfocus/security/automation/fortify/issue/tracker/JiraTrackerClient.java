@@ -22,8 +22,6 @@ import java.net.Proxy;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import com.microfocus.security.automation.fortify.issue.manager.BugTrackerException;
-import com.microfocus.security.automation.fortify.issue.manager.BugTrackerSettings;
 import okhttp3.HttpUrl;
 import okhttp3.MediaType;
 import okhttp3.Request;

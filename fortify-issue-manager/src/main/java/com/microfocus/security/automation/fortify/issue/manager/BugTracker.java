@@ -16,6 +16,7 @@
 package com.microfocus.security.automation.fortify.issue.manager;
 
 import com.microfocus.security.automation.fortify.issue.manager.models.Vulnerability;
+import com.microfocus.security.automation.fortify.issue.tracker.BugTrackerException;
 
 import java.util.List;
 

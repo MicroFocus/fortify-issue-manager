@@ -15,9 +15,6 @@
  */
 package com.microfocus.security.automation.fortify.issue.tracker;
 
-import com.microfocus.security.automation.fortify.issue.manager.BugTrackerException;
-import com.microfocus.security.automation.fortify.issue.manager.BugTrackerSettings;
-import com.microfocus.security.automation.fortify.issue.manager.OctaneLoginException;
 import okhttp3.Cookie;
 import okhttp3.CookieJar;
 import okhttp3.HttpUrl;

@@ -20,10 +20,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.microfocus.security.automation.fortify.issue.manager.BugTracker;
-import com.microfocus.security.automation.fortify.issue.manager.BugTrackerException;
 import com.microfocus.security.automation.fortify.issue.manager.ConfigurationException;
 import com.microfocus.security.automation.fortify.issue.manager.ConfigurationManager;
-import com.microfocus.security.automation.fortify.issue.manager.OctaneBugTrackerSettings;
 import com.microfocus.security.automation.fortify.issue.manager.models.Vulnerability;
 
 import java.io.IOException;
