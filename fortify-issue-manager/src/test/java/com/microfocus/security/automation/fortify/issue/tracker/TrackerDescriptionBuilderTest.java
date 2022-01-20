@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.Map;
 
 
-public class OctaneTrackerDescriptionBuilderTest {
+public class TrackerDescriptionBuilderTest {
 
     private static List<Vulnerability> vulnerabilities;
     private static Map<String, String> tables;
