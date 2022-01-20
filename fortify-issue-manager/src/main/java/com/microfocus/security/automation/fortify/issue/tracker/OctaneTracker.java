@@ -20,8 +20,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.microfocus.security.automation.fortify.issue.manager.BugTracker;
-import com.microfocus.security.automation.fortify.issue.manager.ConfigurationException;
-import com.microfocus.security.automation.fortify.issue.manager.ConfigurationManager;
 import com.microfocus.security.automation.fortify.issue.manager.models.Vulnerability;
 
 import java.io.IOException;
@@ -29,16 +27,13 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public final class OctaneTracker extends BaseTracker implements BugTracker {
+public final class OctaneTracker implements BugTracker {
     private final static JsonParser parser = new JsonParser();
     private final String browseUrl;
     private final String defectUrl;
-    private final OctaneBugTrackerSettings bugTrackerSettings;
+    private final OctaneTrackerClient client;
 
-    public OctaneTracker() throws ConfigurationException {
-        super();
-        bugTrackerSettings = loadTrackerSettings();
-
+    public OctaneTracker(final OctaneBugTrackerSettings bugTrackerSettings) {
         browseUrl = String.format(
             "ui/entity-navigation?p=%s/%s&entityType=work_item&id=",
             bugTrackerSettings.getSharedSpaceId(),
@@ -49,12 +44,12 @@ public final class OctaneTracker extends BaseTracker implements BugTracker {
             bugTrackerSettings.getSharedSpaceId(),
             bugTrackerSettings.getWorkspaceId()
         );
+        client = new OctaneTrackerClient(bugTrackerSettings);
     }
 
     @Override
     public String createBug(final String payload) throws BugTrackerException {
         try {
-            final OctaneTrackerClient client = new OctaneTrackerClient(bugTrackerSettings);
             final String issue = client.performPostRequest(defectUrl, payload);
 
             // Parse the Response
@@ -124,23 +119,5 @@ public final class OctaneTracker extends BaseTracker implements BugTracker {
         }
         issues.append("</body></table>");
         return issues.toString();
-    }
-
-    private OctaneBugTrackerSettings loadTrackerSettings() throws ConfigurationException {
-        final String workspaceId = ConfigurationManager.getConfig("TRACKER_WORKSPACE_ID", configErrors);
-        final String sharedSpaceId = ConfigurationManager.getConfig("TRACKER_SHARED_SPACE_ID", configErrors);
-
-        if (!configErrors.isEmpty()) {
-            throw new ConfigurationException("Invalid configuration " + configErrors);
-        }
-
-        return new OctaneBugTrackerSettings(
-            bugTrackerUsername,
-            bugTrackerPassword,
-            bugTrackerApiUrl,
-            sharedSpaceId,
-            workspaceId,
-            proxySettings
-        );
     }
 }

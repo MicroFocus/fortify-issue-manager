@@ -19,7 +19,6 @@ import com.google.common.net.UrlEscapers;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.microfocus.security.automation.fortify.issue.manager.BugTracker;
-import com.microfocus.security.automation.fortify.issue.manager.ConfigurationException;
 import com.microfocus.security.automation.fortify.issue.manager.models.Vulnerability;
 
 import java.io.IOException;
@@ -27,20 +26,15 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public final class JiraTracker extends BaseTracker implements BugTracker {
+public final class JiraTracker implements BugTracker {
 
     private final JiraTrackerClient client;
     private final static JsonParser parser = new JsonParser();
+    private final String apiUrl;
 
-
-    public JiraTracker() throws ConfigurationException {
+    public JiraTracker(final BugTrackerSettings bugTrackerSettings) {
         super();
-        final BugTrackerSettings bugTrackerSettings = new BugTrackerSettings(
-            bugTrackerUsername,
-            bugTrackerPassword,
-            bugTrackerApiUrl,
-            proxySettings
-        );
+        this.apiUrl = bugTrackerSettings.getApiUrl();
         this.client = new JiraTrackerClient(bugTrackerSettings);
     }
 
@@ -53,7 +47,7 @@ public final class JiraTracker extends BaseTracker implements BugTracker {
             final JsonObject response = parser.parse(issue).getAsJsonObject();
             if (response.has("key")) {
                 final String bugLink = response.get("key").getAsString();
-                return bugTrackerApiUrl + "/browse/" + UrlEscapers.urlPathSegmentEscaper().escape(bugLink);
+                return apiUrl + "/browse/" + UrlEscapers.urlPathSegmentEscaper().escape(bugLink);
             } else {
                 final String errors = response.get("errors").toString();
                 throw new BugTrackerException(errors);

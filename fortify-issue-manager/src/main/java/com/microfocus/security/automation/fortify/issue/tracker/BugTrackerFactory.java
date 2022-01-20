@@ -17,14 +17,50 @@ package com.microfocus.security.automation.fortify.issue.tracker;
 
 import com.microfocus.security.automation.fortify.issue.manager.BugTracker;
 import com.microfocus.security.automation.fortify.issue.manager.ConfigurationException;
+import com.microfocus.security.automation.fortify.issue.manager.ConfigurationManager;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class BugTrackerFactory {
+
+    private final static Map<String, String> proxySettings = ConfigurationManager.getProxySetting("HTTP_PROXY");;
+    private final static List<String> configErrors = new ArrayList<>();;
+    private final static String bugTrackerUsername = ConfigurationManager.getConfig("TRACKER_USERNAME", configErrors);;
+    private final static String bugTrackerPassword = ConfigurationManager.getConfig("TRACKER_PASSWORD", configErrors);;
+    private final static String bugTrackerApiUrl = ConfigurationManager.getConfig("TRACKER_API_URL", configErrors);;
+
     public static BugTracker getTracker(
             final String name) throws ConfigurationException {
         if (name.equalsIgnoreCase("JIRA")) {
-            return new JiraTracker();
+            if (!configErrors.isEmpty()) {
+                throw new ConfigurationException("Invalid Jira configuration " + configErrors);
+            }
+            final BugTrackerSettings jiraSettings = new BugTrackerSettings(
+                bugTrackerUsername,
+                bugTrackerPassword,
+                bugTrackerApiUrl,
+                proxySettings
+            );
+            return new JiraTracker(jiraSettings);
         } else if (name.equalsIgnoreCase("OCTANE")) {
-            return new OctaneTracker();
+            final String workspaceId = ConfigurationManager.getConfig("TRACKER_WORKSPACE_ID", configErrors);
+            final String sharedSpaceId = ConfigurationManager.getConfig("TRACKER_SHARED_SPACE_ID", configErrors);
+
+            if (!configErrors.isEmpty()) {
+                throw new ConfigurationException("Invalid Octane configuration " + configErrors);
+            }
+
+            final OctaneBugTrackerSettings octaneSettings =  new OctaneBugTrackerSettings(
+                bugTrackerUsername,
+                bugTrackerPassword,
+                bugTrackerApiUrl,
+                sharedSpaceId,
+                workspaceId,
+                proxySettings
+            );
+            return new OctaneTracker(octaneSettings);
         } else {
             throw new ConfigurationException("Tracker:" + name + "has not been configured");
         }
