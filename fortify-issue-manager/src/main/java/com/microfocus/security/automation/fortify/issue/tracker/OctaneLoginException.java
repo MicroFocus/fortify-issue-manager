@@ -13,14 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.microfocus.security.automation.fortify.issue.manager;
+package com.microfocus.security.automation.fortify.issue.tracker;
 
-public final class ConfigurationException extends Exception
-{
-    private static final long serialVersionUID = -1990413390688297420L;
+import java.io.IOException;
 
-    public ConfigurationException(final String message)
-    {
-        super(message);
+public final class OctaneLoginException extends IOException {
+    public OctaneLoginException(final String msg) {
+        super(msg);
     }
 }

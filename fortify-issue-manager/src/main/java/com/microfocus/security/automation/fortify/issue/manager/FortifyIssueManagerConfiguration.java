@@ -18,12 +18,12 @@ package com.microfocus.security.automation.fortify.issue.manager;
 final class FortifyIssueManagerConfiguration
 {
     private final FortifySettings fortifySettings;
-    private final BugTrackerSettings bugTrackerSettings;
+    private final String bugTrackerName;
 
-    FortifyIssueManagerConfiguration(final FortifySettings fortifySettings, final BugTrackerSettings bugTrackerSettings)
+    FortifyIssueManagerConfiguration(final FortifySettings fortifySettings, final String bugTrackerName)
     {
         this.fortifySettings = fortifySettings;
-        this.bugTrackerSettings = bugTrackerSettings;
+        this.bugTrackerName = bugTrackerName;
     }
 
     FortifySettings getFortifySettings()
@@ -31,8 +31,7 @@ final class FortifyIssueManagerConfiguration
         return fortifySettings;
     }
 
-    BugTrackerSettings getBugTrackerSettings()
-    {
-        return bugTrackerSettings;
+    String getBugTrackerName() {
+        return bugTrackerName;
     }
 }

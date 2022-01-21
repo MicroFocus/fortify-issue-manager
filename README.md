@@ -1,6 +1,6 @@
 # Fortify Issue Manager
 
-This is a utility to find issues created by Fortify on Demand scans and create corresponding bugs in a bug tracker like Jira. Once the bugs are created they are linked back to the Fortify on Demand issue. Users can then click the `View Bug` button in Fortify on Demand to navigate to the corresponding bug.
+This is a utility to find issues created by Fortify on Demand scans and create corresponding bugs in a bug tracker like Octane. Once the bugs are created they are linked back to the Fortify on Demand issue. Users can then click the `View Bug` button in Fortify on Demand to navigate to the corresponding bug.
 
 ### Fortify on Demand Configuration
 You will need to configure the Fortify on Demand application to `Enable Bug Tracker Integration` and set `Bug Tracker` to `Other`. This can be done from the Fortify on Demand Applications view > Settings > Bug Tracker tab.
@@ -83,14 +83,27 @@ The following environment variables must be set:
     If no issue filters are specified, the following filters are applied:  
     `severityString:Critical|High+auditorStatus:Remediation Required`
 
-- `JIRA_USERNAME`  
-    This property configures the Jira username
+- `TRACKER`
+    This property defines the issue tracker to use.
+    Supported trackers: JIRA, OCTANE
 
-- `JIRA_PASSWORD`  
-    This property configures the Jira password
+- `TRACKER_USERNAME`  
+    This property configures the issue tracker username
 
-- `JIRA_API_URL`  
-    This property configures the Jira url
+- `TRACKER_PASSWORD`  
+    This property configures the issue tracker password
+
+- `TRACKER_API_URL`  
+    This property configures the issue tracker url
+
+#### Octane required configuration
+###### Note that the username and password must be generated for the shared_space and workspace
+
+- `TRACKER_SHARED_SPACE_ID`  
+  This property configures the octane shared space id.
+
+- `TRACKER_WORKSPACE_ID`  
+  This property configures the octane workspace id.
 
 Set the `FORTIFY_ISSUE_MANAGER_LOG_LEVEL` environment variable to configure the log level. Default is `INFO`.
 
@@ -99,13 +112,13 @@ Fortify on Demand field filters are specified as follows:
 Field name and value should be separated by a colon (:). Multiple fields should be separated by a plus (+). Multiple fields are treated as an AND condition.  
 Example, `fieldname1:value+fieldname2:value`  
 Multiple values for a field should be separated by a pipe (|).  
-Mulitple values for a field are treated as an OR condition.  
+Multiple values for a field are treated as an OR condition.  
 Example, `fieldname1:value1|value2`
 
 ### fortify-issue-manager-cli-image
 This module builds a Docker image for the command-line interface, potentially allowing for simpler usage in some environments.
 
-Here is an example command:
+Here is an example command specific to Octane:
 
 ```
 docker container run --rm \
@@ -119,9 +132,12 @@ docker container run --rm \
     -e FORTIFY_APPLICATION_IDS=<Comma separated list of application ids> \
     -e FORTIFY_RELEASE_FILTERS=<Delimited list of release field filters> \
     -e FORTIFY_ISSUE_FILTERS=<Delimited list of issue field filters> \
-    -e JIRA_USERNAME=<Jira username> \
-    -e JIRA_PASSWORD=<Jira password> \
-    -e JIRA_API_URL=<Jira URL> \
+    -e TRACKER=<JIRA|OCTANE> \
+    -e TRACKER_USERNAME=<username> \
+    -e TRACKER_PASSWORD=<password> \
+    -e TRACKER_API_URL=<URL> \
+    -e TRACKER_SHARED_SPACE_ID=<id> \
+    -e TRACKER_WORKSPACE_ID=<id> \
     -e HTTP_PROXY \
     -v $(pwd):/wd \
     microfocus/fortify-issue-manager \

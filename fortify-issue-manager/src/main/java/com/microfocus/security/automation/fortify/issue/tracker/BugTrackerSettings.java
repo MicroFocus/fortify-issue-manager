@@ -13,18 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.microfocus.security.automation.fortify.issue.manager;
+package com.microfocus.security.automation.fortify.issue.tracker;
 
 import java.util.Map;
 
-public final class BugTrackerSettings
+class BugTrackerSettings
 {
     private final String username;
     private final String password;
     private final String apiUrl;
     private final Map<String, String> proxySettings;
 
-    public BugTrackerSettings(final String username, final String password, final String apiUrl, final Map<String, String> proxySettings)
+    public BugTrackerSettings(
+            final String username,
+            final String password,
+            final String apiUrl,
+            final Map<String, String> proxySettings)
     {
         this.username = username;
         this.password = password;
