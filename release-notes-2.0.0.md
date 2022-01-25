@@ -12,5 +12,6 @@ ${version-number}
   `JIRA_USERNAME`, `JIRA_PASSWORD` and `JIRA_API_URL` 
   have been replaced with `TRACKER_USERNAME`, 
   `TRACKER_PASSWORD` and `TRACKER_API_URL`.  
-  `TRACKER` is now required. 
+  `TRACKER` is now required.
+
 #### Known Issues

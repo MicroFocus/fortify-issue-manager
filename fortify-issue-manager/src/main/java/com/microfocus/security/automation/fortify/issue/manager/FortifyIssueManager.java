@@ -46,7 +46,7 @@ import com.microfocus.security.automation.fortify.issue.manager.models.Release;
 import com.microfocus.security.automation.fortify.issue.manager.models.Vulnerability;
 import com.microfocus.security.automation.fortify.issue.manager.utils.JavaScriptFunctions;
 
-public final class FortifyIssueManager
+public class FortifyIssueManager
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(FortifyIssueManager.class);
     private final String FORTIFY_ISSUE_LINK_FORMAT = "%s/Releases/%s/Issues/";

@@ -33,6 +33,7 @@ public final class BugTrackerFactory {
         final String bugTrackerUsername = ConfigurationManager.getConfig("TRACKER_USERNAME", configErrors);
         final String bugTrackerPassword = ConfigurationManager.getConfig("TRACKER_PASSWORD", configErrors);
         final String bugTrackerApiUrl = ConfigurationManager.getConfig("TRACKER_API_URL", configErrors);
+
         if (name.equalsIgnoreCase("JIRA")) {
             if (!configErrors.isEmpty()) {
                 throw new ConfigurationException("Invalid Jira configuration " + configErrors);
@@ -63,14 +64,6 @@ public final class BugTrackerFactory {
             return new OctaneTracker(octaneSettings);
         } else {
             throw new ConfigurationException("Tracker:" + name + "has not been configured");
-        }
-    }
-
-    private static void validateNumeric(final String value) {
-        try {
-            Integer.parseInt(value);
-        } catch (final NumberFormatException e) {
-            e.printStackTrace();
         }
     }
 }
