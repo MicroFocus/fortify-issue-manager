@@ -15,6 +15,7 @@
  */
 package com.microfocus.security.automation.fortify.issue.tracker;
 
+import com.microfocus.security.automation.fortify.issue.manager.ConfigurationException;
 import okhttp3.Cookie;
 import okhttp3.CookieJar;
 import okhttp3.HttpUrl;
@@ -59,9 +60,13 @@ final class OctaneTrackerClient {
 
     String performPostRequest(
         final String defectUrl,
-        final String payload) throws IOException, BugTrackerException {
+        final String payload) throws IOException, BugTrackerException, OctaneLoginException, ConfigurationException {
         login();
         final HttpUrl apiUrl = HttpUrl.parse(bugTrackerSettings.getApiUrl());
+        if (apiUrl == null) {
+            throw new ConfigurationException("Invalid Octane configuration, invalid api url:"
+                + bugTrackerSettings.getApiUrl());
+        }
         final String url = apiUrl.newBuilder().addPathSegments(defectUrl).build().toString();
         LOGGER.debug("Performing request POST {}", url);
 
@@ -75,6 +80,10 @@ final class OctaneTrackerClient {
         final Response response = client.newCall(request).execute();
         if (!response.isSuccessful()) {
             throw new BugTrackerException("Failed to create issue for payload : " + payload);
+        }
+
+        if (response.body() == null) {
+            throw new BugTrackerException("Response body is null");
         }
 
         // Read the result
@@ -116,7 +125,7 @@ final class OctaneTrackerClient {
         return builder.build();
     }
 
-    private void login() throws IOException {
+    private void login() throws IOException, OctaneLoginException {
         final HttpUrl url = HttpUrl.parse(bugTrackerSettings.getApiUrl() + URI_AUTHENTICATION);
         final String payload = "{\"client_id\":\""
             + bugTrackerSettings.getUsername()

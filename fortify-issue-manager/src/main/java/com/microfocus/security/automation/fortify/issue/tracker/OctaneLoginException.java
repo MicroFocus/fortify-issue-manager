@@ -15,9 +15,7 @@
  */
 package com.microfocus.security.automation.fortify.issue.tracker;
 
-import java.io.IOException;
-
-public final class OctaneLoginException extends IOException {
+public final class OctaneLoginException extends Exception {
     public OctaneLoginException(final String msg) {
         super(msg);
     }

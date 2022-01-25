@@ -28,6 +28,8 @@ import java.util.Map;
 public final class ConfigurationManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationManager.class);
 
+    private ConfigurationManager() {}
+
     public static Map<String, String> getProxySetting(final String proxyEnvVariable)
     {
         final Map<String, String> proxySettings = new HashMap<>();
@@ -58,5 +60,19 @@ public final class ConfigurationManager {
             errorConfigs.add(configName);
         }
         return configValue;
+    }
+
+    public static int getIntConfig(final String configName, final List<String> errorConfigs)
+    {
+        try {
+            final String value = System.getenv(configName);
+            if (StringUtils.isEmpty(value)) {
+                errorConfigs.add(configName);
+            }
+            return Integer.parseInt(value);
+        } catch (final NumberFormatException e) {
+            errorConfigs.add(configName);
+        }
+        return -1;
     }
 }

@@ -19,15 +19,15 @@ import java.util.Map;
 
 final class OctaneBugTrackerSettings extends BugTrackerSettings
 {
-    private final String sharedSpaceId;
-    private final String workspaceId;
+    private final int sharedSpaceId;
+    private final int workspaceId;
 
     public OctaneBugTrackerSettings(
             final String username,
             final String password,
             final String apiUrl,
-            final String sharedSpaceId,
-            final String workspaceId,
+            final int sharedSpaceId,
+            final int workspaceId,
             final Map<String, String> proxySettings)
     {
         super(username, password, apiUrl, proxySettings);
@@ -35,11 +35,11 @@ final class OctaneBugTrackerSettings extends BugTrackerSettings
         this.workspaceId = workspaceId;
     }
 
-    public String getSharedSpaceId() {
+    public int getSharedSpaceId() {
         return sharedSpaceId;
     }
 
-    public String getWorkspaceId() {
+    public int getWorkspaceId() {
         return workspaceId;
     }
 }
