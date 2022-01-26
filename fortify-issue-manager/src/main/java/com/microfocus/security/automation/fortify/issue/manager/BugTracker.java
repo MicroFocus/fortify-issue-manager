@@ -31,7 +31,7 @@ public interface BugTracker
      */
     String createBug(String bugDetails) throws BugTrackerException;
 
-    String getIssueDescription(final String issueBaseUrl, final List<Vulnerability> vulnerabilities);
+    String getIssueDescription(String issueBaseUrl, List<Vulnerability> vulnerabilities);
 
-    String getOpenSourceIssueDescription(final String issueBaseUrl, final List<Vulnerability> vulnerabilities);
+    String getOpenSourceIssueDescription(String issueBaseUrl, List<Vulnerability> vulnerabilities);
 }

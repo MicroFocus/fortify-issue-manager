@@ -22,6 +22,7 @@ import java.net.Proxy;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import com.microfocus.security.automation.fortify.issue.manager.ConfigurationException;
 import okhttp3.HttpUrl;
 import okhttp3.MediaType;
 import okhttp3.Request;
@@ -47,7 +48,7 @@ final class JiraTrackerClient {
 
     private final String encodedAuth;
 
-    private final static String restApiPath = "/rest/api/2/issue";
+    private final static String REST_API_PATH = "/rest/api/2/issue";
 
     JiraTrackerClient(final BugTrackerSettings bugTrackerSettings) {
         this.apiUrl = bugTrackerSettings.getApiUrl();
@@ -60,9 +61,12 @@ final class JiraTrackerClient {
     }
 
 
-    String performPostRequest(final String payload) throws IOException, BugTrackerException {
+    String performPostRequest(final String payload) throws IOException, BugTrackerException, ConfigurationException {
         final HttpUrl httpUrl = HttpUrl.parse(apiUrl);
-        final String url = httpUrl.newBuilder().addPathSegments(restApiPath).build().toString();
+        if (httpUrl == null) {
+            throw new ConfigurationException("Invalid Jira configuration, invalid api url:" + apiUrl);
+        }
+        final String url = httpUrl.newBuilder().addPathSegments(REST_API_PATH).build().toString();
         LOGGER.debug("Performing request POST {}", url);
 
         final RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), payload);

@@ -19,6 +19,7 @@ import com.google.common.net.UrlEscapers;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.microfocus.security.automation.fortify.issue.manager.BugTracker;
+import com.microfocus.security.automation.fortify.issue.manager.ConfigurationException;
 import com.microfocus.security.automation.fortify.issue.manager.models.Vulnerability;
 
 import java.io.IOException;
@@ -32,7 +33,7 @@ public final class JiraTracker implements BugTracker {
     private final static JsonParser parser = new JsonParser();
     private final String apiUrl;
 
-    public JiraTracker(final BugTrackerSettings bugTrackerSettings) {
+    JiraTracker(final BugTrackerSettings bugTrackerSettings) {
         super();
         this.apiUrl = bugTrackerSettings.getApiUrl();
         this.client = new JiraTrackerClient(bugTrackerSettings);
@@ -52,7 +53,7 @@ public final class JiraTracker implements BugTracker {
                 final String errors = response.get("errors").toString();
                 throw new BugTrackerException(errors);
             }
-        } catch (final IOException e) {
+        } catch (final IOException | ConfigurationException e) {
             throw new BugTrackerException(e);
         }
     }

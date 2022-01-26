@@ -20,6 +20,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.microfocus.security.automation.fortify.issue.manager.BugTracker;
+import com.microfocus.security.automation.fortify.issue.manager.ConfigurationException;
 import com.microfocus.security.automation.fortify.issue.manager.models.Vulnerability;
 
 import java.io.IOException;
@@ -34,7 +35,7 @@ public final class OctaneTracker implements BugTracker {
     private final String defectUrl;
     private final OctaneTrackerClient client;
 
-    public OctaneTracker(final OctaneBugTrackerSettings bugTrackerSettings) {
+    OctaneTracker(final OctaneBugTrackerSettings bugTrackerSettings) {
         apiUrl = bugTrackerSettings.getApiUrl();
         browseUrl = String.format(
             "/ui/entity-navigation?p=%s/%s&entityType=work_item&id=",
@@ -68,7 +69,7 @@ public final class OctaneTracker implements BugTracker {
                 final String errors = response.get("errors").toString();
                 throw new BugTrackerException(errors);
             }
-        } catch (final IOException e) {
+        } catch (final IOException | OctaneLoginException | ConfigurationException e) {
             throw new BugTrackerException(e);
         }
     }
@@ -80,13 +81,13 @@ public final class OctaneTracker implements BugTracker {
         final StringBuilder issues = new StringBuilder();
         issues.append("<table><body><tr><th>&nbsp;Issue Id&nbsp;</th><th>&nbsp;Description&nbsp;</th></tr>");
         for (final Vulnerability vulnerability : vulnerabilities) {
-            issues.append("<tr>")
-                .append("<td>&nbsp;<a href=\""
-                    + fortifyIssueUrl
-                    + vulnerability.getId()
-                    + "\">" + vulnerability.getId()
-                    + "</a>&nbsp;</td>")
-                .append("<td>&nbsp;" + vulnerability.getPrimaryLocation());
+            issues.append("<tr><td>&nbsp;<a href=\"")
+                .append(fortifyIssueUrl)
+                .append(vulnerability.getId())
+                .append("\">")
+                .append(vulnerability.getId())
+                .append("</a>&nbsp;</td><td>&nbsp;")
+                .append(vulnerability.getPrimaryLocation());
             if (vulnerability.getLineNumber() != null) {
                 issues.append(" : ")
                     .append(vulnerability.getLineNumber());
@@ -104,15 +105,15 @@ public final class OctaneTracker implements BugTracker {
         issues.append("<table><body><tr><th>&nbsp;Issue Id&nbsp;</th><th>&nbsp;CVE ID&nbsp;"
             + "</th><th>&nbsp;Component&nbsp;</th></tr>");
         for (final Vulnerability vulnerability : vulnerabilities) {
-            issues.append("<tr>")
-                .append("<td>&nbsp;<a href=\""
-                    + fortifyIssueUrl
-                    + vulnerability.getId()
-                    + "\">"
-                    + vulnerability.getId()
-                    + "</a>&nbsp;</td>")
-                .append("<td>&nbsp;" + vulnerability.getCheckId() + "&nbsp;</td>")
-                .append("<td>&nbsp;" + vulnerability.getPrimaryLocation());
+            issues.append("<tr><td>&nbsp;<a href=\"")
+                  .append(fortifyIssueUrl)
+                  .append(vulnerability.getId())
+                  .append("\">")
+                  .append(vulnerability.getId())
+                  .append("</a>&nbsp;</td><td>&nbsp;")
+                  .append(vulnerability.getCheckId())
+                  .append("&nbsp;</td><td>&nbsp;")
+                  .append(vulnerability.getPrimaryLocation());
             if (vulnerability.getLineNumber() != null) {
                 issues.append(" : ")
                     .append(vulnerability.getLineNumber());

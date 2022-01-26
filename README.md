@@ -1,6 +1,6 @@
 # Fortify Issue Manager
 
-This is a utility to find issues created by Fortify on Demand scans and create corresponding bugs in a bug tracker like Octane. Once the bugs are created they are linked back to the Fortify on Demand issue. Users can then click the `View Bug` button in Fortify on Demand to navigate to the corresponding bug.
+This is a utility to find issues created by Fortify on Demand scans and create corresponding bugs in a bug tracker like `Jira` or `Octane`. Once the bugs are created they are linked back to the Fortify on Demand issue. Users can then click the `View Bug` button in Fortify on Demand to navigate to the corresponding bug.
 
 ### Fortify on Demand Configuration
 You will need to configure the Fortify on Demand application to `Enable Bug Tracker Integration` and set `Bug Tracker` to `Other`. This can be done from the Fortify on Demand Applications view > Settings > Bug Tracker tab.
@@ -47,7 +47,7 @@ The script should return the payload for creating a bug in a bug tracking applic
 
 Here is a sample script file [getPayload.js](./fortify-issue-manager/src/test/resources/getPayload.js).
 
-### Configuration
+### Required Configuration
 The following environment variables must be set:
 - `FORTIFY_GRANT_TYPE`  
     This property configures the Fortify on Demand authentication grant type.  
@@ -83,9 +83,9 @@ The following environment variables must be set:
     If no issue filters are specified, the following filters are applied:  
     `severityString:Critical|High+auditorStatus:Remediation Required`
 
-- `TRACKER`
+- `TRACKER`  
     This property defines the issue tracker to use.
-    Supported trackers: JIRA, OCTANE
+    Supported trackers: `JIRA`, `OCTANE`
 
 - `TRACKER_USERNAME`  
     This property configures the issue tracker username
@@ -105,6 +105,10 @@ The following environment variables must be set:
 - `TRACKER_WORKSPACE_ID`  
   This property configures the octane workspace id.
 
+- `TRACKER_API_URL`  
+    This property configures the issue tracker url
+
+#### Logging
 Set the `FORTIFY_ISSUE_MANAGER_LOG_LEVEL` environment variable to configure the log level. Default is `INFO`.
 
 #### Note
