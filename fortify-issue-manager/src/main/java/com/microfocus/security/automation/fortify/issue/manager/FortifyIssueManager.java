@@ -228,7 +228,7 @@ public final class FortifyIssueManager
             if (StringUtils.isEmpty(getPayloadScript)) {
                 throw new ScriptNotFoundException("Script getPayload not found.");
             }
-            final ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
+            final ScriptEngine engine = new ScriptEngineManager().getEngineByName("js");
             engine.eval(getPayloadScript);
             return engine;
         }
