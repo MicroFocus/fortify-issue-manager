@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.microfocus.security.automation.fortify.issue.manager.utils.JavaScriptFunctions;
-import jdk.nashorn.api.scripting.NashornScriptEngine;
 
 public class JavaScriptFunctionsTest
 {
