@@ -92,7 +92,7 @@
                 <artifactId>guava</artifactId>
                 <version>25.0-jre</version>
             </dependency>
-                        <dependency>
+            <dependency>
                 <groupId>org.graalvm.js</groupId>
                 <artifactId>js</artifactId>
                 <version>1.0.0-rc10</version>
