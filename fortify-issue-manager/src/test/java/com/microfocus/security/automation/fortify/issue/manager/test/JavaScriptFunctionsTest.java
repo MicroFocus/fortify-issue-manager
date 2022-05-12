@@ -69,7 +69,7 @@ public class JavaScriptFunctionsTest
         LOGGER.info("Loding script from {}", scriptFile);
         try (final InputStream inputStream = JavaScriptFunctionsTest.class.getResourceAsStream(scriptFile)) {
             final String script = IOUtils.toString(inputStream, "utf-8");
-            final ScriptEngine engine = new ScriptEngineManager().getEngineFactories().get(0).getScriptEngine();
+            final ScriptEngine engine = new ScriptEngineManager().getEngineByName("graal.js");
             engine.eval(script);
             return engine;
         }

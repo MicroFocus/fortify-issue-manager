@@ -95,19 +95,19 @@
             <dependency>
                 <groupId>org.graalvm.js</groupId>
                 <artifactId>js</artifactId>
-                <version>1.0.0-rc10</version>
+                <version>22.0.0.2</version>
                 <scope>runtime</scope>
             </dependency>
             <dependency>
                 <groupId>org.graalvm.js</groupId>
                 <artifactId>js-scriptengine</artifactId>
-                <version>1.0.0-rc10</version>
+                <version>22.0.0.2</version>
                 <scope>runtime</scope>
             </dependency>
             <dependency>
                 <groupId>org.graalvm.truffle</groupId>
                 <artifactId>truffle-api</artifactId>
-                <version>1.0.0-rc10</version>
+                <version>22.0.0.2</version>
                 <scope>runtime</scope>
             </dependency>
             <dependency>
