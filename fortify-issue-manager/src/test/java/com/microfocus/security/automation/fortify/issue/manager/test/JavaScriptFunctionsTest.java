@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.microfocus.security.automation.fortify.issue.manager.utils.JavaScriptFunctions;
+import jdk.nashorn.api.scripting.NashornScriptEngine;
 
 public class JavaScriptFunctionsTest
 {
@@ -69,7 +70,7 @@ public class JavaScriptFunctionsTest
         LOGGER.info("Loding script from {}", scriptFile);
         try (final InputStream inputStream = JavaScriptFunctionsTest.class.getResourceAsStream(scriptFile)) {
             final String script = IOUtils.toString(inputStream, "utf-8");
-            ScriptEngine engine = new ScriptEngineManager().getEngineFactories().get(0).getScriptEngine();
+            final ScriptEngine engine = new ScriptEngineManager().getEngineFactories().get(0).getScriptEngine();
             engine.eval(script);
             return engine;
         }

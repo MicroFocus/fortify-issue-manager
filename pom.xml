@@ -92,6 +92,24 @@
                 <artifactId>guava</artifactId>
                 <version>25.0-jre</version>
             </dependency>
+                        <dependency>
+                <groupId>org.graalvm.js</groupId>
+                <artifactId>js</artifactId>
+                <version>1.0.0-rc10</version>
+                <scope>runtime</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.graalvm.js</groupId>
+                <artifactId>js-scriptengine</artifactId>
+                <version>1.0.0-rc10</version>
+                <scope>runtime</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.graalvm.truffle</groupId>
+                <artifactId>truffle-api</artifactId>
+                <version>1.0.0-rc10</version>
+                <scope>runtime</scope>
+            </dependency>
             <dependency>
                 <groupId>com.microfocus.security.automation.fortify</groupId>
                 <artifactId>fortify-issue-manager</artifactId>
