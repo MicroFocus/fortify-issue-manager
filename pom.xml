@@ -95,17 +95,17 @@
             <dependency>
                 <groupId>org.graalvm.js</groupId>
                 <artifactId>js</artifactId>
-                <version>20.3.6</version>
+                <version>20.1.0</version>
             </dependency>
             <dependency>
                 <groupId>org.graalvm.js</groupId>
                 <artifactId>js-scriptengine</artifactId>
-                <version>20.3.6</version>
+                <version>20.1.0</version>
             </dependency>
             <dependency>
                 <groupId>org.graalvm.truffle</groupId>
                 <artifactId>truffle-api</artifactId>
-                <version>20.3.6</version>
+                <version>20.1.0</version>
             </dependency>
             <dependency>
                 <groupId>com.microfocus.security.automation.fortify</groupId>
