@@ -229,6 +229,9 @@ public final class FortifyIssueManager
                 throw new ScriptNotFoundException("Script getPayload not found.");
             }
             final ScriptEngine engine = new ScriptEngineManager().getEngineByName("graal.js");
+            for (javax.script.ScriptEngineFactory factory : new ScriptEngineManager().getEngineFactories()) {
+                System.out.println("Engine: " + factory.getEngineName());
+            }
             engine.eval(getPayloadScript);
             return engine;
         }
