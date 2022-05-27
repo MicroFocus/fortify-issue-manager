@@ -103,9 +103,15 @@
                 <version>20.1.0</version>
             </dependency>
             <dependency>
-                <groupId>org.graalvm.sdk</groupId>
-                <artifactId>graal-sdk</artifactId>
+                <groupId>org.graalvm.truffle</groupId>
+                <artifactId>truffle-api</artifactId>
+                <version>20.1.0</version> 
+            </dependency>
+            <dependency>
+                <groupId>org.graalvm.truffle</groupId>
+                <artifactId>truffle-dsl-processor</artifactId>
                 <version>20.1.0</version>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>com.microfocus.security.automation.fortify</groupId>
