@@ -233,7 +233,7 @@ public final class FortifyIssueManager
             
             List<ScriptEngineFactory> factories = new ScriptEngineManager().getEngineFactories();
             for(ScriptEngineFactory f : new ScriptEngineManager().getEngineFactories()){
-                LOGGER.info("AVAILABLE: " + f.getEngineName());
+                LOGGER.info("AVAILABLES: " + f.getEngineName());
             }
             LOGGER.info("ENGINE USED: " + engine.toString());
             engine.eval(getPayloadScript);
