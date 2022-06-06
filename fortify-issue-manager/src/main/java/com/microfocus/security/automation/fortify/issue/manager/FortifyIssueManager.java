@@ -236,7 +236,7 @@ public final class FortifyIssueManager
                 LOGGER.info("AVAILABLES: " + f.getEngineName());
             }
             LOGGER.info("ENGINE USED: " + engine.toString());
-            engine.eval(getPayloadScript);
+//            engine.eval(getPayloadScript);
             return engine;
         }
     }
