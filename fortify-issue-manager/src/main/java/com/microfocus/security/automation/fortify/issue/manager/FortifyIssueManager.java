@@ -45,6 +45,7 @@ import com.microfocus.security.automation.fortify.issue.manager.models.Category;
 import com.microfocus.security.automation.fortify.issue.manager.models.Release;
 import com.microfocus.security.automation.fortify.issue.manager.models.Vulnerability;
 import com.microfocus.security.automation.fortify.issue.manager.utils.JavaScriptFunctions;
+import javax.script.ScriptEngineFactory;
 
 public final class FortifyIssueManager
 {
@@ -230,6 +231,10 @@ public final class FortifyIssueManager
             }
             final ScriptEngine engine = new ScriptEngineManager().getEngineFactories().get(0).getScriptEngine();
             
+            List<ScriptEngineFactory> factories = new ScriptEngineManager().getEngineFactories();
+            for(ScriptEngineFactory f : new ScriptEngineManager().getEngineFactories()){
+                LOGGER.info("AVAILABLE: " + f.getEngineName());
+            }
             LOGGER.info("ENGINE USED: " + engine.toString());
             engine.eval(getPayloadScript);
             return engine;
