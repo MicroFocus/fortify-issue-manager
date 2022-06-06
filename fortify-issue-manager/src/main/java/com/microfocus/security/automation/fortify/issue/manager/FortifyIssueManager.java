@@ -45,6 +45,8 @@ import com.microfocus.security.automation.fortify.issue.manager.models.Category;
 import com.microfocus.security.automation.fortify.issue.manager.models.Release;
 import com.microfocus.security.automation.fortify.issue.manager.models.Vulnerability;
 import com.microfocus.security.automation.fortify.issue.manager.utils.JavaScriptFunctions;
+import javax.script.Bindings;
+import javax.script.ScriptContext;
 import javax.script.ScriptEngineFactory;
 
 public final class FortifyIssueManager
@@ -236,6 +238,8 @@ public final class FortifyIssueManager
                 LOGGER.info("AVAILABLES: " + f.getEngineName());
             }
             LOGGER.info("ENGINE USED: " + engine.toString());
+            javax.script.Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
+            bindings.put("polyglot.js.allowAllAccess", true);
             engine.eval(getPayloadScript);
             return engine;
         }
