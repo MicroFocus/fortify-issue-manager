@@ -45,7 +45,6 @@ import com.microfocus.security.automation.fortify.issue.manager.models.Category;
 import com.microfocus.security.automation.fortify.issue.manager.models.Release;
 import com.microfocus.security.automation.fortify.issue.manager.models.Vulnerability;
 import com.microfocus.security.automation.fortify.issue.manager.utils.JavaScriptFunctions;
-import javax.script.ScriptEngineFactory;
 
 public final class FortifyIssueManager
 {
