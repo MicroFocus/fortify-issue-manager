@@ -1,5 +1,3 @@
-!not-ready-for-release!
-
 #### Version Number
 ${version-number}
 
@@ -14,3 +12,4 @@ ${version-number}
   `TRACKER` is now required.
 
 #### Known Issues
+- None
