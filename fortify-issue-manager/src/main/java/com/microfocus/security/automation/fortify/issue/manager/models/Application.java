@@ -17,16 +17,28 @@ package com.microfocus.security.automation.fortify.issue.manager.models;
 
 public final class Application
 {
-    private int applicationId;
-    private String applicationName;
+    private int id;
+    private String name;
 
-    public int getApplicationId()
+    public int getId()
     {
-        return applicationId;
+        return id;
     }
 
-    public String getApplicationName()
+    public String getName()
     {
-        return applicationName;
+        return name;
+    }
+
+    @Override
+    public String toString()
+    {
+        final StringBuilder builder = new StringBuilder();
+        builder.append("Application [id=");
+        builder.append(id);
+        builder.append(", name=");
+        builder.append(name);
+        builder.append("]");
+        return builder.toString();
     }
 }

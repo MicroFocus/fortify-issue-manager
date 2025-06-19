@@ -111,7 +111,7 @@ public final class OctaneTracker implements BugTracker {
                   .append("\">")
                   .append(vulnerability.getId())
                   .append("</a>&nbsp;</td><td>&nbsp;")
-                  .append(vulnerability.getCheckId())
+                  .append(vulnerability.getPrimaryRuleGuid())
                   .append("&nbsp;</td><td>&nbsp;")
                   .append(vulnerability.getPrimaryLocation());
             if (vulnerability.getLineNumber() != null) {

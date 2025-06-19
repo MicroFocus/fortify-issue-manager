@@ -49,20 +49,16 @@ Here is a sample script file [getPayload.js](./fortify-issue-manager/src/test/re
 
 ### Required Configuration
 The following environment variables must be set:
-- `FORTIFY_GRANT_TYPE`  
-    This property configures the Fortify on Demand authentication grant type.  
-    It must be set to `client_credentials` or `password`.
+- `FORTIFY_AUTH_TYPE`  
+    This property configures the Fortify on Demand authentication type.  
+    It must be set to `basic` or `token`.
 
-    If grant type is `client_credentials` then the following environment variables must be set:
-     - `FORTIFY_CLIENT_ID`
-     - `FORTIFY_CLIENT_SECRET`
-
-    If grant type is `password` then the following environment variables must be set:
+    If grant type is `basic` then the following environment variables must be set:
      - `FORTIFY_USERNAME`
      - `FORTIFY_PASSWORD`
 
-- `FORTIFY_SCOPE`  
-    This property configures the Fortify on Demand scope. Example: api-tenant
+    If grant type is `token` then the following environment variable must be set:
+     - `FORTIFY_TOKEN`
 
 - `FORTIFY_API_URL`  
     This property configures the Fortify on Demand api url
@@ -73,15 +69,14 @@ The following environment variables must be set:
 - `FORTIFY_APPLICATION_IDS`  
     This property is a comma separated list of Fortify on Demand application ids
 
-- `FORTIFY_RELEASE_FILTERS`  
-    This property is a delimited list of field filters for Fortify on Demand releases.  
-    If no release filters are specified, the following filter is applied:  
-    `sdlcStatusType:Production`
-
-- `FORTIFY_ISSUE_FILTERS`  
-    This property is a delimited list of field filters for Fortify on Demand issues.  
-    If no issue filters are specified, the following filters are applied:  
-    `severityString:Critical|High+auditorStatus:Remediation Required`
+- `FORTIFY_ISSUE_QUERY`  
+    This property is a Fortify issue query expression used to filter which issues selected.  
+    If specified, it will be combined with the `comments:!bugURL` filter (which selects issues that have not had a bug
+    raised against them yet in the issue tracker).  
+    If not specified, the following issue query expression is applied:  
+    `comments:!bugURL audited:false [fortify priority order]:high [fortify priority order]:critical`
+    which Fortify applies as:  
+    `comments:!bugURL AND audited:false AND ([fortify priority order]:high OR [fortify priority order]:critical))`
 
 - `TRACKER`  
     This property defines the issue tracker to use.

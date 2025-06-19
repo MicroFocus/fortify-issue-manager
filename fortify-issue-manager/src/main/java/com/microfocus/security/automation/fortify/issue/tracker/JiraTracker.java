@@ -95,7 +95,7 @@ public final class JiraTracker implements BugTracker {
                 .append(issueBaseUrl)
                 .append(vulnerability.getId())
                 .append("]|")
-                .append(vulnerability.getCheckId())
+                .append(vulnerability.getPrimaryRuleGuid())
                 .append("|")
                 .append(vulnerability.getPrimaryLocation());
             if (vulnerability.getLineNumber() != null) {

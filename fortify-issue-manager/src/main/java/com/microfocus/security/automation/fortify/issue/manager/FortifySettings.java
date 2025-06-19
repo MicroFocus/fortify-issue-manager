@@ -17,65 +17,58 @@ package com.microfocus.security.automation.fortify.issue.manager;
 
 import java.util.Map;
 
-import com.microfocus.security.automation.fortify.issue.manager.FortifyClient.GrantType;
+import com.microfocus.security.automation.fortify.issue.manager.FortifyClient.AuthType;
 
 final class FortifySettings
 {
-    private final GrantType grantType;
-    private final String id;
-    private final String secret;
-    private final String scope;
+    private final AuthType authType;
+    private final String username;
+    private final String password;
+    private final String token;
     private final String apiUrl;
     private final String issueUrl;
     private final Map<String, String> proxySettings;
     private final String[] applicationIds;
-    private final String releaseFilters;
-    private final String issueFilters;
+    private final String issueQuery;
 
     FortifySettings(
-        final GrantType grantType,
-        final String id,
-        final String secret,
-        final String scope,
+        final AuthType authType,
+        final String username,
+        final String password,
+        final String token,
         final String apiUrl,
         final String issueUrl,
         final Map<String, String> proxySettings,
         final String[] applicationIds,
-        final String releaseFilters,
-        final String issueFilters
+        final String issueQuery
     )
     {
         super();
-        this.grantType = grantType;
-        this.id = id;
-        this.secret = secret;
-        this.scope = scope;
+        this.authType = authType;
+        this.username = username;
+        this.password = password;
+        this.token = token;
         this.apiUrl = apiUrl;
         this.issueUrl = issueUrl;
         this.proxySettings = proxySettings;
         this.applicationIds = applicationIds;
-        this.releaseFilters = releaseFilters;
-        this.issueFilters = issueFilters;
+        this.issueQuery = issueQuery;
     }
 
-    GrantType getGrantType()
-    {
-        return grantType;
+    AuthType getAuthType() {
+        return authType;
     }
 
-    String getId()
-    {
-        return id;
+    String getUsername() {
+        return username;
     }
 
-    String getSecret()
-    {
-        return secret;
+    String getPassword() {
+        return password;
     }
 
-    String getScope()
-    {
-        return scope;
+    String getToken() {
+        return token;
     }
 
     String getApiUrl()
@@ -98,11 +91,7 @@ final class FortifySettings
         return applicationIds;
     }
 
-    String getReleaseFilters() {
-        return releaseFilters;
-    }
-
-    String getIssueFilters() {
-        return issueFilters;
+    String getIssueQuery() {
+        return issueQuery;
     }
 }
