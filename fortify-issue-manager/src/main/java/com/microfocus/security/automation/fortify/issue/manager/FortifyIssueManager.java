@@ -47,7 +47,11 @@ import com.microfocus.security.automation.fortify.issue.manager.utils.JavaScript
 public final class FortifyIssueManager
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(FortifyIssueManager.class);
-    private final String FORTIFY_ISSUE_LINK_FORMAT = "%s/ssc/html/ssc/version/%s/audit?issue=";
+   // private final String FORTIFY_ISSUE_LINK_FORMAT = "%s/ssc/html/ssc/version/%s/audit?q=[instance id]:";
+   // private final String FORTIFY_ISSUE_LINK_FORMAT = "%s/ssc/html/ssc/version/%s/audit?q=%5Binstance%%20id%5D%%3A";
+
+    //   https://fortifyhub.otxlab.net/ssc/html/ssc/version/1301/audit?q=%5Binstance%20id%5D%3A265F3A8F2181596CCB92EBA2602D099F%20
+    //   "issueInstanceId" : "24EEEC2639498E6426DDAECC003F1B10",
     //https://fortifyhub.otxlab.net/ssc/html/ssc/version/1301/audit?issue=05861F0EB70D93D3497FBC517BE607AC
 
     private final FortifyRequestHandler fortifyRequestHandler;
@@ -118,7 +122,7 @@ public final class FortifyIssueManager
         return !hasErrors;
     }
 
-    private static FortifyIssueManagerConfiguration loadConfigurationOrig() throws ConfigurationException
+    private static FortifyIssueManagerConfiguration loadConfiguration() throws ConfigurationException
     {
         final Map<String, String> proxySettings = ConfigurationManager.getProxySetting("HTTP_PROXY");
         final List<String> configErrors = new ArrayList<>();
@@ -175,13 +179,9 @@ public final class FortifyIssueManager
         }
 
         // Get the list of configured Applications
-        // TODO filters
-        final List<String> filters = new ArrayList<>();
-//        final FilterList filters = new FilterList();
-//        filters.addFilter("id", Joiner.on('|').join(this.applicationIds));
         final String applicationFields = "id,name";
         LOGGER.info("Getting applications...");
-        final List<Application> applications = this.fortifyRequestHandler.getApplications(filters.toString(), applicationFields);
+        final List<Application> applications = this.fortifyRequestHandler.getApplications(applicationIds, applicationFields);
         if (applications == null || applications.isEmpty()) {
             LOGGER.info("No applications found.");
             return;
@@ -290,8 +290,7 @@ public final class FortifyIssueManager
                             final Map<Category, List<Vulnerability>> sortedIssues,
                             final ScriptEngine getPayLoadScript) throws FortifyRequestException, NoSuchMethodException, ScriptException
     {
-        // https://fortifyhub.otxlab.net/ssc/html/ssc/version/1301/audit?issue=05861F0EB70D93D3497FBC517BE607AC
-        final String issueBaseUrl = String.format(FORTIFY_ISSUE_LINK_FORMAT, issueUrl, releaseId);
+        final String issueBaseUrl = issueUrl + "/ssc/html/ssc/version/" + releaseId + "/audit?q=%5Binstance%20id%5D%3A";
 
         final Set<Category> categories = sortedIssues.keySet();
         int counter = 1;
@@ -318,10 +317,11 @@ public final class FortifyIssueManager
 
                 try {
                     final String bugLink = this.bugTracker.createBug(bugDetails);
-                    final List<String> vulnerabilityIds = vulnerabilities.stream()
-                        .map(Vulnerability::getVulnId)
+                    final List<Integer> vulnerabilityIds = vulnerabilities.stream()
+                        .map(Vulnerability::getId)
                         .collect(Collectors.toList());
-                    final boolean issuesUpdated = this.fortifyRequestHandler.updateVulnerability(releaseId, vulnerabilityIds, bugLink);
+                    final boolean issuesUpdated = this.fortifyRequestHandler.addBugLinkCommentToFortifyIssues(
+                            releaseId, bugLink, vulnerabilityIds);
                     if (!issuesUpdated) {
                         hasErrors = true;
                     }
@@ -337,7 +337,7 @@ public final class FortifyIssueManager
 
     public static void main(String[] args) {
         String scriptFile = FortifyIssueManager.class.getClassLoader().getResource("getPayload.js").getPath();
-        boolean result = manageIssues(true, scriptFile);
+        boolean result = manageIssues(false, scriptFile);
         System.out.println("Completed with " + (result ? "success" : "errors"));
     }
 }

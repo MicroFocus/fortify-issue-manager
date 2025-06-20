@@ -64,6 +64,7 @@ final class FortifyClient
     /**
      * For Basic Auth, returns a Base64-encoded header. For Token, returns Bearer token.
      */
+    // TODO drop basic auth
     public String getAuthHeader() {
         if (authType == AuthType.BASIC) {
         //    final String credentials = username + ":" + password;
