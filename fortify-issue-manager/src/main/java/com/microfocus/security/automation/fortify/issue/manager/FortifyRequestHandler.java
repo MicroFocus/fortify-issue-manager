@@ -272,7 +272,7 @@ final class FortifyRequestHandler
         payload.addProperty("hasTagComment", false);
 
         final String api = "/ssc/api/v1/projectVersions/" + releaseId + "/issues/action/audit";
-        final HttpUrl apiUrl = HttpUrl.parse(fortifyClient.getApiUrl());
+        final HttpUrl apiUrl = HttpUrl.parse(fortifyClient.getUrl());
         if (apiUrl == null) {
             final String errorMessage = String.format(
                     "Error creating request to add bug link comment to Fortify issues. " +
@@ -334,7 +334,7 @@ final class FortifyRequestHandler
     private String getUrl(final String api, final String query, final String fields, final String orderBy)
         throws FortifyRequestException
     {
-        final HttpUrl apiUrl = HttpUrl.parse(fortifyClient.getApiUrl());
+        final HttpUrl apiUrl = HttpUrl.parse(fortifyClient.getUrl());
         if (apiUrl == null) {
             throw new FortifyRequestException("Invalid url : " + api);
         }

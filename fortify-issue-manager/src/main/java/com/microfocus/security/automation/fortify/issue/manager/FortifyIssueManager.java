@@ -47,12 +47,6 @@ import com.microfocus.security.automation.fortify.issue.manager.utils.JavaScript
 public final class FortifyIssueManager
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(FortifyIssueManager.class);
-   // private final String FORTIFY_ISSUE_LINK_FORMAT = "%s/ssc/html/ssc/version/%s/audit?q=[instance id]:";
-   // private final String FORTIFY_ISSUE_LINK_FORMAT = "%s/ssc/html/ssc/version/%s/audit?q=%5Binstance%%20id%5D%%3A";
-
-    //   https://fortifyhub.otxlab.net/ssc/html/ssc/version/1301/audit?q=%5Binstance%20id%5D%3A265F3A8F2181596CCB92EBA2602D099F%20
-    //   "issueInstanceId" : "24EEEC2639498E6426DDAECC003F1B10",
-    //https://fortifyhub.otxlab.net/ssc/html/ssc/version/1301/audit?issue=05861F0EB70D93D3497FBC517BE607AC
 
     private final FortifyRequestHandler fortifyRequestHandler;
     private final BugTracker bugTracker;
@@ -99,18 +93,15 @@ public final class FortifyIssueManager
                     : "Bugs will be created and Fortify issues will be updated with the corresponding link to the bug.");
             final FortifySettings fortifySettings = config.getFortifySettings();
             final FortifyClient client = new FortifyClient(
-                fortifySettings.getApiUrl(),
-                fortifySettings.getUsername(),
-                fortifySettings.getPassword(),
+                fortifySettings.getUrl(),
                 fortifySettings.getToken(),
-                fortifySettings.getAuthType(),
                 fortifySettings.getProxySettings());
 
             final FortifyIssueManager issueManager = new FortifyIssueManager(
                 dryRun, client,
                 fortifySettings.getApplicationIds(),
                 fortifySettings.getIssueQuery(),
-                fortifySettings.getIssueUrl(),
+                fortifySettings.getUrl(),
                 config.getBugTrackerName());
             issueManager.linkIssuesToBugTracker(scriptFile);
         } catch (final IOException | ScriptNotFoundException | ScriptException | FortifyAuthenticationException |
@@ -128,42 +119,25 @@ public final class FortifyIssueManager
         final List<String> configErrors = new ArrayList<>();
 
         // Get Fortify settings
-        final String fortifyAuthTypeFromEnv = System.getenv("FORTIFY_AUTH_TYPE");
-        final FortifyClient.AuthType fortifyAuthType;
-        final String fortifyUsername;
-        final String fortifyPassword;
-        final String fortifyToken;
-
-        if (FortifyClient.AuthType.BASIC.name().equalsIgnoreCase(fortifyAuthTypeFromEnv)) {
-            fortifyAuthType = FortifyClient.AuthType.BASIC;
-            fortifyUsername = ConfigurationManager.getConfig("FORTIFY_USERNAME", configErrors);
-            fortifyPassword = ConfigurationManager.getConfig("FORTIFY_PASSWORD", configErrors);
-            fortifyToken = null; // Not used for BASIC auth
-        } else if (FortifyClient.AuthType.TOKEN.name().equalsIgnoreCase(fortifyAuthTypeFromEnv)) {
-            fortifyAuthType =  FortifyClient.AuthType.TOKEN;
-            fortifyToken = ConfigurationManager.getConfig("FORTIFY_TOKEN", configErrors);
-            fortifyUsername = null; // Not used for TOKEN auth
-            fortifyPassword = null; // Not used for TOKEN auth
-        } else {
-            throw new ConfigurationException("Invalid Fortify auth type. Set FORTIFY_AUTH_TYPE to 'basic' or 'token'");
-        }
-
-        final String fortifyApiUrl = ConfigurationManager.getConfig("FORTIFY_API_URL", configErrors);
-        final String fortifyIssueUrl = ConfigurationManager.getConfig("FORTIFY_ISSUE_URL", configErrors);
+        final String fortifyToken  = ConfigurationManager.getConfig("FORTIFY_TOKEN", configErrors);
+        final String fortifyUrl = ConfigurationManager.getConfig("FORTIFY_URL", configErrors);
         final String trackerName = ConfigurationManager.getConfig("TRACKER", configErrors);
         final String fortifyApplicationIds[] = System.getenv("FORTIFY_APPLICATION_IDS") == null
             ? null
             : System.getenv("FORTIFY_APPLICATION_IDS").split(",");
+        final String fortifyReleaseIds[] = System.getenv("FORTIFY_RELEASE_IDS") == null
+                ? null
+                : System.getenv("FORTIFY_RELEASE_IDS").split(",");
+
         final String fortifyIssueQuery = System.getenv("FORTIFY_ISSUE_QUERY");
 
         if (!configErrors.isEmpty()) {
             throw new ConfigurationException("Invalid configuration " + configErrors);
         }
 
-        final FortifySettings fortifySettings = new FortifySettings(
-            fortifyAuthType, fortifyUsername, fortifyPassword, fortifyToken,
-            fortifyApiUrl, fortifyIssueUrl, proxySettings,
-            fortifyApplicationIds, fortifyReleaseFilters, fortifyIssueQuery);
+        final FortifySettings fortifySettings = new FortifySettings(fortifyToken,
+            fortifyUrl, proxySettings,
+            fortifyApplicationIds, fortifyReleaseIds, fortifyIssueQuery);
 
         final FortifyIssueManagerConfiguration config = new FortifyIssueManagerConfiguration(
                 fortifySettings, trackerName);

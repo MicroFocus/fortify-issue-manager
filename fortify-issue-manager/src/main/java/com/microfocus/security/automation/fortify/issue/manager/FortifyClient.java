@@ -27,54 +27,20 @@ final class FortifyClient
     private final static int WRITE_TIMEOUT = 600; // seconds
     private final static int READ_TIMEOUT = 600; // seconds
 
-    private final String apiUrl;
-    private final OkHttpClient client;
-    private String token;
-    private final String username;
-    private final String password;
-    private final String staticToken; // For token auth
+    private final String url;
+    private final String authHeader;
     private final Map<String, String> proxySettings;
-    private final AuthType authType;
+    private final OkHttpClient client;
 
-    enum AuthType {
-        BASIC,
-        TOKEN
-    }
-
-    /**
-     * Constructor for Fortify Hub API using Basic or Token authentication.
-     */
     FortifyClient(
-        final String apiUrl,
-        final String username,
-        final String password,
-        final String staticToken,
-        final AuthType authType,
+        final String url,
+        final String token,
         final Map<String, String> proxySettings
     ) {
-        this.apiUrl = apiUrl;
-        this.username = username;
-        this.password = password;
-        this.staticToken = staticToken;
-        this.authType = authType;
+        this.url = url;
+        this.authHeader = "FortifyToken " + token;
         this.proxySettings = proxySettings;
         this.client = createClient();
-    }
-
-    /**
-     * For Basic Auth, returns a Base64-encoded header. For Token, returns Bearer token.
-     */
-    // TODO drop basic auth
-    public String getAuthHeader() {
-        if (authType == AuthType.BASIC) {
-        //    final String credentials = username + ":" + password;
-            final String credentials = "rtorney@opentext.com:Microfocus+14";
-            return "Basic " + java.util.Base64.getEncoder().encodeToString(credentials.getBytes());
-        } else if (authType == AuthType.TOKEN) {
-            return "FortifyToken " + staticToken;
-        } else {
-            throw new IllegalArgumentException("Unsupported authentication type: " + authType);
-        }
     }
 
     private OkHttpClient createClient() {
@@ -92,8 +58,12 @@ final class FortifyClient
         return baseClient.build();
     }
 
-    public String getApiUrl() {
-        return apiUrl;
+    public String getUrl() {
+        return url;
+    }
+
+    public String getAuthHeader() {
+        return authHeader;
     }
 
     public OkHttpClient getClient() {

@@ -17,73 +17,50 @@ package com.microfocus.security.automation.fortify.issue.manager;
 
 import java.util.Map;
 
-import com.microfocus.security.automation.fortify.issue.manager.FortifyClient.AuthType;
-
 final class FortifySettings
 {
-    private final AuthType authType;
-    private final String username;
-    private final String password;
     private final String token;
-    private final String apiUrl;
-    private final String issueUrl;
+    private final String url;
     private final Map<String, String> proxySettings;
     private final String[] applicationIds;
+    private final String[] releaseIds;
     private final String issueQuery;
 
     FortifySettings(
-        final AuthType authType,
-        final String username,
-        final String password,
         final String token,
-        final String apiUrl,
-        final String issueUrl,
+        final String url,
         final Map<String, String> proxySettings,
+        final String[] releaseIds,
         final String[] applicationIds,
         final String issueQuery
     )
     {
         super();
-        this.authType = authType;
-        this.username = username;
-        this.password = password;
         this.token = token;
-        this.apiUrl = apiUrl;
-        this.issueUrl = issueUrl;
+        this.url = url;
         this.proxySettings = proxySettings;
+        this.releaseIds = releaseIds;
         this.applicationIds = applicationIds;
         this.issueQuery = issueQuery;
-    }
-
-    AuthType getAuthType() {
-        return authType;
-    }
-
-    String getUsername() {
-        return username;
-    }
-
-    String getPassword() {
-        return password;
     }
 
     String getToken() {
         return token;
     }
 
-    String getApiUrl()
+    String getUrl()
     {
-        return apiUrl;
-    }
-
-    String getIssueUrl()
-    {
-        return issueUrl;
+        return url;
     }
 
     Map<String, String> getProxySettings()
     {
         return proxySettings;
+    }
+
+    String[] getReleaseIds()
+    {
+        return releaseIds;
     }
 
     String[] getApplicationIds()
