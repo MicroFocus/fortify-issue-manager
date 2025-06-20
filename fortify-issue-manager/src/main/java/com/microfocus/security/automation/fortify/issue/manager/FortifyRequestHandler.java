@@ -99,8 +99,10 @@ final class FortifyRequestHandler
         return applications;
     }
 
-    public List<Release> getReleases(final int applicationId, final String fields)
+    public List<Release> getReleases(final int applicationId, final String[] releaseIds, final String fields)
             throws IOException, FortifyRequestException {
+        // TODO filter on releaseIds
+
         final String url = getUrl("ssc/api/v1/projects/" + applicationId + "/versions", null, fields, "id");
         final String content = performRequest(url);
         final JsonObject root = gson.fromJson(content, JsonObject.class);

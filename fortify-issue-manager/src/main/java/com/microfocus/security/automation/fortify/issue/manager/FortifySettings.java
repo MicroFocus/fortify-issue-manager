@@ -30,8 +30,8 @@ final class FortifySettings
         final String token,
         final String url,
         final Map<String, String> proxySettings,
-        final String[] releaseIds,
         final String[] applicationIds,
+        final String[] releaseIds,
         final String issueQuery
     )
     {
@@ -39,8 +39,8 @@ final class FortifySettings
         this.token = token;
         this.url = url;
         this.proxySettings = proxySettings;
-        this.releaseIds = releaseIds;
         this.applicationIds = applicationIds;
+        this.releaseIds = releaseIds;
         this.issueQuery = issueQuery;
     }
 
@@ -58,14 +58,14 @@ final class FortifySettings
         return proxySettings;
     }
 
-    String[] getReleaseIds()
-    {
-        return releaseIds;
-    }
-
     String[] getApplicationIds()
     {
         return applicationIds;
+    }
+
+    String[] getReleaseIds()
+    {
+        return releaseIds;
     }
 
     String getIssueQuery() {

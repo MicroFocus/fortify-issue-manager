@@ -51,6 +51,7 @@ public final class FortifyIssueManager
     private final FortifyRequestHandler fortifyRequestHandler;
     private final BugTracker bugTracker;
     private final String[] applicationIds;
+    private final String[] releaseIds;
     private final String issueQuery;
     private final String issueUrl;
     private final boolean dryRun;
@@ -60,6 +61,7 @@ public final class FortifyIssueManager
         final boolean dryRun,
         final FortifyClient client,
         final String[] applicationIds,
+        final String[] releaseIds,
         final String issueQuery,
         final String issueUrl,
         final String targetTrackerName
@@ -68,6 +70,7 @@ public final class FortifyIssueManager
         this.fortifyRequestHandler = new FortifyRequestHandler(client);
         this.bugTracker = BugTrackerFactory.getTracker(targetTrackerName);
         this.applicationIds = applicationIds;
+        this.releaseIds = releaseIds;
         this.issueQuery = issueQuery;
         this.issueUrl = issueUrl;
     }
@@ -100,6 +103,7 @@ public final class FortifyIssueManager
             final FortifyIssueManager issueManager = new FortifyIssueManager(
                 dryRun, client,
                 fortifySettings.getApplicationIds(),
+                fortifySettings.getReleaseIds(),
                 fortifySettings.getIssueQuery(),
                 fortifySettings.getUrl(),
                 config.getBugTrackerName());
@@ -113,7 +117,7 @@ public final class FortifyIssueManager
         return !hasErrors;
     }
 
-    private static FortifyIssueManagerConfiguration loadConfiguration() throws ConfigurationException
+    private static FortifyIssueManagerConfiguration loadConfigurationOrig() throws ConfigurationException
     {
         final Map<String, String> proxySettings = ConfigurationManager.getProxySetting("HTTP_PROXY");
         final List<String> configErrors = new ArrayList<>();
@@ -144,6 +148,29 @@ public final class FortifyIssueManager
         return config;
     }
 
+    private static FortifyIssueManagerConfiguration loadConfiguration() throws ConfigurationException
+    {
+        final Map<String, String> proxySettings = ConfigurationManager.getProxySetting("HTTP_PROXY");
+        final String fortifyToken = "";
+        final String fortifyUrl = "https://fortifyhub.otxlab.net";
+        final String trackerName = "OCTANE";
+        final String fortifyApplicationIds[] = new String[] {
+            "898", "899", "900", "901", "902", "903", "904", "905"
+        };
+        final String fortifyReleaseIds[] = new String[] {
+                "1301"
+        };
+        final String fortifyIssueQuery = System.getenv("FORTIFY_ISSUE_QUERY");
+
+        final FortifySettings fortifySettings = new FortifySettings(fortifyToken,
+                fortifyUrl, proxySettings,
+                fortifyApplicationIds, fortifyReleaseIds, fortifyIssueQuery);
+
+        final FortifyIssueManagerConfiguration config = new FortifyIssueManagerConfiguration(
+                fortifySettings, trackerName);
+        return config;
+    }
+
     private void linkIssuesToBugTracker(final String scriptFile)
         throws IOException, ScriptNotFoundException, ScriptException, FortifyAuthenticationException, FortifyRequestException, NoSuchMethodException
     {
@@ -167,7 +194,7 @@ public final class FortifyIssueManager
         // For each application get Releases
         for (final Application application : applications) {
             LOGGER.info("---- Managing issues in application {} ----", application.getName());
-            final List<Release> releases = getReleases(application.getId());
+            final List<Release> releases = getReleases(application.getId(), releaseIds);
             if (releases == null || releases.isEmpty()) {
                 LOGGER.info("No releases in application {}.", application.getId());
                 continue;
@@ -209,14 +236,14 @@ public final class FortifyIssueManager
     /*
      * Get a list of releases for the application
      */
-    private List<Release> getReleases(final int applicationId)
+    private List<Release> getReleases(final int applicationId, final String[] releaseIds)
         throws IOException, FortifyRequestException
     {
         LOGGER.info("Getting releases for application {}...", applicationId);
 
         final String fields = "id,name,project";
 
-        final List<Release> releases = this.fortifyRequestHandler.getReleases(applicationId, fields);
+        final List<Release> releases = this.fortifyRequestHandler.getReleases(applicationId, releaseIds, fields);
         return releases;
     }
 
