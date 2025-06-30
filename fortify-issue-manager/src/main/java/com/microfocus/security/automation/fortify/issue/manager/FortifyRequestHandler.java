@@ -101,29 +101,42 @@ final class FortifyRequestHandler
 
     public List<Release> getReleases(final int applicationId, final String[] releaseIds, final String fields)
             throws IOException, FortifyRequestException {
-        // TODO filter on releaseIds
-
-        final String url = getUrl("ssc/api/v1/projects/" + applicationId + "/versions", null, fields, "id");
-        final String content = performRequest(url);
-        final JsonObject root = gson.fromJson(content, JsonObject.class);
-        if (root == null || !root.has("data")) {
-            return null;
-        }
-
-        final JsonArray dataArray = root.getAsJsonArray("data");
-        if (dataArray.size() == 0) {
-            return null;
-        }
-
         final List<Release> releases = new ArrayList<>();
-        for (int i = 0; i < dataArray.size(); i++) {
-            final JsonObject obj = dataArray.get(i).getAsJsonObject();
-            final Release release = gson.fromJson(obj, Release.class);
-            releases.add(release);
-        }
+        int offset = 0;
+        int pageCount;
 
-        if (releases.size() > LIMIT) {
-            LOGGER.warn("Too many releases: {}", releases.size());
+        do {
+            final String url = getUrl("ssc/api/v1/projects/" + applicationId + "/versions", null, fields, "id")
+                + "&start=" + offset + "&limit=" + LIMIT;
+            final String content = performRequest(url);
+
+            final JsonObject root = gson.fromJson(content, JsonObject.class);
+            if (root == null || !root.has("data")) {
+                break;
+            }
+
+            final JsonArray dataArray = root.getAsJsonArray("data");
+            pageCount = dataArray.size();
+            if (pageCount == 0) {
+                break;
+            }
+
+            for (int i = 0; i < pageCount; i++) {
+                final JsonObject obj = dataArray.get(i).getAsJsonObject();
+                final Release release = gson.fromJson(obj, Release.class);
+                releases.add(release);
+            }
+
+            offset += pageCount;
+        } while (pageCount == LIMIT);
+
+        // It is not possible to filter releases by id in the SSC API via the `q` parameter,
+        // so we filter them manually after fetching all releases.
+        if (releaseIds != null && releaseIds.length > 0) {
+            return releases.stream()
+                .filter(release -> java.util.Arrays.stream(releaseIds)
+                    .anyMatch(id -> String.valueOf(release.getId()).equals(id)))
+                .collect(Collectors.toList());
         }
 
         return releases;
@@ -194,65 +207,6 @@ final class FortifyRequestHandler
         }
     }
 
-//    public boolean updateVulnerability(final int releaseId, final List<String> vulnerabilityIdList, final String bugLink)
-//        throws FortifyRequestException
-//    {
-//        final JsonArray vulnerabilityIds = new JsonArray();
-//        vulnerabilityIdList.stream().forEach(id -> vulnerabilityIds.add(id));
-//        final JsonObject payload = new JsonObject();
-//        payload.addProperty("bugLink", bugLink);
-//        payload.add("vulnerabilityIds", vulnerabilityIds);
-//
-//        final String api = "/ssc/api/v3/releases/" + releaseId + "/vulnerabilities/bug-link";
-//        final HttpUrl apiUrl = HttpUrl.parse(fortifyClient.getApiUrl());
-//        if (apiUrl == null) {
-//            LOGGER.error("Error updating vulnerabilities: {}", payload.toString());
-//            throw new FortifyRequestException("Invalid url : " + api);
-//        }
-//        final String updateVulnerabilityUrl = apiUrl.newBuilder().addPathSegments(api).build().toString();
-//
-//        LOGGER.debug("Updating vulnerabilities: POST {} with {}", updateVulnerabilityUrl, payload.toString());
-//
-//        // Update the Fortify issue with bug link
-//        final RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), payload.toString());
-//
-//        final Request request = new Request.Builder()
-//            .url(updateVulnerabilityUrl)
-//            .addHeader("Authorization", fortifyClient.getAuthHeader())
-//            .addHeader("Accept", "application/json")
-//            .post(requestBody)
-//            .build();
-//
-//        try {
-//            // Sleep 6s between POST requests
-//            Thread.sleep(6 * 1000);
-//
-//            final Response response = fortifyClient.getClient().newCall(request).execute();
-//
-//            // Read the result
-//            final ResponseBody body = response.body();
-//            if (body == null) {
-//                LOGGER.error("Error updating vulnerabilities: {}", payload.toString());
-//                throw new FortifyRequestException("Unable to update vulnerability. Response is null for POST " + api);
-//            }
-//
-//            // Read the result
-//            try (final InputStream responseStream = body.byteStream()) {
-//                final String responseContent = IOUtils.toString(responseStream, "utf-8");
-//                if (!response.isSuccessful()) {
-//                    LOGGER.error("Updating vulnerabilities failed. POST {} with {}. Error: {}",
-//                            updateVulnerabilityUrl, payload.toString(), responseContent);
-//                    return false;
-//                }
-//                LOGGER.info("Updated vulnerabilities with bugLink {}, response: {}", bugLink, responseContent);
-//            }
-//        } catch (final IOException | InterruptedException e) {
-//            LOGGER.error("Error updating vulnerabilities POST {} with {}", updateVulnerabilityUrl, payload.toString(), e);
-//            return false;
-//        }
-//        return true;
-//    }
-
     public boolean addBugLinkCommentToFortifyIssues(
             final int releaseId,
             final String bugLink,
@@ -273,7 +227,7 @@ final class FortifyRequestHandler
         payload.addProperty("comment", "bugURL: " + bugLink);
         payload.addProperty("hasTagComment", false);
 
-        final String api = "/ssc/api/v1/projectVersions/" + releaseId + "/issues/action/audit";
+        final String api = "ssc/api/v1/projectVersions/" + releaseId + "/issues/action/audit";
         final HttpUrl apiUrl = HttpUrl.parse(fortifyClient.getUrl());
         if (apiUrl == null) {
             final String errorMessage = String.format(

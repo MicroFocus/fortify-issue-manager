@@ -104,7 +104,7 @@ docker container run --rm \
     -e FORTIFY_TOKEN=<Fortify token> \
     -e FORTIFY_URL=<Fortify URL> \
     -e FORTIFY_APPLICATION_IDS=<Comma separated list of application ids> \
-    -e FORTIFY_RELEASE_IDS=<Comma separated list of application ids> \
+    -e FORTIFY_RELEASE_IDS=<Comma separated list of release ids> \
     -e FORTIFY_ISSUE_QUERY=<Fortify issue query expression> \
     -e TRACKER=<JIRA|OCTANE> \
     -e TRACKER_USERNAME=<username> \
