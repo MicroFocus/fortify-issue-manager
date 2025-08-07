@@ -117,7 +117,7 @@ public final class FortifyIssueManager
         return !hasErrors;
     }
 
-    private static FortifyIssueManagerConfiguration loadConfigurationOrig() throws ConfigurationException
+    private static FortifyIssueManagerConfiguration loadConfiguration() throws ConfigurationException
     {
         final Map<String, String> proxySettings = ConfigurationManager.getProxySetting("HTTP_PROXY");
         final List<String> configErrors = new ArrayList<>();
@@ -148,29 +148,6 @@ public final class FortifyIssueManager
         return config;
     }
 
-    private static FortifyIssueManagerConfiguration loadConfiguration() throws ConfigurationException
-    {
-        final Map<String, String> proxySettings = ConfigurationManager.getProxySetting("HTTP_PROXY");
-        final String fortifyToken = "";
-        final String fortifyUrl = "https://fortifyhub.otxlab.net";
-        final String trackerName = "OCTANE";
-        final String fortifyApplicationIds[] = new String[] {
-            "898", "899", "900", "901", "902", "903", "904", "905"
-        };
-        final String fortifyReleaseIds[] = new String[] {
-                "1301"
-        };
-        final String fortifyIssueQuery = System.getenv("FORTIFY_ISSUE_QUERY");
-
-        final FortifySettings fortifySettings = new FortifySettings(fortifyToken,
-                fortifyUrl, proxySettings,
-                fortifyApplicationIds, fortifyReleaseIds, fortifyIssueQuery);
-
-        final FortifyIssueManagerConfiguration config = new FortifyIssueManagerConfiguration(
-                fortifySettings, trackerName);
-        return config;
-    }
-
     private void linkIssuesToBugTracker(final String scriptFile)
         throws IOException, ScriptNotFoundException, ScriptException, FortifyAuthenticationException, FortifyRequestException, NoSuchMethodException
     {
@@ -193,28 +170,27 @@ public final class FortifyIssueManager
 
         // For each application get Releases
         for (final Application application : applications) {
-            LOGGER.info("---- Managing issues in application {} ----", application.getName());
+            LOGGER.info("---- Managing issues in application {} ----", application);
             final List<Release> releases = getReleases(application.getId(), releaseIds);
             if (releases == null || releases.isEmpty()) {
-                LOGGER.info("No releases in application {}.", application.getId());
+                LOGGER.info("No releases in application {}.", application);
                 continue;
             }
-            LOGGER.info("Got {} release(s) for application {}: {}", releases.size(), application.getName(), releases);
+            LOGGER.info("Got {} release(s) for application {}: {}", releases.size(), application, releases);
             // For each Release get a list of all Vulnerabilities that have
             // severityString set to Critical or High AND bugSubmitted set to false
             for (final Release release : releases) {
                 final List<Vulnerability> vulnerabilities = getVulnerabilities(release.getId());
                 if (vulnerabilities == null || vulnerabilities.isEmpty()) {
-                    LOGGER.info("No vulnerabilities in release {} of application {}.",
-                                release.getId(), application.getId());
+                    LOGGER.info("No vulnerabilities in release {} of application {}.", release, application);
                 } else {
-                    LOGGER.info("Got {} vulnerabilities.", vulnerabilities.size());
+                    LOGGER.info("Got {} vulnerabilities in release {} of application {}.", vulnerabilities.size(), release, application);
                     final Map<Category, List<Vulnerability>> sortedIssues = sortVulnerabilities(vulnerabilities);
                     // Create a bug in the bug tracker for each category of issues, update the vulnerability with the bugLink
                     createBugs(application, release.getId(), sortedIssues, bugPayloadScript);
                 }
             }
-            LOGGER.info("---- Managing issues in application {} completed. ----", application.getName());
+            LOGGER.info("---- Managing issues in application {} completed. ----", application);
         }
     }
 
@@ -296,8 +272,8 @@ public final class FortifyIssueManager
         final Set<Category> categories = sortedIssues.keySet();
         int counter = 1;
         for (final Category category : categories) {
-            LOGGER.info("Creating bugs for Application:{} Release:{} {}...",
-                        application.getId(), releaseId, category);
+            LOGGER.info("Creating bugs for Application:{}, Release ID:{}, Category: {}...",
+                        application, releaseId, category);
             LOGGER.debug("-----------------------------------------");
             final List<Vulnerability> vulnerabilities = sortedIssues.get(category);
             final String bugDescription = category.getName().contains("Open Source")
@@ -321,6 +297,10 @@ public final class FortifyIssueManager
                     final List<Integer> vulnerabilityIds = vulnerabilities.stream()
                         .map(Vulnerability::getId)
                         .collect(Collectors.toList());
+                    
+                    // Fortify Hub (SSC API) does not support updating the bugURL field in the vulnerability,
+                    // so we add a comment with the bug link to each vulnerability like:
+                    // bugURL: <bugLink>
                     final boolean issuesUpdated = this.fortifyRequestHandler.addBugLinkCommentToFortifyIssues(
                             releaseId, bugLink, vulnerabilityIds);
                     if (!issuesUpdated) {
@@ -334,11 +314,5 @@ public final class FortifyIssueManager
             }
             LOGGER.debug("-----------------------------------------");
         }
-    }
-
-    public static void main(String[] args) {
-        String scriptFile = FortifyIssueManager.class.getClassLoader().getResource("getPayload.js").getPath();
-        boolean result = manageIssues(false, scriptFile);
-        System.out.println("Completed with " + (result ? "success" : "errors"));
     }
 }
