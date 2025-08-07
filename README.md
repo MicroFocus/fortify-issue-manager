@@ -51,21 +51,6 @@ The following environment variables must be set:
 - `FORTIFY_URL`  
     This property configures the Fortify url
 
-- `FORTIFY_APPLICATION_IDS`  
-    This property is a comma separated list of Fortify application ids
-
-- `FORTIFY_RELEASE_IDS`  
-  This property is a comma separated list of Fortify release/version ids
-
-- `FORTIFY_ISSUE_QUERY`  
-    This property is a Fortify issue query expression used to filter which issues selected.  
-    If specified, it will be combined with the `comments:!bugURL` filter (which selects issues that have not had a bug
-    raised against them yet in the issue tracker).  
-    If not specified, the following issue query expression is applied:  
-    `comments:!bugURL audited:false [fortify priority order]:high [fortify priority order]:critical`
-    which Fortify applies as:  
-    `comments:!bugURL AND audited:false AND ([fortify priority order]:high OR [fortify priority order]:critical))`
-
 - `TRACKER`  
     This property defines the issue tracker to use.
     Supported trackers: `JIRA`, `OCTANE`
