@@ -77,7 +77,7 @@ The following environment variables may optionally be set:
   If specified, it will be combined with the `comments:!bugURL` filter (which selects issues that have not had a bug
   raised against them yet in the issue tracker).  
   If not specified, the following issue query expression is applied:  
-  `comments:!bugURL audited:false [fortify priority order]:high [fortify priority order]:critical`
+  `comments:!bugURL audited:false [fortify priority order]:high [fortify priority order]:critical`  
   which Fortify applies as:  
   `comments:!bugURL AND audited:false AND ([fortify priority order]:high OR [fortify priority order]:critical))`
 
@@ -89,9 +89,6 @@ The following environment variables may optionally be set:
 
 - `TRACKER_WORKSPACE_ID`  
   This property configures the octane workspace id.
-
-- `TRACKER_API_URL`  
-    This property configures the issue tracker url
 
 #### Logging
 Set the `FORTIFY_ISSUE_MANAGER_LOG_LEVEL` environment variable to configure the log level. Default is `INFO`.
