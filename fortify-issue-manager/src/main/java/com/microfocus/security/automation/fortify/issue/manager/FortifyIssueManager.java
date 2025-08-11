@@ -31,6 +31,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
+import com.microfocus.security.automation.fortify.issue.manager.models.Release;
 import com.microfocus.security.automation.fortify.issue.tracker.BugTrackerException;
 import com.microfocus.security.automation.fortify.issue.tracker.BugTrackerFactory;
 import org.apache.commons.io.IOUtils;
@@ -38,24 +39,20 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Joiner;
-import com.microfocus.security.automation.fortify.issue.manager.FortifyClient.GrantType;
 import com.microfocus.security.automation.fortify.issue.manager.models.Application;
 import com.microfocus.security.automation.fortify.issue.manager.models.Category;
-import com.microfocus.security.automation.fortify.issue.manager.models.Release;
 import com.microfocus.security.automation.fortify.issue.manager.models.Vulnerability;
 import com.microfocus.security.automation.fortify.issue.manager.utils.JavaScriptFunctions;
 
 public final class FortifyIssueManager
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(FortifyIssueManager.class);
-    private final String FORTIFY_ISSUE_LINK_FORMAT = "%s/Releases/%s/Issues/";
 
     private final FortifyRequestHandler fortifyRequestHandler;
     private final BugTracker bugTracker;
     private final String[] applicationIds;
-    private final String releaseFilter;
-    private final String issueFilter;
+    private final String[] releaseIds;
+    private final String issueQuery;
     private final String issueUrl;
     private final boolean dryRun;
     private static boolean hasErrors;
@@ -64,8 +61,8 @@ public final class FortifyIssueManager
         final boolean dryRun,
         final FortifyClient client,
         final String[] applicationIds,
-        final String releaseFilter,
-        final String issueFilter,
+        final String[] releaseIds,
+        final String issueQuery,
         final String issueUrl,
         final String targetTrackerName
     ) throws ConfigurationException {
@@ -73,8 +70,8 @@ public final class FortifyIssueManager
         this.fortifyRequestHandler = new FortifyRequestHandler(client);
         this.bugTracker = BugTrackerFactory.getTracker(targetTrackerName);
         this.applicationIds = applicationIds;
-        this.releaseFilter = releaseFilter;
-        this.issueFilter = issueFilter;
+        this.releaseIds = releaseIds;
+        this.issueQuery = issueQuery;
         this.issueUrl = issueUrl;
     }
 
@@ -99,19 +96,16 @@ public final class FortifyIssueManager
                     : "Bugs will be created and Fortify issues will be updated with the corresponding link to the bug.");
             final FortifySettings fortifySettings = config.getFortifySettings();
             final FortifyClient client = new FortifyClient(
-                fortifySettings.getGrantType(),
-                fortifySettings.getId(),
-                fortifySettings.getSecret(),
-                fortifySettings.getApiUrl(),
-                fortifySettings.getScope(),
+                fortifySettings.getUrl(),
+                fortifySettings.getToken(),
                 fortifySettings.getProxySettings());
-            client.authenticate();
+
             final FortifyIssueManager issueManager = new FortifyIssueManager(
                 dryRun, client,
                 fortifySettings.getApplicationIds(),
-                fortifySettings.getReleaseFilters(),
-                fortifySettings.getIssueFilters(),
-                fortifySettings.getIssueUrl(),
+                fortifySettings.getReleaseIds(),
+                fortifySettings.getIssueQuery(),
+                fortifySettings.getUrl(),
                 config.getBugTrackerName());
             issueManager.linkIssuesToBugTracker(scriptFile);
         } catch (final IOException | ScriptNotFoundException | ScriptException | FortifyAuthenticationException |
@@ -129,41 +123,25 @@ public final class FortifyIssueManager
         final List<String> configErrors = new ArrayList<>();
 
         // Get Fortify settings
-        final String grantType = System.getenv("FORTIFY_GRANT_TYPE");
-        final String fortifyId;
-        final GrantType fortifyGrantType;
-        final String fortifySecret;
-
-        if (GrantType.CLIENT_CREDENTIALS.name().equalsIgnoreCase(grantType)) {
-            fortifyGrantType = GrantType.CLIENT_CREDENTIALS;
-            fortifyId = ConfigurationManager.getConfig("FORTIFY_CLIENT_ID", configErrors);
-            fortifySecret = ConfigurationManager.getConfig("FORTIFY_CLIENT_SECRET", configErrors);
-        } else if (GrantType.PASSWORD.name().equalsIgnoreCase(grantType)) {
-            fortifyGrantType = GrantType.PASSWORD;
-            fortifyId = ConfigurationManager.getConfig("FORTIFY_TENANT", configErrors) + "\\" + ConfigurationManager.getConfig("FORTIFY_USERNAME", configErrors);
-            fortifySecret = ConfigurationManager.getConfig("FORTIFY_PASSWORD", configErrors);
-        } else {
-            throw new ConfigurationException("Invalid Fortify grant type. Set FORTIFY_GRANT_TYPE to 'client_credentials' or 'password'");
-        }
-
-        final String fortifyScope = ConfigurationManager.getConfig("FORTIFY_SCOPE", configErrors);
-        final String fortifyApiUrl = ConfigurationManager.getConfig("FORTIFY_API_URL", configErrors);
-        final String fortifyIssueUrl = ConfigurationManager.getConfig("FORTIFY_ISSUE_URL", configErrors);
+        final String fortifyToken  = ConfigurationManager.getConfig("FORTIFY_TOKEN", configErrors);
+        final String fortifyUrl = ConfigurationManager.getConfig("FORTIFY_URL", configErrors);
         final String trackerName = ConfigurationManager.getConfig("TRACKER", configErrors);
         final String fortifyApplicationIds[] = System.getenv("FORTIFY_APPLICATION_IDS") == null
             ? null
             : System.getenv("FORTIFY_APPLICATION_IDS").split(",");
-        final String fortifyReleaseFilters = System.getenv("FORTIFY_RELEASE_FILTERS");
-        final String fortifyIssueFilters = System.getenv("FORTIFY_ISSUE_FILTERS");
+        final String fortifyReleaseIds[] = System.getenv("FORTIFY_RELEASE_IDS") == null
+                ? null
+                : System.getenv("FORTIFY_RELEASE_IDS").split(",");
+
+        final String fortifyIssueQuery = System.getenv("FORTIFY_ISSUE_QUERY");
 
         if (!configErrors.isEmpty()) {
             throw new ConfigurationException("Invalid configuration " + configErrors);
         }
 
-        final FortifySettings fortifySettings = new FortifySettings(
-            fortifyGrantType, fortifyId, fortifySecret, fortifyScope,
-            fortifyApiUrl, fortifyIssueUrl, proxySettings,
-            fortifyApplicationIds, fortifyReleaseFilters, fortifyIssueFilters);
+        final FortifySettings fortifySettings = new FortifySettings(fortifyToken,
+            fortifyUrl, proxySettings,
+            fortifyApplicationIds, fortifyReleaseIds, fortifyIssueQuery);
 
         final FortifyIssueManagerConfiguration config = new FortifyIssueManagerConfiguration(
                 fortifySettings, trackerName);
@@ -179,43 +157,40 @@ public final class FortifyIssueManager
         }
 
         // Get the list of configured Applications
-        final FilterList filters = new FilterList();
-        filters.addFilter("applicationId", Joiner.on('|').join(this.applicationIds));
-        final String applicationFields = "applicationId,applicationName";
+        final String applicationFields = "id,name";
         LOGGER.info("Getting applications...");
-        final List<Application> applications = this.fortifyRequestHandler.getApplications(filters.toString(), applicationFields);
+        final List<Application> applications = this.fortifyRequestHandler.getApplications(applicationIds, applicationFields);
         if (applications == null || applications.isEmpty()) {
             LOGGER.info("No applications found.");
             return;
         }
-        LOGGER.info("Got {} application(s).", applications.size());
+        LOGGER.info("Got {} application(s): {}", applications.size(), applications);
 
         final ScriptEngine bugPayloadScript = getBugPayloadScript(scriptFile);
 
-        // For each application get Releases where sdlcStatusType is set to "Production"
+        // For each application get Releases
         for (final Application application : applications) {
-            LOGGER.info("---- Managing issues in application {} ----", application.getApplicationName());
-            final List<Release> releases = getReleases(application.getApplicationId());
+            LOGGER.info("---- Managing issues in application {} ----", application);
+            final List<Release> releases = getReleases(application.getId(), releaseIds);
             if (releases == null || releases.isEmpty()) {
-                LOGGER.info("No releases in application {}.", application.getApplicationId());
+                LOGGER.info("No releases in application {}.", application);
                 continue;
             }
-            LOGGER.info("Got {} release(s).", releases.size());
+            LOGGER.info("Got {} release(s) for application {}: {}", releases.size(), application, releases);
             // For each Release get a list of all Vulnerabilities that have
             // severityString set to Critical or High AND bugSubmitted set to false
             for (final Release release : releases) {
-                final List<Vulnerability> vulnerabilities = getVulnerabilities(release.getReleaseId());
+                final List<Vulnerability> vulnerabilities = getVulnerabilities(release.getId());
                 if (vulnerabilities == null || vulnerabilities.isEmpty()) {
-                    LOGGER.info("No vulnerabilities in release {} of application {}.",
-                                release.getReleaseId(), application.getApplicationId());
+                    LOGGER.info("No vulnerabilities in release {} of application {}.", release, application);
                 } else {
-                    LOGGER.info("Got {} vulnerabilities.", vulnerabilities.size());
+                    LOGGER.info("Got {} vulnerabilities in release {} of application {}.", vulnerabilities.size(), release, application);
                     final Map<Category, List<Vulnerability>> sortedIssues = sortVulnerabilities(vulnerabilities);
                     // Create a bug in the bug tracker for each category of issues, update the vulnerability with the bugLink
-                    createBugs(application, release.getReleaseId(), sortedIssues, bugPayloadScript);
+                    createBugs(application, release.getId(), sortedIssues, bugPayloadScript);
                 }
             }
-            LOGGER.info("---- Managing issues in application {} completed. ----", application.getApplicationName());
+            LOGGER.info("---- Managing issues in application {} completed. ----", application);
         }
     }
 
@@ -235,58 +210,42 @@ public final class FortifyIssueManager
     }
 
     /*
-     * Get a list of 'production' releases for the application
+     * Get a list of releases for the application
      */
-    private List<Release> getReleases(final int applicationId)
-        throws IOException, FortifyAuthenticationException, FortifyRequestException
+    private List<Release> getReleases(final int applicationId, final String[] releaseIds)
+        throws IOException, FortifyRequestException
     {
         LOGGER.info("Getting releases for application {}...", applicationId);
-        final String filters = getReleaseFilters(applicationId);
 
-        final String fields = "releaseId,releaseName,applicationId,applicationName,sdlcStatusType";
+        final String fields = "id,name,project";
 
-        final List<Release> releases = this.fortifyRequestHandler.getReleases(filters, fields);
+        final List<Release> releases = this.fortifyRequestHandler.getReleases(applicationId, releaseIds, fields);
         return releases;
     }
 
-    private String getReleaseFilters(final int applicationId)
-    {
-        final FilterList filters = new FilterList();
-        filters.addFilter("applicationId", applicationId);
-        if(StringUtils.isEmpty(this.releaseFilter)) {
-            // Default release filter
-            filters.addFilter("sdlcStatusType", "Production");
-            return filters.toString();
-        }
-        else {
-            return filters.toString() + "+" + this.releaseFilter;
-        }
-    }
-
     private List<Vulnerability> getVulnerabilities(final int releaseId)
-        throws IOException, FortifyAuthenticationException, FortifyRequestException
+        throws IOException, FortifyRequestException
     {
         LOGGER.info("Getting vulnerabilities for release {}...", releaseId);
-        final String filters = getIssueFilters();
+        final String query = getIssueQuery();
 
         final String fields = null;
-        final List<Vulnerability> vulnerabilities = this.fortifyRequestHandler.getVulnerabilities(releaseId, filters, fields);
+        final List<Vulnerability> vulnerabilities = this.fortifyRequestHandler.getVulnerabilities(releaseId, query, fields);
         return vulnerabilities;
     }
 
-    private String getIssueFilters()
-    {
-        final FilterList filters = new FilterList();
-        filters.addFilter("bugSubmitted", false);
-        if(StringUtils.isEmpty(this.issueFilter)) {
-            // Default issue filter
-            filters.addFilter("severityString", "Critical|High");
-            filters.addFilter("auditorStatus", "Remediation Required");
-            return filters.toString();
+    private String getIssueQuery() {
+        List<String> queries = new ArrayList<>();
+        queries.add("comments:!bugURL");
+
+        if (StringUtils.isEmpty(this.issueQuery)) {
+            queries.add("audited:false");
+            queries.add("[fortify priority order]:high [fortify priority order]:critical");
+        } else {
+            queries.add(this.issueQuery);
         }
-        else {
-            return filters.toString() + "+" + this.issueFilter;
-        }
+
+        return String.join(" ", queries);
     }
 
     private Map<Category, List<Vulnerability>> sortVulnerabilities(final List<Vulnerability> vulnerabilities)
@@ -294,7 +253,7 @@ public final class FortifyIssueManager
         // Sort the list of vulnerabilities based on their categories and severity.
         final Map<Category, List<Vulnerability>> sortedIssues = new HashMap<>();
         for (final Vulnerability vulnerability : vulnerabilities) {
-            final Category category = new Category(vulnerability.getCategory(), vulnerability.getSeverity());
+            final Category category = new Category(vulnerability.getIssueName(), vulnerability.getSeverity());
             if (!sortedIssues.containsKey(category)) {
                 sortedIssues.put(category, new ArrayList<>());
             }
@@ -308,13 +267,13 @@ public final class FortifyIssueManager
                             final Map<Category, List<Vulnerability>> sortedIssues,
                             final ScriptEngine getPayLoadScript) throws FortifyRequestException, NoSuchMethodException, ScriptException
     {
-        final String issueBaseUrl = String.format(FORTIFY_ISSUE_LINK_FORMAT, issueUrl, releaseId);
+        final String issueBaseUrl = issueUrl + "/ssc/html/ssc/version/" + releaseId + "/audit?q=%5Binstance%20id%5D%3A";
 
         final Set<Category> categories = sortedIssues.keySet();
         int counter = 1;
         for (final Category category : categories) {
-            LOGGER.info("Creating bugs for Application:{} Release:{} {}...",
-                        application.getApplicationId(), releaseId, category);
+            LOGGER.info("Creating bugs for Application:{}, Release ID:{}, Category: {}...",
+                        application, releaseId, category);
             LOGGER.debug("-----------------------------------------");
             final List<Vulnerability> vulnerabilities = sortedIssues.get(category);
             final String bugDescription = category.getName().contains("Open Source")
@@ -322,7 +281,7 @@ public final class FortifyIssueManager
                 : bugTracker.getIssueDescription(issueBaseUrl, vulnerabilities);
 
             final String bugDetails = JavaScriptFunctions.invokeFunction(getPayLoadScript, "getPayload",
-                                                                         application.getApplicationName(),
+                                                                         application.getName(),
                                                                          category.getSeverity(),
                                                                          category.getName(),
                                                                          bugDescription);
@@ -335,10 +294,15 @@ public final class FortifyIssueManager
 
                 try {
                     final String bugLink = this.bugTracker.createBug(bugDetails);
-                    final List<String> vulnerabilityIds = vulnerabilities.stream()
-                        .map(Vulnerability::getVulnId)
+                    final List<Integer> vulnerabilityIds = vulnerabilities.stream()
+                        .map(Vulnerability::getId)
                         .collect(Collectors.toList());
-                    final boolean issuesUpdated = this.fortifyRequestHandler.updateVulnerability(releaseId, vulnerabilityIds, bugLink);
+                    
+                    // Fortify Hub (SSC API) does not support updating the bugURL field in the vulnerability,
+                    // so we add a comment with the bug link to each vulnerability like:
+                    // bugURL: <bugLink>
+                    final boolean issuesUpdated = this.fortifyRequestHandler.addBugLinkCommentToFortifyIssues(
+                            releaseId, bugLink, vulnerabilityIds);
                     if (!issuesUpdated) {
                         hasErrors = true;
                     }

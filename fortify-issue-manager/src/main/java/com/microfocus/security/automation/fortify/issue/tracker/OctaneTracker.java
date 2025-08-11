@@ -83,7 +83,7 @@ public final class OctaneTracker implements BugTracker {
         for (final Vulnerability vulnerability : vulnerabilities) {
             issues.append("<tr><td>&nbsp;<a href=\"")
                 .append(fortifyIssueUrl)
-                .append(vulnerability.getId())
+                .append(vulnerability.getIssueInstanceId())
                 .append("\">")
                 .append(vulnerability.getId())
                 .append("</a>&nbsp;</td><td>&nbsp;")
@@ -107,11 +107,11 @@ public final class OctaneTracker implements BugTracker {
         for (final Vulnerability vulnerability : vulnerabilities) {
             issues.append("<tr><td>&nbsp;<a href=\"")
                   .append(fortifyIssueUrl)
-                  .append(vulnerability.getId())
+                  .append(vulnerability.getIssueInstanceId())
                   .append("\">")
                   .append(vulnerability.getId())
                   .append("</a>&nbsp;</td><td>&nbsp;")
-                  .append(vulnerability.getCheckId())
+                  .append(vulnerability.getPrimaryRuleGuid())
                   .append("&nbsp;</td><td>&nbsp;")
                   .append(vulnerability.getPrimaryLocation());
             if (vulnerability.getLineNumber() != null) {

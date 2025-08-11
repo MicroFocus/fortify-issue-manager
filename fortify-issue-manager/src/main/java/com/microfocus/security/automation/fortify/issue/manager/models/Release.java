@@ -15,36 +15,36 @@
  */
 package com.microfocus.security.automation.fortify.issue.manager.models;
 
+import java.util.Map;
+
 public final class Release
 {
-    private int releaseId;
-    private String releaseName;
-    private int applicationId;
-    private String applicationName;
-    private String sdlcStatusType;
+    private int id;
+    private String name;
+    private Map<String, Object> project;
 
-    public int getReleaseId()
+    public int getId()
     {
-        return releaseId;
+        return id;
     }
 
-    public String getReleaseName()
+    public String getName()
     {
-        return releaseName;
+        return name;
     }
 
-    public int getApplicationId()
+    public Map<String, Object> getProject()
     {
-        return applicationId;
+        return project;
     }
 
-    public String getApplicationName()
-    {
-        return applicationName;
-    }
-
-    public String getSdlcStatusType()
-    {
-        return sdlcStatusType;
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder();
+        builder.append("Release [id=").append(id);
+        builder.append(", name=").append(name);
+        builder.append(", project=").append(project);
+        builder.append("]");
+        return builder.toString();
     }
 }

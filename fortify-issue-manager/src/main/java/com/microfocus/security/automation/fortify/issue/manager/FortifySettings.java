@@ -17,75 +17,40 @@ package com.microfocus.security.automation.fortify.issue.manager;
 
 import java.util.Map;
 
-import com.microfocus.security.automation.fortify.issue.manager.FortifyClient.GrantType;
-
 final class FortifySettings
 {
-    private final GrantType grantType;
-    private final String id;
-    private final String secret;
-    private final String scope;
-    private final String apiUrl;
-    private final String issueUrl;
+    private final String token;
+    private final String url;
     private final Map<String, String> proxySettings;
     private final String[] applicationIds;
-    private final String releaseFilters;
-    private final String issueFilters;
+    private final String[] releaseIds;
+    private final String issueQuery;
 
     FortifySettings(
-        final GrantType grantType,
-        final String id,
-        final String secret,
-        final String scope,
-        final String apiUrl,
-        final String issueUrl,
+        final String token,
+        final String url,
         final Map<String, String> proxySettings,
         final String[] applicationIds,
-        final String releaseFilters,
-        final String issueFilters
+        final String[] releaseIds,
+        final String issueQuery
     )
     {
         super();
-        this.grantType = grantType;
-        this.id = id;
-        this.secret = secret;
-        this.scope = scope;
-        this.apiUrl = apiUrl;
-        this.issueUrl = issueUrl;
+        this.token = token;
+        this.url = url;
         this.proxySettings = proxySettings;
         this.applicationIds = applicationIds;
-        this.releaseFilters = releaseFilters;
-        this.issueFilters = issueFilters;
+        this.releaseIds = releaseIds;
+        this.issueQuery = issueQuery;
     }
 
-    GrantType getGrantType()
-    {
-        return grantType;
+    String getToken() {
+        return token;
     }
 
-    String getId()
+    String getUrl()
     {
-        return id;
-    }
-
-    String getSecret()
-    {
-        return secret;
-    }
-
-    String getScope()
-    {
-        return scope;
-    }
-
-    String getApiUrl()
-    {
-        return apiUrl;
-    }
-
-    String getIssueUrl()
-    {
-        return issueUrl;
+        return url;
     }
 
     Map<String, String> getProxySettings()
@@ -98,11 +63,12 @@ final class FortifySettings
         return applicationIds;
     }
 
-    String getReleaseFilters() {
-        return releaseFilters;
+    String[] getReleaseIds()
+    {
+        return releaseIds;
     }
 
-    String getIssueFilters() {
-        return issueFilters;
+    String getIssueQuery() {
+        return issueQuery;
     }
 }

@@ -1,11 +1,7 @@
 # Fortify Issue Manager
 
-This is a utility to find issues created by Fortify on Demand scans and create corresponding bugs in a bug tracker like `Jira` or `Octane`. Once the bugs are created they are linked back to the Fortify on Demand issue. Users can then click the `View Bug` button in Fortify on Demand to navigate to the corresponding bug.
-
-### Fortify on Demand Configuration
-You will need to configure the Fortify on Demand application to `Enable Bug Tracker Integration` and set `Bug Tracker` to `Other`. This can be done from the Fortify on Demand Applications view > Settings > Bug Tracker tab.
-
-![Settings](images/FoDsettings.png)
+This is a utility to find issues created by Fortify scans and create corresponding bugs in a bug tracker like `Jira` or `Octane`. 
+Once the bugs are created they are linked back to the Fortify issue via a comment on the Fortify issue using the format `bugURL: http://example.com`.
 
 ### fortify-java-issue-manager
 
@@ -49,39 +45,11 @@ Here is a sample script file [getPayload.js](./fortify-issue-manager/src/test/re
 
 ### Required Configuration
 The following environment variables must be set:
-- `FORTIFY_GRANT_TYPE`  
-    This property configures the Fortify on Demand authentication grant type.  
-    It must be set to `client_credentials` or `password`.
+- `FORTIFY_TOKEN`  
+    This property configures the Fortify auth token that will be placed in the `Authorization` header.
 
-    If grant type is `client_credentials` then the following environment variables must be set:
-     - `FORTIFY_CLIENT_ID`
-     - `FORTIFY_CLIENT_SECRET`
-
-    If grant type is `password` then the following environment variables must be set:
-     - `FORTIFY_USERNAME`
-     - `FORTIFY_PASSWORD`
-
-- `FORTIFY_SCOPE`  
-    This property configures the Fortify on Demand scope. Example: api-tenant
-
-- `FORTIFY_API_URL`  
-    This property configures the Fortify on Demand api url
-
-- `FORTIFY_ISSUE_URL`  
-    This property configures the Fortify on Demand issue url
-
-- `FORTIFY_APPLICATION_IDS`  
-    This property is a comma separated list of Fortify on Demand application ids
-
-- `FORTIFY_RELEASE_FILTERS`  
-    This property is a delimited list of field filters for Fortify on Demand releases.  
-    If no release filters are specified, the following filter is applied:  
-    `sdlcStatusType:Production`
-
-- `FORTIFY_ISSUE_FILTERS`  
-    This property is a delimited list of field filters for Fortify on Demand issues.  
-    If no issue filters are specified, the following filters are applied:  
-    `severityString:Critical|High+auditorStatus:Remediation Required`
+- `FORTIFY_URL`  
+    This property configures the Fortify url
 
 - `TRACKER`  
     This property defines the issue tracker to use.
@@ -96,6 +64,23 @@ The following environment variables must be set:
 - `TRACKER_API_URL`  
     This property configures the issue tracker url
 
+### Optional Configuration
+The following environment variables may optionally be set:
+- `FORTIFY_APPLICATION_IDS`  
+  This property is a comma separated list of Fortify application ids
+
+- `FORTIFY_RELEASE_IDS`  
+  This property is a comma separated list of Fortify release/version ids
+
+- `FORTIFY_ISSUE_QUERY`  
+  This property is a Fortify issue query expression used to filter which issues selected.  
+  If specified, it will be combined with the `comments:!bugURL` filter (which selects issues that have not had a bug
+  raised against them yet in the issue tracker).  
+  If not specified, the following issue query expression is applied:  
+  `comments:!bugURL audited:false [fortify priority order]:high [fortify priority order]:critical`  
+  which Fortify applies as:  
+  `comments:!bugURL AND audited:false AND ([fortify priority order]:high OR [fortify priority order]:critical))`
+
 #### Octane required configuration
 ###### Note that the username and password must be generated for the shared_space and workspace
 
@@ -105,19 +90,8 @@ The following environment variables must be set:
 - `TRACKER_WORKSPACE_ID`  
   This property configures the octane workspace id.
 
-- `TRACKER_API_URL`  
-    This property configures the issue tracker url
-
 #### Logging
 Set the `FORTIFY_ISSUE_MANAGER_LOG_LEVEL` environment variable to configure the log level. Default is `INFO`.
-
-#### Note
-Fortify on Demand field filters are specified as follows:  
-Field name and value should be separated by a colon (:). Multiple fields should be separated by a plus (+). Multiple fields are treated as an AND condition.  
-Example, `fieldname1:value+fieldname2:value`  
-Multiple values for a field should be separated by a pipe (|).  
-Multiple values for a field are treated as an OR condition.  
-Example, `fieldname1:value1|value2`
 
 ### fortify-issue-manager-cli-image
 This module builds a Docker image for the command-line interface, potentially allowing for simpler usage in some environments.
@@ -126,16 +100,11 @@ Here is an example command specific to Octane:
 
 ```
 docker container run --rm \
-    -e FORTIFY_GRANT_TYPE=password \
-    -e FORTIFY_USERNAME=<Fortify on Demand username> \
-    -e FORTIFY_PASSWORD=<Fortify on Demand password> \
-    -e FORTIFY_TENANT=<Fortify on Demand tenant> \
-    -e FORTIFY_SCOPE=<Fortify on Demand scope> \
-    -e FORTIFY_API_URL=<Fortify on Demand API URL> \
-    -e FORTIFY_ISSUE_URL=<Fortify on Demand issue URL> \
+    -e FORTIFY_TOKEN=<Fortify token> \
+    -e FORTIFY_URL=<Fortify URL> \
     -e FORTIFY_APPLICATION_IDS=<Comma separated list of application ids> \
-    -e FORTIFY_RELEASE_FILTERS=<Delimited list of release field filters> \
-    -e FORTIFY_ISSUE_FILTERS=<Delimited list of issue field filters> \
+    -e FORTIFY_RELEASE_IDS=<Comma separated list of release ids> \
+    -e FORTIFY_ISSUE_QUERY=<Fortify issue query expression> \
     -e TRACKER=<JIRA|OCTANE> \
     -e TRACKER_USERNAME=<username> \
     -e TRACKER_PASSWORD=<password> \
