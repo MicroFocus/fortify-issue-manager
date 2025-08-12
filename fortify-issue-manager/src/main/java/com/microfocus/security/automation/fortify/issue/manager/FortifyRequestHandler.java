@@ -210,14 +210,14 @@ final class FortifyRequestHandler
     public boolean addBugLinkCommentToFortifyIssues(
             final int releaseId,
             final String bugLink,
-            final List<Integer> vulnerabilityIds)
+            final List<Vulnerability> vulnerabilities)
         throws FortifyRequestException
     {
         final JsonArray issuesArray = new JsonArray();
-        for (final Integer vulnerabilityId : vulnerabilityIds) {
+        for (final Vulnerability vulnerability : vulnerabilities) {
             final JsonObject issueObj = new JsonObject();
-            issueObj.addProperty("id", vulnerabilityId);
-            issueObj.addProperty("revision", 0);
+            issueObj.addProperty("id", vulnerability.getId());
+            issueObj.addProperty("revision", vulnerability.getRevision());
             issuesArray.add(issueObj);
         }
 
