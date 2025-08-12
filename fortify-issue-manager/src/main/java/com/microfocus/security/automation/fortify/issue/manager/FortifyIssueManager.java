@@ -294,15 +294,12 @@ public final class FortifyIssueManager
 
                 try {
                     final String bugLink = this.bugTracker.createBug(bugDetails);
-                    final List<Integer> vulnerabilityIds = vulnerabilities.stream()
-                        .map(Vulnerability::getId)
-                        .collect(Collectors.toList());
                     
                     // Fortify Hub (SSC API) does not support updating the bugURL field in the vulnerability,
                     // so we add a comment with the bug link to each vulnerability like:
                     // bugURL: <bugLink>
                     final boolean issuesUpdated = this.fortifyRequestHandler.addBugLinkCommentToFortifyIssues(
-                            releaseId, bugLink, vulnerabilityIds);
+                            releaseId, bugLink, vulnerabilities);
                     if (!issuesUpdated) {
                         hasErrors = true;
                     }
